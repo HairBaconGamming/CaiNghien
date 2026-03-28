@@ -104,8 +104,8 @@ def main() -> int:
             break
     if not existing_notes:
         existing_notes = [
-            "Them web release hub va updater co hoi y kien.",
-            "Them cleanup cache ban cap nhat cu.",
+            "Thêm web release hub và updater có hỏi ý kiến.",
+            "Thêm dọn dẹp cache bản cập nhật cũ.",
         ]
 
     release = {

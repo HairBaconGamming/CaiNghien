@@ -20,14 +20,26 @@ const createNotes = (notes) => {
   return `<ul class="notes-list">${notes.map((item) => `<li>${item}</li>`).join("")}</ul>`;
 };
 
+const iconDownload = `<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" style="margin-right:4px; vertical-align: text-bottom;"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>`;
+
 const createDownloadLinks = (release) => {
   const installer = release.files?.installer
-    ? `<a class="button primary" href="${release.files.installer.url}">Tai installer</a>`
+    ? `<a class="button primary" href="${release.files.installer.url}">${iconDownload} Tải Installer</a>`
     : "";
   const portable = release.files?.portable
-    ? `<a class="button secondary" href="${release.files.portable.url}">Tai portable EXE</a>`
+    ? `<a class="button secondary" href="${release.files.portable.url}">${iconDownload} Tải Portable EXE</a>`
     : "";
   return `<div class="download-actions">${installer}${portable}</div>`;
+};
+
+const formatDate = (dateString) => {
+  if (!dateString) return "không rõ";
+  try {
+    const [year, month, day] = dateString.split("-");
+    return `${day}/${month}/${year}`;
+  } catch (e) {
+    return dateString;
+  }
 };
 
 fetch("./data/releases.json")
@@ -41,14 +53,14 @@ fetch("./data/releases.json")
         <article class="latest-card">
           <div class="version-header">
             <div>
-              <p class="eyebrow">Latest Stable</p>
-              <h3>${latest.version}</h3>
+              <p class="eyebrow">Bản ổn định mới nhất</p>
+              <h3>Phiên bản ${latest.version}</h3>
             </div>
-            <span class="pill latest">Khuyen dung</span>
+            <span class="pill latest">Khuyên dùng</span>
           </div>
           <p class="download-meta">
-            Phat hanh ${latest.published_at || "khong ro"}.
-            ${latest.files?.installer?.size_bytes ? `Installer ${formatBytes(latest.files.installer.size_bytes)}.` : ""}
+            Phát hành: <strong>${formatDate(latest.published_at)}</strong>.
+            ${latest.files?.installer?.size_bytes ? `Kích thước Installer: ${formatBytes(latest.files.installer.size_bytes)}.` : ""}
           </p>
           ${createNotes(latest.notes)}
           ${createDownloadLinks(latest)}
@@ -62,11 +74,11 @@ fetch("./data/releases.json")
           <article class="version-card">
             <div class="version-header">
               <div>
-                <h3>${release.version}</h3>
-                <p class="version-meta">Phat hanh ${release.published_at || "khong ro"}.</p>
+                <h3>Phiên bản ${release.version}</h3>
+                <p class="version-meta">Phát hành: ${formatDate(release.published_at)}.</p>
               </div>
               <span class="pill ${release.version === latest?.version ? "latest" : "history"}">
-                ${release.version === latest?.version ? "Moi nhat" : "Lich su"}
+                ${release.version === latest?.version ? "Mới nhất" : "Lịch sử"}
               </span>
             </div>
             ${createNotes(release.notes)}
@@ -77,5 +89,5 @@ fetch("./data/releases.json")
       .join("");
   })
   .catch((error) => {
-    latestContainer.innerHTML = `<article class="latest-card"><p>Khong tai duoc danh sach phien ban: ${error.message}</p></article>`;
+    latestContainer.innerHTML = `<article class="latest-card"><p style="color: red;">Không tải được danh sách phiên bản: ${error.message}</p></article>`;
   });

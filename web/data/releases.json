@@ -3,8 +3,8 @@
     "version": "0.2.0",
     "published_at": "2026-03-28",
     "notes": [
-      "Lich theo ngay, canh bao truoc gio khoa, manual lock countdown.",
-      "Service nen Windows, updater, cleanup cache va web release hub."
+      "Lịch theo ngày, cảnh báo trước giờ khóa, đếm ngược khóa thủ công (manual lock countdown).",
+      "Service nền Windows, updater, dọn dẹp cache và web release hub."
     ],
     "files": {
       "installer": {
@@ -24,8 +24,8 @@
       "version": "0.2.0",
       "published_at": "2026-03-28",
       "notes": [
-        "Lich theo ngay, canh bao truoc gio khoa, manual lock countdown.",
-        "Service nen Windows, updater, cleanup cache va web release hub."
+        "Lịch theo ngày, cảnh báo trước giờ khóa, đếm ngược khóa thủ công (manual lock countdown).",
+        "Service nền Windows, updater, dọn dẹp cache và web release hub."
       ],
       "files": {
         "installer": {
@@ -44,7 +44,7 @@
       "version": "0.1.0",
       "published_at": "2026-03-26",
       "notes": [
-        "Ban phat hanh desktop dau tien co strict mode, hosts blocking va installer."
+        "Bản phát hành desktop đầu tiên có strict mode, chặn hosts và installer cài đặt."
       ],
       "files": {
         "installer": {

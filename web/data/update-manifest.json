@@ -5,8 +5,8 @@
     "published_at": "2026-03-28",
     "installer": "../downloads/0.2.0/CaiNghienFocusGuard-Setup-0.2.0.exe",
     "notes": [
-      "Lich theo ngay, canh bao truoc gio khoa, manual lock countdown.",
-      "Service nen Windows, updater, cleanup cache va web release hub."
+      "Lịch theo ngày, cảnh báo trước giờ khóa, đếm ngược khóa thủ công (manual lock countdown).",
+      "Service nền Windows, updater, dọn dẹp cache và web release hub."
     ],
     "sha256": "7d434b486bc0f86f73617b6bc7e4e40bd57fa9b93c53aecd18c2fe98655fd460",
     "size_bytes": 48564638
