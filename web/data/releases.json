@@ -1,25 +1,45 @@
 {
   "latest": {
-    "version": "0.2.0",
+    "version": "0.2.1",
     "published_at": "2026-03-28",
     "notes": [
-      "Lịch theo ngày, cảnh báo trước giờ khóa, đếm ngược khóa thủ công (manual lock countdown).",
-      "Service nền Windows, updater, dọn dẹp cache và web release hub."
+      "Nâng cấp uninstaller chuyên nghiệp với bước ủy quyền gỡ cài đặt cho cả app và Windows Settings.",
+      "Thêm recovery key, emergency recovery cooldown và reset mật khẩu an toàn khi quên mật khẩu strict."
     ],
     "files": {
       "installer": {
-        "url": "../downloads/0.2.0/CaiNghienFocusGuard-Setup-0.2.0.exe",
-        "size_bytes": 48622952,
-        "sha256": "7af1d630ba45cdee7e27d1c19c90e175e589ce49c9be1d5394ef0ff7e90b13de"
+        "url": "../downloads/0.2.1/CaiNghienFocusGuard-Setup-0.2.1.exe",
+        "size_bytes": 48620658,
+        "sha256": "bd6cd721b5e855bceb11a103631fbedda0c21a252435d5f64705eb930a6d6811"
       },
       "portable": {
-        "url": "../downloads/0.2.0/CaiNghienFocusGuard-0.2.0.exe",
-        "size_bytes": 47036054,
-        "sha256": "dba43cde710dd0a6a52105aa90b4d9a372997c53e227c8a924da149d72cb29f7"
+        "url": "../downloads/0.2.1/CaiNghienFocusGuard-0.2.1.exe",
+        "size_bytes": 47033611,
+        "sha256": "0fa290d564ba1541b2d0fe3e264d8728bb07a8abf330842d7a2d55ab64fe1011"
       }
     }
   },
   "releases": [
+    {
+      "version": "0.2.1",
+      "published_at": "2026-03-28",
+      "notes": [
+        "Nâng cấp uninstaller chuyên nghiệp với bước ủy quyền gỡ cài đặt cho cả app và Windows Settings.",
+        "Thêm recovery key, emergency recovery cooldown và reset mật khẩu an toàn khi quên mật khẩu strict."
+      ],
+      "files": {
+        "installer": {
+          "url": "../downloads/0.2.1/CaiNghienFocusGuard-Setup-0.2.1.exe",
+          "size_bytes": 48620658,
+          "sha256": "bd6cd721b5e855bceb11a103631fbedda0c21a252435d5f64705eb930a6d6811"
+        },
+        "portable": {
+          "url": "../downloads/0.2.1/CaiNghienFocusGuard-0.2.1.exe",
+          "size_bytes": 47033611,
+          "sha256": "0fa290d564ba1541b2d0fe3e264d8728bb07a8abf330842d7a2d55ab64fe1011"
+        }
+      }
+    },
     {
       "version": "0.2.0",
       "published_at": "2026-03-28",

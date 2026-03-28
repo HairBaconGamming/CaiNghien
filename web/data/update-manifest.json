@@ -1,14 +1,14 @@
 {
   "product": "CaiNghien Focus Guard",
   "latest": {
-    "version": "0.2.0",
+    "version": "0.2.1",
     "published_at": "2026-03-28",
-    "installer": "../downloads/0.2.0/CaiNghienFocusGuard-Setup-0.2.0.exe",
+    "installer": "../downloads/0.2.1/CaiNghienFocusGuard-Setup-0.2.1.exe",
     "notes": [
-      "Lịch theo ngày, cảnh báo trước giờ khóa, đếm ngược khóa thủ công (manual lock countdown).",
-      "Service nền Windows, updater, dọn dẹp cache và web release hub."
+      "Nâng cấp uninstaller chuyên nghiệp với bước ủy quyền gỡ cài đặt cho cả app và Windows Settings.",
+      "Thêm recovery key, emergency recovery cooldown và reset mật khẩu an toàn khi quên mật khẩu strict."
     ],
-    "sha256": "7af1d630ba45cdee7e27d1c19c90e175e589ce49c9be1d5394ef0ff7e90b13de",
-    "size_bytes": 48622952
+    "sha256": "bd6cd721b5e855bceb11a103631fbedda0c21a252435d5f64705eb930a6d6811",
+    "size_bytes": 48620658
   }
 }
