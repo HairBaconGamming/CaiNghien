@@ -129,29 +129,29 @@ class WindowsServiceManager:
 
     def query_status(self) -> tuple[bool, str]:
         if win32serviceutil is None or win32service is None:
-            return False, "PyWin32 chua san sang."
+            return False, "PyWin32 chưa sẵn sàng."
         try:
             status = win32serviceutil.QueryServiceStatus(SERVICE_NAME)[1]
         except Exception as exc:
             if pywintypes is not None and isinstance(exc, pywintypes.error):
                 if exc.winerror == 1060:
-                    return False, "Service chua duoc cai."
+                    return False, "Dịch vụ chưa được cài."
             return False, str(exc)
 
         if status == win32service.SERVICE_RUNNING:
-            return True, "Service dang chay."
+            return True, "Dịch vụ đang chạy."
         if status == win32service.SERVICE_START_PENDING:
-            return False, "Service dang khoi dong."
+            return False, "Dịch vụ đang khởi động."
         if status == win32service.SERVICE_STOP_PENDING:
-            return False, "Service dang dung."
-        return False, "Service dang tat."
+            return False, "Dịch vụ đang dừng."
+        return False, "Dịch vụ đang tắt."
 
     def install_and_start(self) -> tuple[bool, str]:
         if not self.is_available():
-            return False, "Khong tim thay binary/service.py de cai service."
+            return False, "Không tìm thấy tệp chương trình hoặc service.py để cài dịch vụ."
 
         installed, message = self.query_status()
-        if "chua duoc cai" in message.lower():
+        if "chưa được cài" in message.lower():
             ok, install_message = self._run_command("install", "--startup", "auto")
             if not ok:
                 return False, install_message
@@ -162,7 +162,7 @@ class WindowsServiceManager:
         running, message = self.query_status()
         if running:
             return True, message
-        if "chua duoc cai" in message.lower():
+        if "chưa được cài" in message.lower():
             return self.install_and_start()
         return self.start()
 
@@ -186,6 +186,5 @@ class WindowsServiceManager:
             )
         except OSError as exc:
             return False, str(exc)
-        output = (result.stdout or result.stderr or "").strip() or "Khong co output."
+        output = (result.stdout or result.stderr or "").strip() or "Không có output."
         return result.returncode == 0, output
-

@@ -1,5 +1,5 @@
 #define MyAppName "CaiNghien Focus Guard"
-#define MyAppVersion "0.2.1"
+#define MyAppVersion "0.3.0"
 #define MyAppPublisher "CaiNghien Project"
 #define MyAppExeName "CaiNghienFocusGuard.exe"
 #define MyServiceExeName "CaiNghienFocusGuardService.exe"

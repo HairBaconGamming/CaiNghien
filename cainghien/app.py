@@ -192,6 +192,54 @@ QFrame#SideNote {
     border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
+QSplitter::handle:horizontal {
+    background: transparent;
+    width: 10px;
+    margin: 10px 0;
+}
+QSplitter::handle:horizontal:hover {
+    background: rgba(151, 121, 96, 0.16);
+    border-radius: 5px;
+}
+
+QWidget#WorkspaceTabPage {
+    background: transparent;
+}
+
+QTabWidget#WorkspaceTabs::pane {
+    border: none;
+    background: transparent;
+    top: -2px;
+}
+
+QTabBar#WorkspaceTabBar {
+    background: transparent;
+}
+
+QTabBar#WorkspaceTabBar::tab {
+    background: rgba(255, 251, 246, 0.72);
+    border: 1px solid #d8cab7;
+    color: #6a5645;
+    padding: 11px 18px;
+    margin-right: 10px;
+    min-width: 110px;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+QTabBar#WorkspaceTabBar::tab:hover {
+    background: rgba(255, 251, 246, 0.9);
+    color: #2c231d;
+}
+
+QTabBar#WorkspaceTabBar::tab:selected {
+    background: rgba(255, 251, 246, 0.98);
+    color: #1a2a22;
+    border-color: #ccb79d;
+}
+
 QWidget#LockScreen {
     background: qradialgradient(
         cx: 0.22, cy: 0.18, radius: 1.15,
@@ -309,9 +357,9 @@ QTimeEdit::up-button, QTimeEdit::down-button, QSpinBox::up-button, QSpinBox::dow
 /* =========================================================
    5. INPUTS & CONTROLS
 ========================================================= */
-QLineEdit, QTimeEdit, QSpinBox { min-height: 44px; }
+QLineEdit, QTimeEdit, QSpinBox, QComboBox { min-height: 44px; }
 
-QLineEdit#SoftInput, QTimeEdit#SoftInput, QSpinBox#SoftInput, QPlainTextEdit#CodeLikeEdit, QPlainTextEdit#LogOutput {
+QLineEdit#SoftInput, QTimeEdit#SoftInput, QSpinBox#SoftInput, QComboBox#SoftInput, QPlainTextEdit#CodeLikeEdit, QPlainTextEdit#LogOutput {
     background: #fffaf4;
     border: 1px solid #d8cdbf;
     border-radius: 16px;
@@ -319,11 +367,36 @@ QLineEdit#SoftInput, QTimeEdit#SoftInput, QSpinBox#SoftInput, QPlainTextEdit#Cod
     selection-background-color: #bd6b2d;
     selection-color: white;
 }
-QLineEdit#SoftInput:focus, QTimeEdit#SoftInput:focus, QSpinBox#SoftInput:focus, QPlainTextEdit#CodeLikeEdit:focus, QPlainTextEdit#LogOutput:focus {
+QLineEdit#SoftInput:focus, QTimeEdit#SoftInput:focus, QSpinBox#SoftInput:focus, QComboBox#SoftInput:focus, QPlainTextEdit#CodeLikeEdit:focus, QPlainTextEdit#LogOutput:focus {
     border: 1px solid #b96a37;
     background: #ffffff;
 }
 QPlainTextEdit#CodeLikeEdit { font-family: "Consolas", monospace; }
+QComboBox#SoftInput {
+    padding-right: 34px;
+}
+QComboBox#SoftInput::drop-down {
+    border: none;
+    width: 28px;
+    background: transparent;
+}
+QComboBox#SoftInput::down-arrow {
+    image: none;
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid #7b5a43;
+    margin-right: 10px;
+}
+QComboBox#SoftInput QAbstractItemView {
+    background: #fffaf4;
+    border: 1px solid #d8cdbf;
+    border-radius: 12px;
+    padding: 6px;
+    selection-background-color: #f2e2d1;
+    selection-color: #16221d;
+}
 
 QCheckBox#SoftCheck {
     color: #16221d;
@@ -442,28 +515,28 @@ def run_uninstall_guard(controller: EnforcementController) -> int:
     result = dialog.result_data
     if result.start_emergency_recovery:
         _, message = controller.start_emergency_recovery()
-        QtWidgets.QMessageBox.information(None, "Emergency recovery", message)
+        QtWidgets.QMessageBox.information(None, "Khôi phục khẩn cấp", message)
         return 2
 
     if controller.requires_uninstall_auth():
         if result.password:
             if not controller.verify_strict_password(result.password):
-                QtWidgets.QMessageBox.warning(None, "Khong the go cai dat", "Mat khau strict khong dung.")
+                QtWidgets.QMessageBox.warning(None, "Không thể gỡ cài đặt", "Mật khẩu nghiêm khắc không đúng.")
                 return 3
         elif result.recovery_code:
             if not controller.verify_recovery_code(result.recovery_code):
-                QtWidgets.QMessageBox.warning(None, "Khong the go cai dat", "Recovery key khong dung.")
+                QtWidgets.QMessageBox.warning(None, "Không thể gỡ cài đặt", "Mã khôi phục không đúng.")
                 return 4
         elif result.use_emergency_recovery:
             if not controller.emergency_recovery_due():
                 QtWidgets.QMessageBox.warning(
                     None,
-                    "Khong the go cai dat",
+                    "Không thể gỡ cài đặt",
                     controller.emergency_recovery_status_text(),
                 )
                 return 5
         else:
-            QtWidgets.QMessageBox.warning(None, "Chua xac thuc", "Can xac thuc truoc khi go cai dat.")
+            QtWidgets.QMessageBox.warning(None, "Chưa xác thực", "Cần xác thực trước khi gỡ cài đặt.")
             return 6
 
     write_uninstall_approval(controller.store, purge_data=result.purge_data)
@@ -475,7 +548,7 @@ def main(argv: list[str] | None = None) -> int:
     uninstall_guard = "--prepare-uninstall" in args
 
     app = QtWidgets.QApplication([sys.argv[0], *args])
-    app.setApplicationName("CaiNghien Focus Guard")
+    app.setApplicationName("CaiNghiện Focus Guard")
     app.setOrganizationName("Codex")
     app.setStyle("Fusion") # Cần thiết để QSS hiển thị chuẩn trên mọi OS
     app.setWindowIcon(app.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_ComputerIcon))
@@ -494,7 +567,7 @@ def main(argv: list[str] | None = None) -> int:
     show_window = not background
     if show_window and controller.requires_strict_access_password():
         show_window = window.request_strict_access(
-            "Nhap mat khau de mo app trong khung gio nghiem khac.",
+            "Nhập mật khẩu để mở app trong khung giờ nghiêm khắc.",
             reevaluate=False,
         )
 

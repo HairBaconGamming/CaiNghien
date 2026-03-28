@@ -65,4 +65,4 @@ def launch_uninstaller(path: Path) -> tuple[bool, str]:
         subprocess.Popen([str(path)])
     except OSError as exc:
         return False, str(exc)
-    return True, "Da mo bo go cai dat."
+    return True, "Đã mở bộ gỡ cài đặt."

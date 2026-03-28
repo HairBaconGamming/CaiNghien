@@ -1,7 +1,7 @@
 {
   "name": "cainghien-focus-guard-site",
   "private": true,
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Static release site for CaiNghien Focus Guard",
   "engines": {
     "node": "20.x"

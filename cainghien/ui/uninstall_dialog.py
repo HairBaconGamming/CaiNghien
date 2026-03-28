@@ -19,20 +19,20 @@ class RecoveryCodeDialog(QtWidgets.QDialog):
     def __init__(self, code: str, *, reason: str, parent: QtWidgets.QWidget | None = None) -> None:
         super().__init__(parent)
         self._code = code
-        self.setWindowTitle("Recovery key moi")
+        self.setWindowTitle("Mã khôi phục mới")
         self.resize(560, 320)
 
         layout = QtWidgets.QVBoxLayout(self)
         layout.setContentsMargins(22, 22, 22, 22)
         layout.setSpacing(14)
 
-        title = QtWidgets.QLabel("Hay luu recovery key nay o noi an toan")
+        title = QtWidgets.QLabel("Hãy lưu mã khôi phục này ở nơi an toàn")
         title.setObjectName("CardTitle")
         title.setWordWrap(True)
         layout.addWidget(title)
 
         subtitle = QtWidgets.QLabel(
-            f"{reason} Recovery key dung de reset mat khau hoac uy quyen go cai dat neu ban quen mat khau strict."
+            f"{reason} Mã khôi phục dùng để đặt lại mật khẩu hoặc ủy quyền gỡ cài đặt nếu bạn quên mật khẩu nghiêm khắc."
         )
         subtitle.setObjectName("CardSubtitle")
         subtitle.setWordWrap(True)
@@ -46,24 +46,24 @@ class RecoveryCodeDialog(QtWidgets.QDialog):
         layout.addWidget(self.code_edit)
 
         hint = QtWidgets.QLabel(
-            "Khong luu recovery key trong app. Neu ban mat ca mat khau lan recovery key, app chi con emergency recovery cooldown de tranh bi khoa vinh vien."
+            "Không lưu mã khôi phục trong app. Nếu bạn mất cả mật khẩu lẫn mã khôi phục, app chỉ còn khôi phục khẩn cấp có thời gian chờ để tránh bị khóa vĩnh viễn."
         )
         hint.setObjectName("MutedLabel")
         hint.setWordWrap(True)
         layout.addWidget(hint)
 
         actions = QtWidgets.QHBoxLayout()
-        copy_button = QtWidgets.QPushButton("Copy")
+        copy_button = QtWidgets.QPushButton("Sao chép")
         copy_button.setObjectName("SecondaryButton")
         copy_button.clicked.connect(self._copy_code)
         actions.addWidget(copy_button)
 
-        save_button = QtWidgets.QPushButton("Luu thanh file")
+        save_button = QtWidgets.QPushButton("Lưu thành file")
         save_button.setObjectName("SecondaryButton")
         save_button.clicked.connect(self._save_file)
         actions.addWidget(save_button)
 
-        close_button = QtWidgets.QPushButton("Dong")
+        close_button = QtWidgets.QPushButton("Đóng")
         close_button.setObjectName("PrimaryButton")
         close_button.clicked.connect(self.accept)
         actions.addWidget(close_button)
@@ -75,7 +75,7 @@ class RecoveryCodeDialog(QtWidgets.QDialog):
     def _save_file(self) -> None:
         path, _ = QtWidgets.QFileDialog.getSaveFileName(
             self,
-            "Luu recovery key",
+            "Lưu mã khôi phục",
             "CaiNghien-Recovery-Key.txt",
             "Text Files (*.txt)",
         )
@@ -83,10 +83,10 @@ class RecoveryCodeDialog(QtWidgets.QDialog):
             return
         try:
             with open(path, "w", encoding="utf-8") as handle:
-                handle.write("CaiNghien Focus Guard Recovery Key\n")
+                handle.write("Mã khôi phục CaiNghiện Focus Guard\n")
                 handle.write(self._code + "\n")
         except OSError as exc:
-            QtWidgets.QMessageBox.warning(self, "Khong luu duoc", str(exc))
+            QtWidgets.QMessageBox.warning(self, "Không lưu được", str(exc))
 
 
 class UninstallApprovalDialog(QtWidgets.QDialog):
@@ -103,35 +103,35 @@ class UninstallApprovalDialog(QtWidgets.QDialog):
         self._require_auth = require_auth
         self._emergency_due = emergency_due
 
-        self.setWindowTitle("Go cai dat CaiNghien Focus Guard")
+        self.setWindowTitle("Gỡ cài đặt CaiNghiện Focus Guard")
         self.resize(620, 460)
 
         layout = QtWidgets.QVBoxLayout(self)
         layout.setContentsMargins(22, 22, 22, 22)
         layout.setSpacing(14)
 
-        title = QtWidgets.QLabel("Trinh go cai dat an toan")
+        title = QtWidgets.QLabel("Trình gỡ cài đặt an toàn")
         title.setObjectName("CardTitle")
         layout.addWidget(title)
 
         subtitle = QtWidgets.QLabel(
-            "App se dung enforcement, cho phep bo go cai dat chuan cua Windows tiep tuc, va co the xoa ca du lieu cuc bo neu ban muon."
+            "App sẽ dừng enforcement, cho phép bộ gỡ cài đặt chuẩn của Windows tiếp tục, và có thể xóa cả dữ liệu cục bộ nếu bạn muốn."
         )
         subtitle.setObjectName("CardSubtitle")
         subtitle.setWordWrap(True)
         layout.addWidget(subtitle)
 
         checklist = QtWidgets.QLabel(
-            "- Stop service va startup\n"
-            "- Bo hosts block con ton\n"
-            "- Chon giu hoac xoa du lieu local\n"
-            "- Neu strict dang duoc arm, bat buoc xac thuc truoc khi go"
+            "- Dừng dịch vụ và khởi động cùng Windows\n"
+            "- Bỏ hosts block còn tồn\n"
+            "- Chọn giữ hoặc xóa dữ liệu cục bộ\n"
+            "- Nếu chế độ nghiêm khắc đang bật, bắt buộc xác thực trước khi gỡ"
         )
         checklist.setObjectName("MutedLabel")
         checklist.setWordWrap(True)
         layout.addWidget(checklist)
 
-        self.purge_checkbox = QtWidgets.QCheckBox("Xoa ca log, state, cache cap nhat va recovery approval file")
+        self.purge_checkbox = QtWidgets.QCheckBox("Xóa cả log, state, cache cập nhật và file phê duyệt khôi phục")
         self.purge_checkbox.setObjectName("SoftCheck")
         layout.addWidget(self.purge_checkbox)
 
@@ -143,41 +143,41 @@ class UninstallApprovalDialog(QtWidgets.QDialog):
             password_layout = QtWidgets.QVBoxLayout(password_tab)
             password_layout.setContentsMargins(14, 14, 14, 14)
             password_layout.setSpacing(10)
-            password_layout.addWidget(self._caption("Nhap mat khau strict"))
+            password_layout.addWidget(self._caption("Nhập mật khẩu nghiêm khắc"))
             self.password_edit = QtWidgets.QLineEdit()
             self.password_edit.setEchoMode(QtWidgets.QLineEdit.EchoMode.Password)
-            self.password_edit.setPlaceholderText("Mat khau strict")
+            self.password_edit.setPlaceholderText("Mật khẩu nghiêm khắc")
             self.password_edit.setObjectName("SoftInput")
             password_layout.addWidget(self.password_edit)
-            self.tabs.addTab(password_tab, "Mat khau")
+            self.tabs.addTab(password_tab, "Mật khẩu")
 
             recovery_tab = QtWidgets.QWidget()
             recovery_layout = QtWidgets.QVBoxLayout(recovery_tab)
             recovery_layout.setContentsMargins(14, 14, 14, 14)
             recovery_layout.setSpacing(10)
-            recovery_layout.addWidget(self._caption("Dung recovery key neu ban quên mat khau"))
+            recovery_layout.addWidget(self._caption("Dùng mã khôi phục nếu bạn quên mật khẩu"))
             self.recovery_edit = QtWidgets.QLineEdit()
-            self.recovery_edit.setPlaceholderText("Recovery key")
+            self.recovery_edit.setPlaceholderText("Mã khôi phục")
             self.recovery_edit.setObjectName("SoftInput")
             recovery_layout.addWidget(self.recovery_edit)
-            self.tabs.addTab(recovery_tab, "Recovery key")
+            self.tabs.addTab(recovery_tab, "Mã khôi phục")
 
             emergency_tab = QtWidgets.QWidget()
             emergency_layout = QtWidgets.QVBoxLayout(emergency_tab)
             emergency_layout.setContentsMargins(14, 14, 14, 14)
             emergency_layout.setSpacing(10)
-            emergency_layout.addWidget(self._caption("Emergency recovery cooldown"))
+            emergency_layout.addWidget(self._caption("Thời gian chờ khôi phục khẩn cấp"))
             status_label = QtWidgets.QLabel(emergency_status)
             status_label.setObjectName("MutedLabel")
             status_label.setWordWrap(True)
             emergency_layout.addWidget(status_label)
             note = QtWidgets.QLabel(
-                "Neu ban quen ca mat khau lan recovery key, day la duong lui an toan de tranh bi khoa vinh vien. Co che nay co do tre nen khong tro thanh duong lat tuc thi."
+                "Nếu bạn quên cả mật khẩu lẫn mã khôi phục, đây là đường lui an toàn để tránh bị khóa vĩnh viễn. Cơ chế này có độ trễ nên không trở thành đường lách tức thì."
             )
             note.setObjectName("MutedLabel")
             note.setWordWrap(True)
             emergency_layout.addWidget(note)
-            self.tabs.addTab(emergency_tab, "Emergency")
+            self.tabs.addTab(emergency_tab, "Khẩn cấp")
 
             layout.addWidget(self.tabs)
         else:
@@ -188,18 +188,18 @@ class UninstallApprovalDialog(QtWidgets.QDialog):
         actions = QtWidgets.QHBoxLayout()
         actions.addStretch()
 
-        self.start_emergency_button = QtWidgets.QPushButton("Bat recovery 7 ngay")
+        self.start_emergency_button = QtWidgets.QPushButton("Bật khôi phục 7 ngày")
         self.start_emergency_button.setObjectName("SecondaryButton")
         self.start_emergency_button.clicked.connect(self._start_emergency)
         self.start_emergency_button.setVisible(require_auth)
         actions.addWidget(self.start_emergency_button)
 
-        cancel_button = QtWidgets.QPushButton("Huy")
+        cancel_button = QtWidgets.QPushButton("Hủy")
         cancel_button.setObjectName("SecondaryButton")
         cancel_button.clicked.connect(self.reject)
         actions.addWidget(cancel_button)
 
-        continue_button = QtWidgets.QPushButton("Tiep tuc go cai dat")
+        continue_button = QtWidgets.QPushButton("Tiếp tục gỡ cài đặt")
         continue_button.setObjectName("PrimaryButton")
         continue_button.clicked.connect(self._approve)
         actions.addWidget(continue_button)
@@ -234,8 +234,8 @@ class UninstallApprovalDialog(QtWidgets.QDialog):
                 if not self._emergency_due:
                     QtWidgets.QMessageBox.information(
                         self,
-                        "Chua den han",
-                        "Emergency recovery chua toi han. Ban co the bat recovery 7 ngay roi quay lai sau.",
+                        "Chưa đến hạn",
+                        "Khôi phục khẩn cấp chưa tới hạn. Bạn có thể bật khôi phục 7 ngày rồi quay lại sau.",
                     )
                     return
                 result.use_emergency_recovery = True

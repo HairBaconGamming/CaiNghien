@@ -97,7 +97,7 @@ class UpdateManager(QtCore.QObject):
                 removed += 1
             except OSError:
                 continue
-        message = f"Da don {removed} ban cap nhat cu trong cache."
+        message = f"Đã dọn {removed} bản cập nhật cũ trong cache."
         self.cleanup_completed.emit(message)
         return message
 
@@ -111,7 +111,7 @@ class UpdateManager(QtCore.QObject):
                 raw = json.loads(response.read().decode("utf-8"))
             update = UpdateInfo.from_manifest(manifest_url, raw)
             if update is None:
-                self.check_completed.emit(None, "Manifest cap nhat khong hop le.", silent)
+                self.check_completed.emit(None, "Manifest cập nhật không hợp lệ.", silent)
                 return
             if update.is_newer_than(current_version):
                 self.check_completed.emit(update, "", silent)
@@ -135,7 +135,7 @@ class UpdateManager(QtCore.QObject):
                     self.download_completed.emit(
                         "",
                         update,
-                        "Checksum ban cap nhat khong khop. Da huy de tranh loi.",
+                        "Checksum bản cập nhật không khớp. Đã hủy để tránh lỗi.",
                     )
                     return
             target_path.write_bytes(payload)
@@ -143,4 +143,3 @@ class UpdateManager(QtCore.QObject):
             self.download_completed.emit(str(target_path), update, "")
         except Exception as exc:
             self.download_completed.emit("", update, str(exc))
-

@@ -38,11 +38,11 @@ class StrictLockWindow(QtWidgets.QWidget):
         shell_layout.setContentsMargins(42, 40, 42, 40)
         shell_layout.setSpacing(18)
 
-        badge = QtWidgets.QLabel("STRICT MODE")
+        badge = QtWidgets.QLabel("CHẾ ĐỘ NGHIÊM KHẮC")
         badge.setObjectName("LockBadge")
         shell_layout.addWidget(badge, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
 
-        title = QtWidgets.QLabel("May tinh dang nam trong khung gio nghiem khac")
+        title = QtWidgets.QLabel("Máy tính đang nằm trong khung giờ nghiêm khắc")
         title.setObjectName("LockTitle")
         title.setWordWrap(True)
         shell_layout.addWidget(title)
@@ -52,8 +52,8 @@ class StrictLockWindow(QtWidgets.QWidget):
         shell_layout.addWidget(accent, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
 
         self.message_label = QtWidgets.QLabel(
-            "Trong khung gio nay, giao dien giai tri va duong vong su dung may tinh da bi khoa. "
-            "Neu muon tat che do nghiem khac, ban phai nhap dung mat khau da dat truoc do."
+            "Trong khung giờ này, giao diện giải trí và đường vòng sử dụng máy tính đã bị khóa. "
+            "Nếu muốn tắt chế độ nghiêm khắc, bạn phải nhập đúng mật khẩu đã đặt trước đó."
         )
         self.message_label.setWordWrap(True)
         self.message_label.setObjectName("LockMessage")
@@ -65,7 +65,7 @@ class StrictLockWindow(QtWidgets.QWidget):
         info_layout.setContentsMargins(20, 18, 20, 18)
         info_layout.setSpacing(8)
 
-        schedule_caption = QtWidgets.QLabel("KHUNG GIO DANG AP DUNG")
+        schedule_caption = QtWidgets.QLabel("KHUNG GIỜ ĐANG ÁP DỤNG")
         schedule_caption.setObjectName("LockCardCaption")
         info_layout.addWidget(schedule_caption)
 
@@ -75,7 +75,7 @@ class StrictLockWindow(QtWidgets.QWidget):
         info_layout.addWidget(self.schedule_label)
 
         self.lock_hint_label = QtWidgets.QLabel(
-            "Sai mat khau se bi khoa thu lai 60 giay."
+            "Sai mật khẩu sẽ bị khóa thử lại 60 giây."
         )
         self.lock_hint_label.setObjectName("LockHint")
         self.lock_hint_label.setWordWrap(True)
@@ -90,14 +90,14 @@ class StrictLockWindow(QtWidgets.QWidget):
             form_layout.setContentsMargins(22, 22, 22, 22)
             form_layout.setSpacing(12)
 
-            form_title = QtWidgets.QLabel("Nhap mat khau de tat che do nghiem khac")
+            form_title = QtWidgets.QLabel("Nhập mật khẩu để tắt chế độ nghiêm khắc")
             form_title.setObjectName("LockFormTitle")
             form_title.setWordWrap(True)
             form_layout.addWidget(form_title)
 
             self.password_edit = QtWidgets.QLineEdit()
             self.password_edit.setEchoMode(QtWidgets.QLineEdit.EchoMode.Password)
-            self.password_edit.setPlaceholderText("Mat khau nghiem khac")
+            self.password_edit.setPlaceholderText("Mật khẩu nghiêm khắc")
             self.password_edit.setObjectName("LockInput")
             self.password_edit.setMinimumHeight(56)
             self.password_edit.returnPressed.connect(self._submit_password)
@@ -109,7 +109,7 @@ class StrictLockWindow(QtWidgets.QWidget):
             self.feedback_label.setWordWrap(True)
             form_layout.addWidget(self.feedback_label)
 
-            submit_button = QtWidgets.QPushButton("Tat che do nghiem khac")
+            submit_button = QtWidgets.QPushButton("Tắt chế độ nghiêm khắc")
             submit_button.clicked.connect(self._submit_password)
             submit_button.setObjectName("LockPrimaryButton")
             submit_button.setMinimumHeight(50)
@@ -184,7 +184,7 @@ class StrictLockWindow(QtWidgets.QWidget):
             self.password_edit.setFocus()
         else:
             self.feedback_label.setText(
-                f"Cho {self.penalty_seconds}s truoc khi thu lai"
+                f"Chờ {self.penalty_seconds}s trước khi thử lại"
             )
 
     def _submit_password(self) -> None:
