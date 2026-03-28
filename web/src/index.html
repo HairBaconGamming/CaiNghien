@@ -3,111 +3,86 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>CaiNghiện Focus Guard - Kỷ luật số cho Windows</title>
-    <meta
-      name="description"
-      content="CaiNghiện Focus Guard là ứng dụng Windows giúp chặn web xao nhãng, khóa máy tính theo lịch, cảnh báo sớm và cập nhật có kiểm soát."
-    />
+    <title>CaiNghiện Focus Guard</title>
+    <meta name="description" content="Ứng dụng Windows chặn web xao nhãng, khóa theo lịch và cập nhật có kiểm soát." />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
     <div class="page-shell">
       <header class="hero fade-in-up">
         <div class="hero-copy">
-          <p class="eyebrow">Kỷ luật số cho Windows</p>
-          <h1>CaiNghiện Focus Guard</h1>
-          <p class="lead">
-            Ứng dụng Windows chuyên dụng để chặn xao nhãng số, khóa nghiêm ngặt theo lịch,
-            quản lý service nền và cập nhật an toàn có hỏi ý kiến người dùng.
-          </p>
-          <div class="hero-actions">
-            <a class="button primary" href="#downloads">
-              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-              Tải bản mới nhất
-            </a>
-            <a class="button secondary" href="#versions">Xem lịch sử phát hành</a>
+          <div>
+            <p class="eyebrow">Kỷ luật số cho Windows</p>
+            <h1>CaiNghiện Focus Guard</h1>
+            <p class="lead">
+              Chặn xao nhãng số, khóa nghiêm ngặt theo lịch, quản lý service nền và cập nhật an toàn.
+            </p>
+            <div class="trust-row">
+              <span>✨ Giữ lại Gemini</span>
+              <span>🛡️ Safe mode</span>
+              <span>🔄 Cập nhật có kiểm soát</span>
+            </div>
           </div>
-          <div class="trust-row">
-            <span>✨ Gemini được giữ lại mặc định</span>
-            <span>🛡️ Safe mode tránh khóa vĩnh viễn</span>
-            <span>🔄 Cập nhật có kiểm soát</span>
+          <div class="hero-actions">
+            <a class="button primary" href="#latest-release">
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+              Tải ngay
+            </a>
           </div>
         </div>
-        <aside class="hero-card">
-          <p class="card-label">Mục tiêu cốt lõi</p>
-          <h2>Không có đường vòng trong giờ cấm</h2>
-          <ul>
-            <li>Chặn domain bằng hosts & service watchdog</li>
-            <li>Khóa nghiêm ngặt theo lịch & đếm ngược thủ công</li>
-            <li>Trì hoãn thay đổi cài đặt sát giờ khóa</li>
-            <li>Thống kê 7 ngày & nhật ký chống phá</li>
-          </ul>
-        </aside>
       </header>
 
-      <main>
-        <section class="feature-grid fade-in-up" style="animation-delay: 0.1s" id="features">
-          <article class="feature-card">
-            <div class="icon-box">🎯</div>
-            <h3>Tập trung có kỷ luật</h3>
-            <p>Lịch theo từng ngày, cảnh báo trước giờ khóa, và đường allow-list mặc định chỉ giữ lại Gemini.</p>
-          </article>
-          <article class="feature-card">
-            <div class="icon-box">🛡️</div>
-            <h3>Safe mode chống lách</h3>
-            <p>Heartbeat UI/service, pending change có thời điểm áp dụng, runtime state tự làm sạch nếu dữ liệu lỗi.</p>
-          </article>
-          <article class="feature-card">
-            <div class="icon-box">⚙️</div>
-            <h3>Cập nhật có kiểm soát</h3>
-            <p>Ứng dụng chỉ kiểm tra và hỏi trước. Nếu đồng ý, ứng dụng tự tải installer đúng phiên bản và xác nhận cài đặt.</p>
-          </article>
-          <article class="feature-card">
-            <div class="icon-box">📦</div>
-            <h3>Phát hành minh bạch</h3>
-            <p>Trang tải xuống có lịch sử phiên bản, changelog ngắn gọn, file installer, và manifest rõ ràng.</p>
-          </article>
-        </section>
+      <main class="dashboard-layout fade-in-up" style="animation-delay: 0.1s">
+        <div class="col-left">
+          <section class="feature-grid" id="features">
+            <article class="feature-card">
+              <h3>🎯 Tập trung kỷ luật</h3>
+              <p>Lịch theo ngày, cảnh báo trước giờ khóa, allow-list mặc định chỉ giữ Gemini.</p>
+            </article>
+            <article class="feature-card">
+              <h3>🛡️ Safe mode</h3>
+              <p>Heartbeat service, tự động làm sạch nếu dữ liệu lỗi, tránh bị khóa vĩnh viễn.</p>
+            </article>
+            <article class="feature-card">
+              <h3>⚙️ Cập nhật an toàn</h3>
+              <p>Kiểm tra manifest và hỏi ý kiến trước khi tải & mở installer.</p>
+            </article>
+            <article class="feature-card">
+              <h3>🛑 Không đường vòng</h3>
+              <p>Chặn bằng hosts + watchdog. Trì hoãn thay đổi cài đặt sát giờ khóa.</p>
+            </article>
+          </section>
 
-        <section class="download-section fade-in-up" style="animation-delay: 0.2s" id="downloads">
-          <div class="section-head">
-            <p class="eyebrow">Tải xuống</p>
-            <h2>Bản phát hành mới nhất</h2>
-          </div>
-          <div class="latest-release" id="latest-release">
-            <p class="loading-text">Đang tải thông tin phiên bản...</p>
-          </div>
-        </section>
+          <section class="manifest-section mt-4">
+            <div class="manifest-card">
+              <div>
+                <p class="eyebrow">Hệ thống cập nhật</p>
+                <h3>Manifest File</h3>
+                <p class="text-sm">App desktop đọc file này để check bản mới.</p>
+              </div>
+              <a class="button secondary btn-sm" href="./data/update-manifest.json" target="_blank">Xem JSON</a>
+            </div>
+          </section>
+        </div>
 
-        <section class="versions-section fade-in-up" style="animation-delay: 0.3s" id="versions">
-          <div class="section-head">
-            <p class="eyebrow">Lịch sử phát hành</p>
-            <h2>Tất cả phiên bản</h2>
-          </div>
-          <div class="version-list" id="version-list">
-          </div>
-        </section>
+        <div class="col-right">
+          <section class="download-section" id="downloads">
+            <h2 class="section-title">Bản mới nhất</h2>
+            <div class="latest-release" id="latest-release">
+              <p class="loading-text">Đang tải...</p>
+            </div>
+          </section>
 
-        <section class="manifest-section fade-in-up" style="animation-delay: 0.4s">
-          <div class="section-head">
-            <p class="eyebrow">Hệ thống cập nhật</p>
-            <h2>Manifest cập nhật</h2>
-          </div>
-          <div class="manifest-card">
-            <p>
-              Desktop app sẽ đọc file manifest này để kiểm tra bản mới, nhưng sẽ
-              luôn hỏi ý kiến của bạn trước khi bắt đầu tải và cài đặt.
-            </p>
-            <a class="button secondary" href="./data/update-manifest.json" target="_blank" rel="noreferrer">
-              Xem update-manifest.json
-            </a>
-          </div>
-        </section>
+          <section class="versions-section mt-4" id="versions">
+            <h2 class="section-title">Các bản cũ hơn</h2>
+            <div class="version-list scrollable-box" id="version-list">
+            </div>
+          </section>
+        </div>
       </main>
 
       <footer class="site-footer">
         <p><strong>CaiNghiện Focus Guard</strong> for Windows</p>
-        <p>Thiết kế tĩnh cho Render, tối ưu hóa quá trình cập nhật desktop.</p>
       </footer>
     </div>
 
