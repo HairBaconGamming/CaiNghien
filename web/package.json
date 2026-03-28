@@ -1,0 +1,12 @@
+{
+  "name": "cainghien-focus-guard-site",
+  "private": true,
+  "version": "0.2.0",
+  "description": "Static release site for CaiNghien Focus Guard",
+  "engines": {
+    "node": "20.x"
+  },
+  "scripts": {
+    "build": "node ./scripts/build.mjs"
+  }
+}

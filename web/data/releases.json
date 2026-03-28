@@ -1,0 +1,59 @@
+{
+  "latest": {
+    "version": "0.2.0",
+    "published_at": "2026-03-28",
+    "notes": [
+      "Lich theo ngay, canh bao truoc gio khoa, manual lock countdown.",
+      "Service nen Windows, updater, cleanup cache va web release hub."
+    ],
+    "files": {
+      "installer": {
+        "url": "../downloads/0.2.0/CaiNghienFocusGuard-Setup-0.2.0.exe",
+        "size_bytes": 48564638,
+        "sha256": "7d434b486bc0f86f73617b6bc7e4e40bd57fa9b93c53aecd18c2fe98655fd460"
+      },
+      "portable": {
+        "url": "../downloads/0.2.0/CaiNghienFocusGuard-0.2.0.exe",
+        "size_bytes": 46978182,
+        "sha256": "e519db2c4979d05e7f446bbe89ded36f04259ec42fd56fec947b116846ec21e3"
+      }
+    }
+  },
+  "releases": [
+    {
+      "version": "0.2.0",
+      "published_at": "2026-03-28",
+      "notes": [
+        "Lich theo ngay, canh bao truoc gio khoa, manual lock countdown.",
+        "Service nen Windows, updater, cleanup cache va web release hub."
+      ],
+      "files": {
+        "installer": {
+          "url": "../downloads/0.2.0/CaiNghienFocusGuard-Setup-0.2.0.exe",
+          "size_bytes": 48564638,
+          "sha256": "7d434b486bc0f86f73617b6bc7e4e40bd57fa9b93c53aecd18c2fe98655fd460"
+        },
+        "portable": {
+          "url": "../downloads/0.2.0/CaiNghienFocusGuard-0.2.0.exe",
+          "size_bytes": 46978182,
+          "sha256": "e519db2c4979d05e7f446bbe89ded36f04259ec42fd56fec947b116846ec21e3"
+        }
+      }
+    },
+    {
+      "version": "0.1.0",
+      "published_at": "2026-03-26",
+      "notes": [
+        "Ban phat hanh desktop dau tien co strict mode, hosts blocking va installer."
+      ],
+      "files": {
+        "installer": {
+          "url": "../downloads/0.1.0/CaiNghienFocusGuard-Setup-0.1.0.exe"
+        },
+        "portable": {
+          "url": "../downloads/0.1.0/CaiNghienFocusGuard-0.1.0.exe"
+        }
+      }
+    }
+  ]
+}

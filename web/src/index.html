@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CaiNghien Focus Guard</title>
+    <meta
+      name="description"
+      content="CaiNghien Focus Guard la app Windows giup chan web sao nhang, khoa may tinh theo lich, canh bao som va cap nhat co kiem soat."
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Digital Discipline For Windows</p>
+          <h1>CaiNghien Focus Guard</h1>
+          <p class="lead">
+            Mot app Windows de chan xa nhang so, khoa nghiem khac theo lich,
+            quan ly service nen, va cap nhat co hoi y kien nguoi dung.
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="#downloads">Tai ban moi nhat</a>
+            <a class="button secondary" href="#versions">Xem lich su phien ban</a>
+          </div>
+          <div class="trust-row">
+            <span>Gemini duoc giu lai mac dinh</span>
+            <span>Safe mode tranh khoa vinh vien</span>
+            <span>Cap nhat co hoi y kien</span>
+          </div>
+        </div>
+        <aside class="hero-card">
+          <p class="card-label">Muc tieu</p>
+          <h2>Khong con duong vong trong gio cam</h2>
+          <ul>
+            <li>Chan domain bang hosts + service watchdog</li>
+            <li>Strict lock theo lich va manual countdown</li>
+            <li>Tri hoan thay doi sat gio khoa</li>
+            <li>Thong ke 7 ngay va nhat ky chong pha</li>
+          </ul>
+        </aside>
+      </header>
+
+      <main>
+        <section class="feature-grid" id="features">
+          <article class="feature-card">
+            <h3>Tap trung co ky luat</h3>
+            <p>Lich theo tung ngay, canh bao truoc gio khoa, va duong allow-list mac dinh chi giu lai Gemini.</p>
+          </article>
+          <article class="feature-card">
+            <h3>Safe mode chong lach</h3>
+            <p>Heartbeat UI/service, pending change co thoi diem ap dung, runtime state tu lam sach neu du lieu bi hong.</p>
+          </article>
+          <article class="feature-card">
+            <h3>Cap nhat co kiem soat</h3>
+            <p>App chi check va hoi truoc. Neu dong y, no tai installer dung version va mo bo cai de ban tu xac nhan.</p>
+          </article>
+          <article class="feature-card">
+            <h3>Phat hanh ro rang</h3>
+            <p>Trang download co version history, changelog ngan, file installer, va manifest de app check cap nhat.</p>
+          </article>
+        </section>
+
+        <section class="download-section" id="downloads">
+          <div class="section-head">
+            <p class="eyebrow">Downloads</p>
+            <h2>Ban moi nhat</h2>
+          </div>
+          <div class="latest-release" id="latest-release"></div>
+        </section>
+
+        <section class="versions-section" id="versions">
+          <div class="section-head">
+            <p class="eyebrow">Version History</p>
+            <h2>Tat ca phien ban</h2>
+          </div>
+          <div class="version-list" id="version-list"></div>
+        </section>
+
+        <section class="manifest-section">
+          <div class="section-head">
+            <p class="eyebrow">Updater</p>
+            <h2>Manifest cap nhat</h2>
+          </div>
+          <div class="manifest-card">
+            <p>
+              App desktop doc file manifest nay de kiem tra ban moi, nhung se
+              luon hoi ban truoc khi tai va cai dat.
+            </p>
+            <a class="button secondary" href="./data/update-manifest.json" target="_blank" rel="noreferrer">
+              Xem update-manifest.json
+            </a>
+          </div>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <p>CaiNghien Focus Guard for Windows</p>
+        <p>Designed for Render static hosting and controlled desktop updates.</p>
+      </footer>
+    </div>
+
+    <script src="./app.js" type="module"></script>
+  </body>
+</html>

@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: cainghien-focus-guard-site
+    runtime: static
+    plan: free
+    branch: main
+    autoDeploy: true
+    buildCommand: npm run build --prefix web
+    staticPublishPath: ./web/dist
+    headers:
+      - path: /downloads/*
+        name: Cache-Control
+        value: public, max-age=3600
+      - path: /data/update-manifest.json
+        name: Cache-Control
+        value: public, max-age=300
+      - path: /data/releases.json
+        name: Cache-Control
+        value: public, max-age=300
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
