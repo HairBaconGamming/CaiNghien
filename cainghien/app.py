@@ -6,7 +6,9 @@ from PySide6 import QtGui, QtWidgets
 
 from .config import ConfigStore
 from .services.enforcement import EnforcementController
+from .services.uninstall_flow import write_uninstall_approval
 from .ui.main_window import MainWindow
+from .ui.uninstall_dialog import UninstallApprovalDialog
 
 # [CẢI CÁCH] Nhóm các thành phần theo Component để dễ bảo trì
 APP_STYLE = """
@@ -426,9 +428,51 @@ QLabel#LockFeedback[error="false"] {
 }
 """
 
+
+def run_uninstall_guard(controller: EnforcementController) -> int:
+    dialog = UninstallApprovalDialog(
+        require_auth=controller.requires_uninstall_auth(),
+        emergency_status=controller.emergency_recovery_status_text(),
+        emergency_due=controller.emergency_recovery_due(),
+        parent=None,
+    )
+    if dialog.exec() != QtWidgets.QDialog.DialogCode.Accepted:
+        return 1
+
+    result = dialog.result_data
+    if result.start_emergency_recovery:
+        _, message = controller.start_emergency_recovery()
+        QtWidgets.QMessageBox.information(None, "Emergency recovery", message)
+        return 2
+
+    if controller.requires_uninstall_auth():
+        if result.password:
+            if not controller.verify_strict_password(result.password):
+                QtWidgets.QMessageBox.warning(None, "Khong the go cai dat", "Mat khau strict khong dung.")
+                return 3
+        elif result.recovery_code:
+            if not controller.verify_recovery_code(result.recovery_code):
+                QtWidgets.QMessageBox.warning(None, "Khong the go cai dat", "Recovery key khong dung.")
+                return 4
+        elif result.use_emergency_recovery:
+            if not controller.emergency_recovery_due():
+                QtWidgets.QMessageBox.warning(
+                    None,
+                    "Khong the go cai dat",
+                    controller.emergency_recovery_status_text(),
+                )
+                return 5
+        else:
+            QtWidgets.QMessageBox.warning(None, "Chua xac thuc", "Can xac thuc truoc khi go cai dat.")
+            return 6
+
+    write_uninstall_approval(controller.store, purge_data=result.purge_data)
+    return 0
+
 def main(argv: list[str] | None = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     background = "--background" in args or "--startup" in args
+    uninstall_guard = "--prepare-uninstall" in args
 
     app = QtWidgets.QApplication([sys.argv[0], *args])
     app.setApplicationName("CaiNghien Focus Guard")
@@ -443,6 +487,9 @@ def main(argv: list[str] | None = None) -> int:
 
     store = ConfigStore()
     controller = EnforcementController(store)
+    if uninstall_guard:
+        return run_uninstall_guard(controller)
+
     window = MainWindow(controller)
     show_window = not background
     if show_window and controller.requires_strict_access_password():

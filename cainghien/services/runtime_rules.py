@@ -205,8 +205,19 @@ def sanitize_runtime_state(state: RuntimeState, now: datetime) -> tuple[RuntimeS
                 changed = True
                 messages.append("Pending config qua cu da duoc xoa.")
 
+    if state.recovery_request:
+        requested_at = state.recovery_request.requested_dt
+        available_at = state.recovery_request.available_dt
+        if requested_at is None or available_at is None or available_at <= requested_at:
+            state.recovery_request = None
+            changed = True
+            messages.append("Yeu cau recovery khong hop le da duoc xoa.")
+        elif available_at < now - timedelta(days=30):
+            state.recovery_request = None
+            changed = True
+            messages.append("Yeu cau recovery qua han da duoc xoa.")
+
     if changed:
         state.last_integrity_issue = messages[-1]
     state.prune_counters(now=now.date())
     return state, messages
-

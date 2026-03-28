@@ -3,6 +3,7 @@ from __future__ import annotations
 import base64
 import hashlib
 import os
+import secrets
 
 from ..models import PasswordRecord
 
@@ -39,3 +40,12 @@ def verify_password(password: str, record: PasswordRecord | None) -> bool:
     )
     return base64.b64encode(digest).decode("ascii") == record.digest
 
+
+def normalize_recovery_code(value: str) -> str:
+    return "".join(ch for ch in value.upper() if ch.isalnum())
+
+
+def generate_recovery_code() -> str:
+    raw = normalize_recovery_code(secrets.token_hex(8))
+    blocks = [raw[index:index + 4] for index in range(0, len(raw), 4)]
+    return "-".join(blocks)

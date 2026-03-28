@@ -60,10 +60,13 @@ Filename: "{app}\{#MyServiceExeName}"; Parameters: "start"; Flags: runhidden wai
 Filename: "{app}\{#MyAppExeName}"; Parameters: "--startup"; Description: "Mo {#MyAppName}"; Flags: nowait postinstall skipifsilent
 
 [UninstallRun]
-Filename: "{app}\{#MyServiceExeName}"; Parameters: "stop"; Flags: runhidden waituntilterminated skipifdoesntexist
-Filename: "{app}\{#MyServiceExeName}"; Parameters: "remove"; Flags: runhidden waituntilterminated skipifdoesntexist
+Filename: "{app}\{#MyServiceExeName}"; Parameters: "stop"; Flags: runhidden waituntilterminated skipifdoesntexist; RunOnceId: "StopFocusGuardService"
+Filename: "{app}\{#MyServiceExeName}"; Parameters: "remove"; Flags: runhidden waituntilterminated skipifdoesntexist; RunOnceId: "RemoveFocusGuardService"
 
 [Code]
+var
+  PurgeLocalData: Boolean;
+
 function RunScQuery(const Query: string): Boolean;
 var
   ResultCode: Integer;
@@ -95,4 +98,95 @@ begin
     ewWaitUntilTerminated,
     ResultCode
   ) and (ResultCode = 0);
+end;
+
+function ApprovalFilePath: string;
+begin
+  Result := ExpandConstant('{commonappdata}\CaiNghienFocusGuard\uninstall-approval.ini');
+end;
+
+procedure ClearApprovalFile;
+begin
+  if FileExists(ApprovalFilePath()) then
+    DeleteFile(ApprovalFilePath());
+end;
+
+function ApprovalStillValid: Boolean;
+var
+  ExpireStamp: string;
+  NowStamp: string;
+begin
+  if not FileExists(ApprovalFilePath()) then
+  begin
+    Result := False;
+    exit;
+  end;
+  ExpireStamp := GetIniString('approval', 'expires_stamp', '', ApprovalFilePath());
+  if ExpireStamp = '' then
+  begin
+    Result := False;
+    exit;
+  end;
+  NowStamp := GetDateTimeString('yyyymmddhhnnss', #0, #0);
+  Result := ExpireStamp >= NowStamp;
+end;
+
+procedure LoadApprovalSettings;
+var
+  PurgeValue: string;
+begin
+  PurgeValue := GetIniString('approval', 'purge_data', '0', ApprovalFilePath());
+  PurgeLocalData := PurgeValue = '1';
+  ClearApprovalFile();
+end;
+
+function LaunchUninstallGuard: Boolean;
+var
+  ResultCode: Integer;
+begin
+  Result := Exec(
+    ExpandConstant('{app}\{#MyAppExeName}'),
+    '--prepare-uninstall',
+    '',
+    SW_SHOWNORMAL,
+    ewWaitUntilTerminated,
+    ResultCode
+  ) and (ResultCode = 0);
+end;
+
+function InitializeUninstall: Boolean;
+begin
+  PurgeLocalData := False;
+  if ApprovalStillValid then
+  begin
+    LoadApprovalSettings();
+    Result := True;
+    exit;
+  end;
+
+  if not LaunchUninstallGuard then
+  begin
+    Result := False;
+    exit;
+  end;
+
+  if ApprovalStillValid then
+  begin
+    LoadApprovalSettings();
+    Result := True;
+    exit;
+  end;
+
+  Result := False;
+end;
+
+procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+begin
+  if CurUninstallStep = usPostUninstall then
+  begin
+    RegDeleteValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Run', 'CaiNghienFocusGuard');
+    ClearApprovalFile();
+    if PurgeLocalData then
+      DelTree(ExpandConstant('{commonappdata}\CaiNghienFocusGuard'), True, True, True);
+  end;
 end;

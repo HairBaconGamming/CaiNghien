@@ -2,19 +2,27 @@ from __future__ import annotations
 
 import subprocess
 from datetime import datetime
+from pathlib import Path
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
 from .. import __version__
 from ..models import AppConfig, DaySchedule, WEEKDAY_KEYS, WEEKDAY_LABELS, dedupe_domains
 from ..services.enforcement import EnforcementController, EnforcementStatus
-from ..services.security import hash_password, validate_password
+from ..services.security import (
+    generate_recovery_code,
+    hash_password,
+    normalize_recovery_code,
+    validate_password,
+)
+from ..services.uninstall_flow import find_uninstaller, launch_uninstaller, write_uninstall_approval
 from ..services.updater import UpdateInfo, UpdateManager
 from ..services.windows_guard import (
     WindowsServiceManager,
     WindowsSessionController,
     WindowsStartupManager,
 )
+from .uninstall_dialog import RecoveryCodeDialog, UninstallApprovalDialog
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -383,6 +391,26 @@ class MainWindow(QtWidgets.QMainWindow):
         self.manual_lock_label.setObjectName("MutedLabel")
         self.manual_lock_label.setWordWrap(True)
         layout.addWidget(self.manual_lock_label)
+
+        recovery_box = QtWidgets.QFrame()
+        recovery_box.setObjectName("InsetCard")
+        recovery_layout = QtWidgets.QVBoxLayout(recovery_box)
+        recovery_layout.setContentsMargins(16, 16, 16, 16)
+        recovery_layout.setSpacing(10)
+        recovery_layout.addWidget(self._section_label("Recovery va quen mat khau"))
+        self.recovery_status_label = QtWidgets.QLabel("Chua tao recovery key.")
+        self.recovery_status_label.setObjectName("MutedLabel")
+        self.recovery_status_label.setWordWrap(True)
+        recovery_layout.addWidget(self.recovery_status_label)
+        recovery_actions = QtWidgets.QHBoxLayout()
+        self.recovery_key_button = QtWidgets.QPushButton("Tao / xoay recovery key")
+        self.recovery_key_button.setObjectName("SecondaryButton")
+        recovery_actions.addWidget(self.recovery_key_button)
+        self.forgot_password_button = QtWidgets.QPushButton("Quen mat khau")
+        self.forgot_password_button.setObjectName("SecondaryButton")
+        recovery_actions.addWidget(self.forgot_password_button)
+        recovery_layout.addLayout(recovery_actions)
+        layout.addWidget(recovery_box)
         return frame
 
     def _create_system_card(self) -> QtWidgets.QFrame:
@@ -433,6 +461,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.update_hint_label.setObjectName("MutedLabel")
         self.update_hint_label.setWordWrap(True)
         layout.addWidget(self.update_hint_label)
+
+        self.uninstall_button = QtWidgets.QPushButton("Go cai dat chuyen nghiep")
+        self.uninstall_button.setObjectName("DangerButton")
+        layout.addWidget(self.uninstall_button)
         return frame
 
     def _create_guardrail_card(self) -> QtWidgets.QFrame:
@@ -515,8 +547,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.service_button.clicked.connect(self.ensure_service_running)
         self.manual_lock_button.clicked.connect(self.start_manual_lock)
         self.cancel_manual_lock_button.clicked.connect(self.cancel_manual_lock)
+        self.recovery_key_button.clicked.connect(self.rotate_recovery_key)
+        self.forgot_password_button.clicked.connect(self.start_password_recovery)
         self.check_update_button.clicked.connect(self.check_for_updates_manual)
         self.cleanup_versions_button.clicked.connect(self.cleanup_cached_updates)
+        self.uninstall_button.clicked.connect(self.start_professional_uninstall)
 
         self.update_manager.check_completed.connect(self._on_update_check_completed)
         self.update_manager.download_completed.connect(self._on_update_download_completed)
@@ -553,6 +588,10 @@ class MainWindow(QtWidgets.QMainWindow):
             if config.has_password
             else "Can dat mat khau truoc khi su dung strict mode hoac manual lock."
         )
+        recovery_state = "Da tao recovery key." if config.has_recovery_key else "Chua tao recovery key."
+        if self.controller.state.recovery_request is not None:
+            recovery_state += " " + self.controller.emergency_recovery_status_text()
+        self.recovery_status_label.setText(recovery_state)
         self._refresh_schedule_preview()
 
     def _apply_status(self, status: EnforcementStatus) -> None:
@@ -586,6 +625,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pending_change_label.setText(status.pending_change_text)
         self.next_window_label.setText(status.next_window_text)
         self.safe_mode_label.setText(status.safe_mode_reason or "Khong co canh bao an toan.")
+        recovery_status = (
+            "Da tao recovery key." if self.controller.config.has_recovery_key else "Chua tao recovery key."
+        )
+        if self.controller.state.recovery_request is not None:
+            recovery_status += " " + self.controller.emergency_recovery_status_text()
+        self.recovery_status_label.setText(recovery_status)
         self.admin_hint_label.setText(
             "Dang chay voi quyen Admin." if status.admin else "Dang chay quyen thuong. Khong duoc phep sua hosts truc tiep."
         )
@@ -656,6 +701,55 @@ class MainWindow(QtWidgets.QMainWindow):
         config.auto_check_updates = self.auto_check_updates_checkbox.isChecked()
         return config
 
+    def _apply_password_inputs(
+        self,
+        candidate: AppConfig,
+        current: AppConfig,
+    ) -> tuple[AppConfig, str | None, str | None]:
+        new_password = self.password_edit.text().strip()
+        confirm_password = self.password_confirm_edit.text().strip()
+        if new_password or confirm_password:
+            if new_password != confirm_password:
+                return candidate, None, "Hai truong mat khau khong trung nhau."
+            validation_error = validate_password(new_password)
+            if validation_error:
+                return candidate, None, validation_error
+            recovery_code = generate_recovery_code()
+            candidate.strict_password = hash_password(new_password)
+            candidate.recovery_key = hash_password(
+                normalize_recovery_code(recovery_code)
+            )
+            candidate.recovery_key_created_at = datetime.now().isoformat(timespec="seconds")
+            return candidate, recovery_code, None
+
+        candidate.strict_password = current.strict_password
+        candidate.recovery_key = current.recovery_key
+        candidate.recovery_key_created_at = current.recovery_key_created_at
+        return candidate, None, None
+
+    def _show_recovery_code(self, code: str, *, reason: str) -> None:
+        dialog = RecoveryCodeDialog(code, reason=reason, parent=self)
+        dialog.exec()
+
+    def _prompt_new_password_pair(self, title: str) -> tuple[str | None, str | None]:
+        password, ok = QtWidgets.QInputDialog.getText(
+            self,
+            title,
+            "Nhap mat khau moi:",
+            QtWidgets.QLineEdit.EchoMode.Password,
+        )
+        if not ok:
+            return None, None
+        confirm, ok = QtWidgets.QInputDialog.getText(
+            self,
+            title,
+            "Nhap lai mat khau moi:",
+            QtWidgets.QLineEdit.EchoMode.Password,
+        )
+        if not ok:
+            return None, None
+        return password, confirm
+
     def save_config(self) -> None:
         current = self.controller.config
         candidate = self._collect_config_from_ui()
@@ -670,19 +764,10 @@ class MainWindow(QtWidgets.QMainWindow):
             ):
                 return
 
-        new_password = self.password_edit.text().strip()
-        confirm_password = self.password_confirm_edit.text().strip()
-        if new_password or confirm_password:
-            if new_password != confirm_password:
-                self._show_warning("Mat khau chua khop", "Hai truong mat khau khong trung nhau.")
-                return
-            validation_error = validate_password(new_password)
-            if validation_error:
-                self._show_warning("Mat khau chua hop le", validation_error)
-                return
-            candidate.strict_password = hash_password(new_password)
-        else:
-            candidate.strict_password = current.strict_password
+        candidate, recovery_code, password_error = self._apply_password_inputs(candidate, current)
+        if password_error:
+            self._show_warning("Mat khau chua hop le", password_error)
+            return
 
         if candidate.mode == "strict" and not candidate.has_password:
             self._show_warning("Can mat khau", "Hay dat mat khau truoc khi bat strict mode.")
@@ -705,6 +790,8 @@ class MainWindow(QtWidgets.QMainWindow):
             "background: rgba(129, 199, 132, 0.2); color: #81c784; border-color: #81c784;"
         )
         QtCore.QTimer.singleShot(2200, self._reset_save_button)
+        if recovery_code:
+            self._show_recovery_code(recovery_code, reason="Ban vua doi mat khau strict.")
 
     def _reset_save_button(self) -> None:
         self.save_button.setText("Luu thiet lap")
@@ -731,19 +818,10 @@ class MainWindow(QtWidgets.QMainWindow):
             self._show_warning("Chua bat duoc bao ve", maybe_error)
             return
 
-        new_password = self.password_edit.text().strip()
-        confirm_password = self.password_confirm_edit.text().strip()
-        if new_password or confirm_password:
-            if new_password != confirm_password:
-                self._show_warning("Mat khau chua khop", "Hai truong mat khau khong trung nhau.")
-                return
-            validation_error = validate_password(new_password)
-            if validation_error:
-                self._show_warning("Mat khau chua hop le", validation_error)
-                return
-            candidate.strict_password = hash_password(new_password)
-        else:
-            candidate.strict_password = current.strict_password
+        candidate, recovery_code, password_error = self._apply_password_inputs(candidate, current)
+        if password_error:
+            self._show_warning("Mat khau chua hop le", password_error)
+            return
 
         if candidate.mode == "strict" and not candidate.has_password:
             self._show_warning("Can mat khau", "Hay dat mat khau truoc khi bat strict mode.")
@@ -764,6 +842,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self._show_warning("Da tri hoan", message)
         self.password_edit.clear()
         self.password_confirm_edit.clear()
+        if recovery_code:
+            self._show_recovery_code(recovery_code, reason="Ban vua dat mat khau strict moi.")
 
     def start_manual_lock(self) -> None:
         success, message = self.controller.start_manual_lock(self.manual_countdown_spin.value())
@@ -777,6 +857,139 @@ class MainWindow(QtWidgets.QMainWindow):
         success, message = self.controller.cancel_manual_lock(password)
         if not success:
             self._show_warning("Khong huy duoc", message)
+
+    def rotate_recovery_key(self) -> None:
+        current = self.controller.config
+        if not current.has_password:
+            self._show_warning("Chua co mat khau", "Hay dat mat khau strict truoc khi tao recovery key.")
+            return
+        if not self._require_strict_password("Nhap mat khau hien tai de tao recovery key moi."):
+            return
+        recovery_code = generate_recovery_code()
+        ok, message = self.controller.save_secret_material(
+            recovery_key=hash_password(normalize_recovery_code(recovery_code)),
+            recovery_key_created_at=datetime.now().isoformat(timespec="seconds"),
+            log_message="Da tao / xoay recovery key moi.",
+        )
+        if not ok:
+            self._show_warning("Khong tao duoc", message)
+            return
+        self._show_recovery_code(recovery_code, reason="Ban vua tao recovery key moi.")
+
+    def start_password_recovery(self) -> None:
+        options = QtWidgets.QMessageBox(self)
+        options.setWindowTitle("Quen mat khau strict")
+        options.setText("Chon cach khoi phuc an toan.")
+        options.setInformativeText(self.controller.emergency_recovery_status_text())
+        recovery_button = options.addButton("Dung recovery key", QtWidgets.QMessageBox.ButtonRole.AcceptRole)
+        emergency_button = options.addButton(
+            "Dung emergency recovery" if self.controller.emergency_recovery_due() else "Bat recovery 7 ngay",
+            QtWidgets.QMessageBox.ButtonRole.ActionRole,
+        )
+        cancel_button = options.addButton(QtWidgets.QMessageBox.StandardButton.Cancel)
+        options.exec()
+
+        clicked = options.clickedButton()
+        if clicked == cancel_button:
+            return
+
+        if clicked == recovery_button:
+            recovery_code, ok = QtWidgets.QInputDialog.getText(
+                self,
+                "Recovery key",
+                "Nhap recovery key:",
+            )
+            if not ok or not recovery_code.strip():
+                return
+            new_password, confirm_password = self._prompt_new_password_pair("Reset mat khau strict")
+            if new_password is None or confirm_password is None:
+                return
+            if new_password != confirm_password:
+                self._show_warning("Mat khau chua khop", "Hai truong mat khau khong trung nhau.")
+                return
+            success, message, new_recovery_code = self.controller.reset_password_with_recovery(
+                new_password=new_password,
+                recovery_code=recovery_code,
+            )
+            if not success:
+                self._show_warning("Khong reset duoc", message)
+                return
+            if new_recovery_code:
+                self._show_recovery_code(
+                    new_recovery_code,
+                    reason="Ban vua reset mat khau strict bang recovery key.",
+                )
+            return
+
+        if self.controller.emergency_recovery_due():
+            new_password, confirm_password = self._prompt_new_password_pair("Emergency recovery")
+            if new_password is None or confirm_password is None:
+                return
+            if new_password != confirm_password:
+                self._show_warning("Mat khau chua khop", "Hai truong mat khau khong trung nhau.")
+                return
+            success, message, new_recovery_code = self.controller.reset_password_with_recovery(
+                new_password=new_password,
+                use_emergency_recovery=True,
+            )
+            if not success:
+                self._show_warning("Khong reset duoc", message)
+                return
+            if new_recovery_code:
+                self._show_recovery_code(
+                    new_recovery_code,
+                    reason="Ban vua reset mat khau bang emergency recovery.",
+                )
+            return
+
+        _, message = self.controller.start_emergency_recovery()
+        QtWidgets.QMessageBox.information(self, "Emergency recovery", message)
+
+    def start_professional_uninstall(self) -> None:
+        require_auth = self.controller.requires_uninstall_auth()
+        dialog = UninstallApprovalDialog(
+            require_auth=require_auth,
+            emergency_status=self.controller.emergency_recovery_status_text(),
+            emergency_due=self.controller.emergency_recovery_due(),
+            parent=self,
+        )
+        if dialog.exec() != QtWidgets.QDialog.DialogCode.Accepted:
+            return
+
+        result = dialog.result_data
+        if result.start_emergency_recovery:
+            _, message = self.controller.start_emergency_recovery()
+            QtWidgets.QMessageBox.information(self, "Emergency recovery", message)
+            return
+
+        if require_auth:
+            if result.password:
+                if not self.controller.verify_strict_password(result.password):
+                    self._show_warning("Khong the go cai dat", "Mat khau strict khong dung.")
+                    return
+            elif result.recovery_code:
+                if not self.controller.verify_recovery_code(result.recovery_code):
+                    self._show_warning("Khong the go cai dat", "Recovery key khong dung.")
+                    return
+            elif result.use_emergency_recovery:
+                if not self.controller.emergency_recovery_due():
+                    self._show_warning("Khong the go cai dat", self.controller.emergency_recovery_status_text())
+                    return
+            else:
+                self._show_warning("Chua xac thuc", "Can xac thuc truoc khi go cai dat.")
+                return
+
+        write_uninstall_approval(self.controller.store, purge_data=result.purge_data)
+        uninstaller_path = find_uninstaller()
+        if uninstaller_path is None:
+            self._show_warning("Khong tim thay uninstaller", "Khong tim thay bo go cai dat cua Windows trong thu muc cai app.")
+            return
+        launched, message = launch_uninstaller(uninstaller_path)
+        if not launched:
+            self._show_warning("Khong mo duoc uninstaller", message)
+            return
+        self.controller.shutdown()
+        QtWidgets.QApplication.quit()
 
     def ensure_service_running(self) -> None:
         ok, message = self.service_manager.ensure_running()

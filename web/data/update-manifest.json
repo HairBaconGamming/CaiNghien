@@ -8,7 +8,7 @@
       "Lịch theo ngày, cảnh báo trước giờ khóa, đếm ngược khóa thủ công (manual lock countdown).",
       "Service nền Windows, updater, dọn dẹp cache và web release hub."
     ],
-    "sha256": "7d434b486bc0f86f73617b6bc7e4e40bd57fa9b93c53aecd18c2fe98655fd460",
-    "size_bytes": 48564638
+    "sha256": "7af1d630ba45cdee7e27d1c19c90e175e589ce49c9be1d5394ef0ff7e90b13de",
+    "size_bytes": 48622952
   }
 }

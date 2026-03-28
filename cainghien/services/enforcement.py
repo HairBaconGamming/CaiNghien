@@ -6,7 +6,14 @@ from datetime import datetime, timedelta
 from PySide6 import QtCore
 
 from ..config import ConfigStore
-from ..models import AppConfig, ManualLockState, RuntimeState, WeeklyStats
+from ..models import (
+    AppConfig,
+    ManualLockState,
+    PasswordRecord,
+    RecoveryRequest,
+    RuntimeState,
+    WeeklyStats,
+)
 from ..ui.lock_overlay import StrictLockManager
 from .hosts_blocker import HostsBlocker
 from .process_guard import SystemGuard
@@ -22,7 +29,13 @@ from .runtime_rules import (
     sanitize_runtime_state,
     should_warn_before_lock,
 )
-from .security import verify_password
+from .security import (
+    generate_recovery_code,
+    hash_password,
+    normalize_recovery_code,
+    validate_password,
+    verify_password,
+)
 from .windows_guard import WindowsSessionController
 
 
@@ -88,6 +101,172 @@ class EnforcementController(QtCore.QObject):
 
     def verify_strict_password(self, password: str) -> bool:
         return verify_password(password, self._config.strict_password)
+
+    def verify_recovery_code(self, recovery_code: str) -> bool:
+        self._config = self._store.load()
+        normalized = normalize_recovery_code(recovery_code)
+        if not normalized:
+            return False
+        return verify_password(normalized, self._config.recovery_key)
+
+    def requires_uninstall_auth(self) -> bool:
+        self._config = self._store.load()
+        self._state = self._store.load_state()
+        return bool(
+            self._config.has_password
+            and (
+                self._state.manual_lock is not None
+                or (self._config.mode == "strict" and self._config.protection_enabled)
+            )
+        )
+
+    def emergency_recovery_due(self, when: datetime | None = None) -> bool:
+        now = when or datetime.now()
+        self._state = self._store.load_state()
+        request = self._state.recovery_request
+        if request is None or request.purpose != "account_recovery":
+            return False
+        available_at = request.available_dt
+        if available_at is None:
+            return False
+        return now >= available_at
+
+    def emergency_recovery_status_text(self, when: datetime | None = None) -> str:
+        now = when or datetime.now()
+        self._state = self._store.load_state()
+        request = self._state.recovery_request
+        if request is None or request.purpose != "account_recovery":
+            return "Chua co emergency recovery nao."
+        available_at = request.available_dt
+        if available_at is None:
+            return "Emergency recovery dang loi va can tao lai."
+        if now >= available_at:
+            return (
+                "Emergency recovery da toi han. Ban co the dung no de reset mat khau "
+                "hoac go cai dat."
+            )
+        return f"Emergency recovery se san sang luc {available_at.strftime('%d/%m/%Y %H:%M')}."
+
+    def start_emergency_recovery(self, *, days: int = 7) -> tuple[bool, str]:
+        now = datetime.now()
+        self._state = self._store.load_state()
+        request = self._state.recovery_request
+        if request and request.purpose == "account_recovery":
+            available_at = request.available_dt
+            if available_at is not None and now < available_at:
+                return (
+                    True,
+                    f"Emergency recovery da duoc bat va se san sang luc {available_at.strftime('%d/%m/%Y %H:%M')}.",
+                )
+            if available_at is not None and now >= available_at:
+                return True, "Emergency recovery da toi han va san sang de su dung."
+
+        available_at = now + timedelta(days=max(1, days))
+        self._state.recovery_request = RecoveryRequest(
+            purpose="account_recovery",
+            requested_at=now.isoformat(timespec="seconds"),
+            available_at=available_at.isoformat(timespec="seconds"),
+        )
+        self._save_state()
+        self._log_event(
+            self._state,
+            "emergency_recovery_started",
+            (
+                "Da bat emergency recovery cooldown. "
+                f"Su dung duoc sau {available_at.strftime('%d/%m/%Y %H:%M')}."
+            ),
+            level="warning",
+            counter_field="tamper_events",
+            now=now,
+        )
+        return True, f"Emergency recovery se san sang luc {available_at.strftime('%d/%m/%Y %H:%M')}."
+
+    def reset_password_with_recovery(
+        self,
+        *,
+        new_password: str,
+        recovery_code: str | None = None,
+        use_emergency_recovery: bool = False,
+    ) -> tuple[bool, str, str | None]:
+        self._config = self._store.load()
+        self._state = self._store.load_state()
+        validation_error = validate_password(new_password)
+        if validation_error:
+            return False, validation_error, None
+
+        if recovery_code:
+            if not self.verify_recovery_code(recovery_code):
+                self._log_event(
+                    self._state,
+                    "recovery_code_failed",
+                    "Nhap sai recovery key khi co gang reset mat khau.",
+                    level="warning",
+                    counter_field="failed_unlocks",
+                )
+                return False, "Recovery key khong dung.", None
+        elif use_emergency_recovery:
+            self._state = self._store.load_state()
+            if not self.emergency_recovery_due():
+                return False, self.emergency_recovery_status_text(), None
+        else:
+            return False, "Can recovery key hoac emergency recovery de reset mat khau.", None
+
+        recovery_code_display = generate_recovery_code()
+        updated = AppConfig.from_dict(self._config.to_dict())
+        updated.strict_password = hash_password(new_password)
+        updated.recovery_key = hash_password(
+            normalize_recovery_code(recovery_code_display)
+        )
+        updated.recovery_key_created_at = datetime.now().isoformat(timespec="seconds")
+        self._config = updated
+        self._store.save(updated)
+        self._state = self._store.load_state()
+        self._state.recovery_request = None
+        self._save_state()
+        self.config_changed.emit(updated)
+        self._log_event(
+            self._state,
+            "password_reset_recovered",
+            "Da reset mat khau strict bang co che recovery.",
+        )
+        self.evaluate(force=True)
+        return True, "Da reset mat khau strict thanh cong.", recovery_code_display
+
+    def save_secret_material(
+        self,
+        *,
+        strict_password: PasswordRecord | None | object = None,
+        recovery_key: PasswordRecord | None | object = None,
+        recovery_key_created_at: str | None | object = None,
+        clear_recovery_request: bool = False,
+        log_message: str = "Da cap nhat secret material.",
+    ) -> tuple[bool, str]:
+        now = datetime.now()
+        marker = object()
+        strict_value = strict_password if strict_password is not None else marker
+        recovery_value = recovery_key if recovery_key is not None else marker
+        recovery_created_value = (
+            recovery_key_created_at if recovery_key_created_at is not None else marker
+        )
+
+        updated = AppConfig.from_dict(self._store.load().to_dict())
+        if strict_value is not marker:
+            updated.strict_password = strict_value  # type: ignore[assignment]
+        if recovery_value is not marker:
+            updated.recovery_key = recovery_value  # type: ignore[assignment]
+        if recovery_created_value is not marker:
+            updated.recovery_key_created_at = recovery_created_value  # type: ignore[assignment]
+
+        self._config = updated
+        self._store.save(updated)
+        self._state = self._store.load_state()
+        if clear_recovery_request:
+            self._state.recovery_request = None
+            self._save_state()
+        self.config_changed.emit(updated)
+        self._log_event(self._state, "secret_material_saved", log_message, now=now)
+        self.evaluate(force=True)
+        return True, log_message
 
     def requires_strict_access_password(self, when: datetime | None = None) -> bool:
         now = when or datetime.now()

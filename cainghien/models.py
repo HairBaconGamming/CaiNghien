@@ -242,9 +242,47 @@ class ManualLockState:
 
 
 @dataclass(slots=True)
+class RecoveryRequest:
+    purpose: str
+    requested_at: str
+    available_at: str
+
+    @classmethod
+    def from_dict(cls, raw: dict[str, Any] | None) -> RecoveryRequest | None:
+        if not raw:
+            return None
+        purpose = str(raw.get("purpose", "")).strip()
+        requested_at = str(raw.get("requested_at", "")).strip()
+        available_at = str(raw.get("available_at", "")).strip()
+        if not purpose or not requested_at or not available_at:
+            return None
+        return cls(
+            purpose=purpose,
+            requested_at=requested_at,
+            available_at=available_at,
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "purpose": self.purpose,
+            "requested_at": self.requested_at,
+            "available_at": self.available_at,
+        }
+
+    @property
+    def requested_dt(self) -> datetime | None:
+        return parse_iso_datetime(self.requested_at)
+
+    @property
+    def available_dt(self) -> datetime | None:
+        return parse_iso_datetime(self.available_at)
+
+
+@dataclass(slots=True)
 class RuntimeState:
     pending_config: PendingConfigChange | None = None
     manual_lock: ManualLockState | None = None
+    recovery_request: RecoveryRequest | None = None
     last_warning_key: str | None = None
     service_last_seen: str | None = None
     ui_last_seen: str | None = None
@@ -281,6 +319,7 @@ class RuntimeState:
         return cls(
             pending_config=PendingConfigChange.from_dict(raw.get("pending_config")),
             manual_lock=ManualLockState.from_dict(raw.get("manual_lock")),
+            recovery_request=RecoveryRequest.from_dict(raw.get("recovery_request")),
             last_warning_key=str(raw.get("last_warning_key")) if raw.get("last_warning_key") else None,
             service_last_seen=str(raw.get("service_last_seen")) if raw.get("service_last_seen") else None,
             ui_last_seen=str(raw.get("ui_last_seen")) if raw.get("ui_last_seen") else None,
@@ -295,6 +334,7 @@ class RuntimeState:
         return {
             "pending_config": self.pending_config.to_dict() if self.pending_config else None,
             "manual_lock": self.manual_lock.to_dict() if self.manual_lock else None,
+            "recovery_request": self.recovery_request.to_dict() if self.recovery_request else None,
             "last_warning_key": self.last_warning_key,
             "service_last_seen": self.service_last_seen,
             "ui_last_seen": self.ui_last_seen,
@@ -363,6 +403,8 @@ class AppConfig:
         default_factory=lambda: DEFAULT_ALLOWED_DOMAINS.copy()
     )
     strict_password: PasswordRecord | None = None
+    recovery_key: PasswordRecord | None = None
+    recovery_key_created_at: str | None = None
     start_with_windows: bool = False
     warning_minutes: int = 10
     last_minute_guard_minutes: int = 30
@@ -401,6 +443,10 @@ class AppConfig:
             )
             or DEFAULT_ALLOWED_DOMAINS.copy(),
             strict_password=PasswordRecord.from_dict(raw.get("strict_password")),
+            recovery_key=PasswordRecord.from_dict(raw.get("recovery_key")),
+            recovery_key_created_at=str(raw.get("recovery_key_created_at"))
+            if raw.get("recovery_key_created_at")
+            else None,
             start_with_windows=bool(raw.get("start_with_windows", False)),
             warning_minutes=max(1, int(raw.get("warning_minutes", 10))),
             last_minute_guard_minutes=max(
@@ -431,6 +477,8 @@ class AppConfig:
             "blocked_domains": dedupe_domains(self.blocked_domains),
             "allowed_domains": dedupe_domains(self.allowed_domains),
             "strict_password": self.strict_password.to_dict() if self.strict_password else None,
+            "recovery_key": self.recovery_key.to_dict() if self.recovery_key else None,
+            "recovery_key_created_at": self.recovery_key_created_at,
             "start_with_windows": self.start_with_windows,
             "warning_minutes": self.warning_minutes,
             "last_minute_guard_minutes": self.last_minute_guard_minutes,
@@ -444,6 +492,10 @@ class AppConfig:
     @property
     def has_password(self) -> bool:
         return self.strict_password is not None
+
+    @property
+    def has_recovery_key(self) -> bool:
+        return self.recovery_key is not None
 
     def day_schedule(self, key: str) -> DaySchedule:
         return self.weekly_schedule.get(key, DaySchedule())
