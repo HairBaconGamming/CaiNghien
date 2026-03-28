@@ -10,10 +10,20 @@ from ..config import ConfigStore
 
 
 APPROVAL_FILE_NAME = "uninstall-approval.ini"
+CLOSE_REQUEST_FILE_NAME = "installer-close-request.flag"
+CLOSE_DENIED_FILE_NAME = "installer-close-denied.flag"
 
 
 def approval_file_path(store: ConfigStore) -> Path:
     return store.root_dir / APPROVAL_FILE_NAME
+
+
+def close_request_file_path(store: ConfigStore) -> Path:
+    return store.root_dir / CLOSE_REQUEST_FILE_NAME
+
+
+def close_denied_file_path(store: ConfigStore) -> Path:
+    return store.root_dir / CLOSE_DENIED_FILE_NAME
 
 
 def write_uninstall_approval(
@@ -39,6 +49,40 @@ def write_uninstall_approval(
 
 def clear_uninstall_approval(store: ConfigStore) -> None:
     target = approval_file_path(store)
+    try:
+        target.unlink()
+    except FileNotFoundError:
+        pass
+    except OSError:
+        pass
+
+
+def write_close_request(store: ConfigStore, *, source: str = "installer") -> Path:
+    target = close_request_file_path(store)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(source, encoding="utf-8")
+    return target
+
+
+def clear_close_request(store: ConfigStore) -> None:
+    target = close_request_file_path(store)
+    try:
+        target.unlink()
+    except FileNotFoundError:
+        pass
+    except OSError:
+        pass
+
+
+def write_close_denied(store: ConfigStore, *, reason: str) -> Path:
+    target = close_denied_file_path(store)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(reason, encoding="utf-8")
+    return target
+
+
+def clear_close_denied(store: ConfigStore) -> None:
+    target = close_denied_file_path(store)
     try:
         target.unlink()
     except FileNotFoundError:

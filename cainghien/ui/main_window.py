@@ -1859,11 +1859,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self._restore_from_tray()
 
     def _quit_from_tray(self) -> None:
-        current = self.controller.config
-        if current.has_password and (
-            self.controller.requires_strict_access_password()
-            or self.controller.state.manual_lock is not None
-        ):
+        if self.controller.requires_exit_password():
             password = self._prompt_password(
                 "Nhập mật khẩu để thoát app khi chế độ nghiêm khắc hoặc khóa thủ công đang bật."
             )

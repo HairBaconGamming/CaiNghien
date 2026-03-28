@@ -277,6 +277,19 @@ class EnforcementController(QtCore.QObject):
         active_window = resolve_active_window(self._config, self._state, now)
         return bool(active_window and active_window.strict and self._config.has_password)
 
+    def requires_exit_password(self, when: datetime | None = None) -> bool:
+        now = when or datetime.now()
+        self._config = self._store.load()
+        self._state, _ = sanitize_runtime_state(self._store.load_state(), now)
+        active_window = resolve_active_window(self._config, self._state, now)
+        return bool(
+            self._config.has_password
+            and (
+                self._state.manual_lock is not None
+                or (active_window and active_window.strict)
+            )
+        )
+
     def set_ui_access_override(self, enabled: bool, *, reevaluate: bool = True) -> None:
         self._ui_access_override = enabled
         if reevaluate:

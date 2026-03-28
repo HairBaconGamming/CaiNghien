@@ -3,86 +3,159 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>CaiNghiện Focus Guard</title>
-    <meta name="description" content="Ứng dụng Windows chặn web xao nhãng, khóa theo lịch và cập nhật có kiểm soát." />
+    <title>CaiNghiện Focus Guard | Kỷ luật số cho Windows</title>
+    <meta
+      name="description"
+      content="CaiNghiện Focus Guard là ứng dụng Windows giúp chặn xao nhãng số, vào phiên học sâu kỷ luật, khóa nghiêm ngặt theo lịch và cập nhật có kiểm soát."
+    />
+    <meta property="og:title" content="CaiNghiện Focus Guard" />
+    <meta
+      property="og:description"
+      content="Chặn xao nhãng số, học tập kỷ luật, khóa nghiêm ngặt theo lịch và cập nhật an toàn cho Windows."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="./assets/CaiNghienFocusGuard-preview.png" />
+    <link rel="icon" type="image/png" href="./assets/CaiNghienFocusGuard-preview.png" />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
+    <div class="ambient ambient-a"></div>
+    <div class="ambient ambient-b"></div>
+
     <div class="page-shell">
       <header class="hero fade-in-up">
-        <div class="hero-copy">
-          <div>
+        <section class="hero-panel hero-copy">
+          <div class="hero-copy-top">
             <p class="eyebrow">Kỷ luật số cho Windows</p>
             <h1>CaiNghiện Focus Guard</h1>
             <p class="lead">
-              Chặn xao nhãng số, khóa nghiêm ngặt theo lịch, quản lý service nền và cập nhật an toàn.
+              Một desktop app dành cho người muốn chặn xao nhãng số thật sự: chặn web,
+              vào phiên học sâu có kỷ luật, giữ service nền ổn định và chỉ cập nhật khi bạn đồng ý.
             </p>
-            <div class="trust-row">
-              <span>✨ Giữ lại Gemini</span>
-              <span>🛡️ Safe mode</span>
-              <span>🔄 Cập nhật có kiểm soát</span>
-            </div>
           </div>
+
+          <div class="hero-proof">
+            <article class="proof-card">
+              <span class="proof-kicker">Chế độ học sâu</span>
+              <strong>Profile học + lịch học riêng</strong>
+              <p>Phiên học thủ công hoặc theo lịch, có streak, báo cáo 7 ngày và quick actions mở tài nguyên học.</p>
+            </article>
+            <article class="proof-card">
+              <span class="proof-kicker">Chế độ nghiêm khắc</span>
+              <strong>Khóa máy đúng giờ, không lách dễ</strong>
+              <p>Safe mode, trì hoãn đổi cấu hình sát giờ khóa, recovery key và emergency recovery tránh khóa vĩnh viễn.</p>
+            </article>
+          </div>
+
           <div class="hero-actions">
             <a class="button primary" href="#latest-release">
-              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-              Tải ngay
+              <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.3" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+              Tải bản mới nhất
+            </a>
+            <a class="button secondary" href="./data/update-manifest.json" target="_blank" rel="noreferrer">
+              Xem manifest cập nhật
             </a>
           </div>
-        </div>
+
+          <div class="trust-row">
+            <span>Gemini được giữ lại mặc định</span>
+            <span>Updater luôn hỏi trước khi cài</span>
+            <span>Service nền + heartbeat an toàn</span>
+          </div>
+        </section>
+
+        <aside class="hero-panel hero-preview">
+          <div class="preview-frame">
+            <img
+              class="preview-image"
+              src="./assets/CaiNghienFocusGuard-preview.png"
+              alt="Ảnh xem trước giao diện CaiNghiện Focus Guard"
+            />
+          </div>
+
+          <div class="preview-meta">
+            <div class="preview-meta-head">
+              <p class="eyebrow">Tập trung vào điều quan trọng</p>
+              <h2>Vừa cai nghiện số, vừa học tập có kỷ luật</h2>
+            </div>
+            <ul class="preview-list">
+              <li>Chặn web xao nhãng bằng hosts và service watchdog</li>
+              <li>Phiên học sâu có profile riêng, lịch riêng, cảnh báo riêng</li>
+              <li>Strict mode vẫn là lớp mạnh nhất khi cần khóa cứng</li>
+            </ul>
+          </div>
+        </aside>
       </header>
 
-      <main class="dashboard-layout fade-in-up" style="animation-delay: 0.1s">
+      <main class="dashboard-layout fade-in-up" style="animation-delay: 0.12s">
         <div class="col-left">
           <section class="feature-grid" id="features">
-            <article class="feature-card">
-              <h3>🎯 Tập trung kỷ luật</h3>
-              <p>Lịch theo ngày, cảnh báo trước giờ khóa, allow-list mặc định chỉ giữ Gemini.</p>
+            <article class="feature-card accent-card">
+              <div class="card-icon">Học</div>
+              <h3>Học tập kỷ luật</h3>
+              <p>Profile học, lịch học, phiên học thủ công, quick actions mở link học và app học đã cấu hình.</p>
             </article>
             <article class="feature-card">
-              <h3>🛡️ Safe mode</h3>
-              <p>Heartbeat service, tự động làm sạch nếu dữ liệu lỗi, tránh bị khóa vĩnh viễn.</p>
+              <div class="card-icon">Chặn</div>
+              <h3>Không còn đường vòng</h3>
+              <p>Chặn domain xao nhãng, trì hoãn thay đổi cấu hình sát giờ khóa và log lại các dấu hiệu chống phá.</p>
             </article>
             <article class="feature-card">
-              <h3>⚙️ Cập nhật an toàn</h3>
-              <p>Kiểm tra manifest và hỏi ý kiến trước khi tải & mở installer.</p>
+              <div class="card-icon">Safe</div>
+              <h3>Safe mode chống lách</h3>
+              <p>Runtime state tự làm sạch, heartbeat UI/service và recovery flow để tránh tự khóa vĩnh viễn.</p>
             </article>
             <article class="feature-card">
-              <h3>🛑 Không đường vòng</h3>
-              <p>Chặn bằng hosts + watchdog. Trì hoãn thay đổi cài đặt sát giờ khóa.</p>
+              <div class="card-icon">Update</div>
+              <h3>Cập nhật có kiểm soát</h3>
+              <p>Desktop app kiểm tra manifest, báo changelog rõ ràng và chỉ tải installer khi bạn chấp nhận.</p>
             </article>
           </section>
 
           <section class="manifest-section mt-4">
-            <div class="manifest-card">
+            <article class="manifest-card">
               <div>
-                <p class="eyebrow">Hệ thống cập nhật</p>
-                <h3>Manifest File</h3>
-                <p class="text-sm">App desktop đọc file này để check bản mới.</p>
+                <p class="eyebrow">Hệ thống phát hành</p>
+                <h3>Feed cập nhật minh bạch</h3>
+                <p class="text-sm">
+                  Trang này đóng vai trò release hub cho app desktop: có changelog, file cài đặt, bản portable và manifest JSON cho updater.
+                </p>
               </div>
-              <a class="button secondary btn-sm" href="./data/update-manifest.json" target="_blank">Xem JSON</a>
-            </div>
+              <div class="manifest-actions">
+                <a class="button secondary btn-sm" href="./data/update-manifest.json" target="_blank" rel="noreferrer">update-manifest.json</a>
+                <a class="button secondary btn-sm" href="./data/releases.json" target="_blank" rel="noreferrer">releases.json</a>
+              </div>
+            </article>
           </section>
         </div>
 
         <div class="col-right">
           <section class="download-section" id="downloads">
-            <h2 class="section-title">Bản mới nhất</h2>
+            <div class="section-head">
+              <p class="eyebrow">Bản ổn định</p>
+              <h2 class="section-title">Tải bản mới nhất</h2>
+            </div>
             <div class="latest-release" id="latest-release">
-              <p class="loading-text">Đang tải...</p>
+              <p class="loading-text">Đang tải thông tin phát hành...</p>
             </div>
           </section>
 
           <section class="versions-section mt-4" id="versions">
-            <h2 class="section-title">Các bản cũ hơn</h2>
-            <div class="version-list scrollable-box" id="version-list">
+            <div class="section-head section-head-inline">
+              <div>
+                <p class="eyebrow">Lịch sử phát hành</p>
+                <h2 class="section-title">Các bản cũ hơn</h2>
+              </div>
+              <p class="section-caption">Giữ gọn trong một hộp cuộn để bạn không phải kéo trang quá dài.</p>
             </div>
+            <div class="version-list scrollable-box" id="version-list"></div>
           </section>
         </div>
       </main>
 
       <footer class="site-footer">
         <p><strong>CaiNghiện Focus Guard</strong> for Windows</p>
+        <p>Release hub tĩnh cho desktop app, tối ưu cho tải bản phát hành và cập nhật có kiểm soát.</p>
       </footer>
     </div>
 

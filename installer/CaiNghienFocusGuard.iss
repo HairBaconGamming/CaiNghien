@@ -1,5 +1,5 @@
 #define MyAppName "CaiNghien Focus Guard"
-#define MyAppVersion "0.3.0"
+#define MyAppVersion "0.3.1"
 #define MyAppPublisher "CaiNghien Project"
 #define MyAppExeName "CaiNghienFocusGuard.exe"
 #define MyServiceExeName "CaiNghienFocusGuardService.exe"
@@ -35,6 +35,9 @@ WizardStyle=modern
 Compression=lzma2/ultra64
 SolidCompression=yes
 ChangesAssociations=no
+CloseApplications=yes
+CloseApplicationsFilter={#MyAppExeName},{#MyServiceExeName}
+RestartApplications=no
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -105,10 +108,208 @@ begin
   Result := ExpandConstant('{commonappdata}\CaiNghienFocusGuard\uninstall-approval.ini');
 end;
 
+function CloseRequestPath: string;
+begin
+  Result := ExpandConstant('{commonappdata}\CaiNghienFocusGuard\installer-close-request.flag');
+end;
+
+function CloseDeniedPath: string;
+begin
+  Result := ExpandConstant('{commonappdata}\CaiNghienFocusGuard\installer-close-denied.flag');
+end;
+
 procedure ClearApprovalFile;
 begin
   if FileExists(ApprovalFilePath()) then
     DeleteFile(ApprovalFilePath());
+end;
+
+procedure ClearCloseRequest;
+begin
+  if FileExists(CloseRequestPath()) then
+    DeleteFile(CloseRequestPath());
+end;
+
+procedure ClearCloseDenied;
+begin
+  if FileExists(CloseDeniedPath()) then
+    DeleteFile(CloseDeniedPath());
+end;
+
+function CloseWasDenied: Boolean;
+begin
+  Result := FileExists(CloseDeniedPath());
+end;
+
+procedure WriteCloseRequest;
+begin
+  ForceDirectories(ExpandConstant('{commonappdata}\CaiNghienFocusGuard'));
+  SaveStringToFile(CloseRequestPath(), GetDateTimeString('yyyy-mm-dd hh:nn:ss', #0, #0), False);
+end;
+
+function ProcessRunning(const ImageName: string): Boolean;
+var
+  ResultCode: Integer;
+begin
+  Result := Exec(
+    ExpandConstant('{cmd}'),
+    '/C tasklist /FI "IMAGENAME eq ' + ImageName + '" | find /I "' + ImageName + '" >nul',
+    '',
+    SW_HIDE,
+    ewWaitUntilTerminated,
+    ResultCode
+  ) and (ResultCode = 0);
+end;
+
+function WaitForProcessExit(const ImageName: string; TimeoutSeconds: Integer): Boolean;
+var
+  Attempt: Integer;
+begin
+  for Attempt := 0 to (TimeoutSeconds * 2) do
+  begin
+    if not ProcessRunning(ImageName) then
+    begin
+      Result := True;
+      exit;
+    end;
+    Sleep(500);
+  end;
+  Result := not ProcessRunning(ImageName);
+end;
+
+function WaitForServiceStop(TimeoutSeconds: Integer): Boolean;
+var
+  Attempt: Integer;
+begin
+  if not ServiceInstalled then
+  begin
+    Result := True;
+    exit;
+  end;
+
+  for Attempt := 0 to (TimeoutSeconds * 2) do
+  begin
+    if not ServiceRunning() then
+    begin
+      Result := True;
+      exit;
+    end;
+    Sleep(500);
+  end;
+  Result := not ServiceRunning();
+end;
+
+procedure RequestInstalledAppClose;
+begin
+  ClearCloseRequest();
+  ClearCloseDenied();
+  WriteCloseRequest();
+end;
+
+function ForceStopServiceProcess: Boolean;
+var
+  ResultCode: Integer;
+begin
+  Result := Exec(
+    ExpandConstant('{cmd}'),
+    '/C taskkill /IM "{#MyServiceExeName}" /T /F >nul 2>nul',
+    '',
+    SW_HIDE,
+    ewWaitUntilTerminated,
+    ResultCode
+  ) and (ResultCode = 0);
+end;
+
+function ForceStopAppProcess: Boolean;
+var
+  ResultCode: Integer;
+begin
+  Result := Exec(
+    ExpandConstant('{cmd}'),
+    '/C taskkill /IM "{#MyAppExeName}" /T /F >nul 2>nul',
+    '',
+    SW_HIDE,
+    ewWaitUntilTerminated,
+    ResultCode
+  ) and (ResultCode = 0);
+end;
+
+procedure StopInstalledService;
+var
+  ResultCode: Integer;
+begin
+  if not ServiceInstalled then
+    exit;
+  Exec(
+    ExpandConstant('{cmd}'),
+    '/C sc stop "{#MyServiceName}" >nul 2>nul',
+    '',
+    SW_HIDE,
+    ewWaitUntilTerminated,
+    ResultCode
+  );
+end;
+
+procedure RestoreServiceIfNeeded(const WasRunning: Boolean);
+var
+  ResultCode: Integer;
+begin
+  if not WasRunning then
+    exit;
+  Exec(
+    ExpandConstant('{cmd}'),
+    '/C sc start "{#MyServiceName}" >nul 2>nul',
+    '',
+    SW_HIDE,
+    ewWaitUntilTerminated,
+    ResultCode
+  );
+end;
+
+function PrepareToInstall(var NeedsRestart: Boolean): String;
+var
+  ServiceWasRunning: Boolean;
+begin
+  Result := '';
+  ClearCloseRequest();
+  ClearCloseDenied();
+  ServiceWasRunning := ServiceRunning();
+
+  StopInstalledService();
+  if not WaitForServiceStop(12) then
+  begin
+    ForceStopServiceProcess();
+    if not WaitForProcessExit('{#MyServiceExeName}', 8) then
+    begin
+      Result := 'Installer không thể dừng service đang chạy. Hãy đóng app và service rồi thử lại.';
+      exit;
+    end;
+  end;
+
+  RequestInstalledAppClose();
+  if not WaitForProcessExit('{#MyAppExeName}', 8) then
+  begin
+    if CloseWasDenied() then
+    begin
+      RestoreServiceIfNeeded(ServiceWasRunning);
+      ClearCloseRequest();
+      ClearCloseDenied();
+      Result := 'Ứng dụng đang ở strict mode hoặc khóa thủ công nên installer không thể tự đóng nó. Hãy mở app, nhập đúng mật khẩu rồi thử lại.';
+      exit;
+    end;
+    ForceStopAppProcess();
+    if not WaitForProcessExit('{#MyAppExeName}', 8) then
+    begin
+      RestoreServiceIfNeeded(ServiceWasRunning);
+      ClearCloseRequest();
+      ClearCloseDenied();
+      Result := 'Installer không thể đóng ứng dụng đang chạy. Hãy thoát CaiNghien Focus Guard rồi thử lại.';
+      exit;
+    end;
+  end;
+
+  ClearCloseRequest();
+  ClearCloseDenied();
 end;
 
 function ApprovalStillValid: Boolean;
@@ -186,6 +387,8 @@ begin
   begin
     RegDeleteValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Run', 'CaiNghienFocusGuard');
     ClearApprovalFile();
+    ClearCloseRequest();
+    ClearCloseDenied();
     if PurgeLocalData then
       DelTree(ExpandConstant('{commonappdata}\CaiNghienFocusGuard'), True, True, True);
   end;

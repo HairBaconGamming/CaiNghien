@@ -1,15 +1,14 @@
 {
   "product": "CaiNghien Focus Guard",
   "latest": {
-    "version": "0.3.0",
+    "version": "0.3.1",
     "published_at": "2026-03-28",
-    "installer": "../downloads/0.3.0/CaiNghienFocusGuard-Setup-0.3.0.exe",
+    "installer": "../downloads/0.3.1/CaiNghienFocusGuard-Setup-0.3.1.exe",
     "notes": [
-      "Thêm chế độ Học tập kỷ luật với profile học, lịch học riêng, phiên học thủ công và cảnh báo trước giờ học.",
-      "Bổ sung báo cáo 7 ngày, streak học tập, chặn app xao nhãng theo phiên học và quick actions mở tài nguyên học.",
-      "Nâng cấp UI sang tab Học tập chuyên dụng, đồng bộ tiếng Việt có dấu hơn và tăng hỗ trợ nền cho study session qua service."
+      "Vá trạng thái installer unable to close application: installer giờ chủ động yêu cầu app thoát, dừng service trước khi nâng cấp và không force-close nếu strict mode đang yêu cầu mật khẩu.",
+      "Nâng cấp web release hub với giao diện gọn hơn, thông tin file tải rõ ràng hơn và lịch sử phiên bản dễ quét mắt."
     ],
-    "sha256": "8cf4b247b95de32ad0ce1c7b086cf019e9db16488f4db54e6f793f47b4880b6c",
-    "size_bytes": 48664153
+    "sha256": "df9141495357c1d74624c4b274de54d675de32b3e4c3610163870cfa36664f04",
+    "size_bytes": 48667286
   }
 }

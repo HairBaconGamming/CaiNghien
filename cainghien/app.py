@@ -2,11 +2,17 @@ from __future__ import annotations
 
 import sys
 
-from PySide6 import QtGui, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 
 from .config import ConfigStore
 from .services.enforcement import EnforcementController
-from .services.uninstall_flow import write_uninstall_approval
+from .services.uninstall_flow import (
+    clear_close_denied,
+    clear_close_request,
+    close_request_file_path,
+    write_uninstall_approval,
+    write_close_denied,
+)
 from .ui.main_window import MainWindow
 from .ui.uninstall_dialog import UninstallApprovalDialog
 
@@ -542,6 +548,45 @@ def run_uninstall_guard(controller: EnforcementController) -> int:
     write_uninstall_approval(controller.store, purge_data=result.purge_data)
     return 0
 
+
+def install_external_close_watcher(
+    app: QtWidgets.QApplication,
+    controller: EnforcementController,
+    window: MainWindow,
+) -> QtCore.QTimer:
+    timer = QtCore.QTimer(app)
+    timer.setInterval(1000)
+
+    def handle_close_request() -> None:
+        request_path = close_request_file_path(controller.store)
+        if not request_path.exists():
+            return
+
+        clear_close_request(controller.store)
+        clear_close_denied(controller.store)
+        if controller.requires_exit_password():
+            reason = "Đang trong strict mode hoặc khóa thủ công nên installer chưa thể đóng ứng dụng."
+            write_close_denied(controller.store, reason=reason)
+            controller.store.append_event(
+                "installer_close_blocked",
+                reason,
+                level="warning",
+            )
+            return
+
+        controller.store.append_event(
+            "installer_close_requested",
+            "Installer đã yêu cầu app thoát để tiếp tục cập nhật.",
+        )
+        window._ignore_close_to_tray = True
+        window.hide()
+        controller.shutdown()
+        app.quit()
+
+    timer.timeout.connect(handle_close_request)
+    timer.start()
+    return timer
+
 def main(argv: list[str] | None = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     background = "--background" in args or "--startup" in args
@@ -572,6 +617,8 @@ def main(argv: list[str] | None = None) -> int:
         )
 
     controller.start()
+    close_watcher = install_external_close_watcher(app, controller, window)
+    app.setProperty("installer_close_watcher", close_watcher)
     if show_window:
         window.show()
     return app.exec()
