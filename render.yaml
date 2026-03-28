@@ -2,10 +2,11 @@ services:
   - type: web
     name: cainghien-focus-guard-site
     runtime: static
+    rootDir: web
     branch: main
     autoDeployTrigger: commit
-    buildCommand: npm run build --prefix web
-    staticPublishPath: ./web/dist
+    buildCommand: npm run build
+    staticPublishPath: dist
     headers:
       - path: /downloads/*
         name: Cache-Control
