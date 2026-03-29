@@ -2185,6 +2185,11 @@ class MainWindow(QtWidgets.QMainWindow):
             return "Danh sách web bị chặn đang rỗng."
         if all(not schedule.enabled for schedule in candidate.weekly_schedule.values()):
             return "Hãy bật ít nhất một ngày trong lịch tự động."
+        if candidate.creates_continuous_strict_lock():
+            return (
+                "Không cho phép lịch nghiêm khắc khóa 24/7. "
+                "Hãy chừa ít nhất một khoảng hở, hoặc dùng khóa thủ công có thời hạn."
+            )
         if not candidate.study_profiles:
             return "Cần có ít nhất một profile học."
         profile_ids: set[str] = set()

@@ -307,6 +307,49 @@ class EnforcementController(QtCore.QObject):
             self._hosts.remove_block()
             self._hosts_applied = False
 
+    def _guard_against_continuous_strict_lock(
+        self,
+        config: AppConfig,
+        *,
+        now: datetime,
+        source: str,
+    ) -> tuple[AppConfig, str | None]:
+        if not config.creates_continuous_strict_lock():
+            return config, None
+
+        if source == "update_config":
+            message = (
+                "Không cho phép lịch nghiêm khắc khóa 24/7. "
+                "Hãy chừa ít nhất một khoảng hở để tránh tự khóa vĩnh viễn."
+            )
+            self._log_event(
+                self._state,
+                "strict_schedule_guarded",
+                message,
+                level="warning",
+                counter_field="tamper_events",
+                now=now,
+                meta={"source": source},
+            )
+            return config, message
+
+        updated = AppConfig.from_dict(config.to_dict())
+        updated.mode = "normal"
+        message = (
+            "Phát hiện lịch nghiêm khắc 24/7. App đã tự hạ về chế độ bình thường "
+            "để tránh tự khóa vĩnh viễn."
+        )
+        self._log_event(
+            self._state,
+            "strict_schedule_guarded",
+            message,
+            level="warning",
+            counter_field="tamper_events",
+            now=now,
+            meta={"source": source},
+        )
+        return updated, message
+
     def update_config(self, config: AppConfig) -> tuple[bool, str, bool]:
         now = datetime.now()
         self._config = self._store.load()
@@ -324,6 +367,14 @@ class EnforcementController(QtCore.QObject):
 
         if config.to_dict() == self._config.to_dict():
             return True, "Không có thay đổi nào để lưu.", False
+
+        config, guarded_message = self._guard_against_continuous_strict_lock(
+            config,
+            now=now,
+            source="update_config",
+        )
+        if guarded_message is not None:
+            return False, guarded_message, False
 
         delay_target = delay_target_for_change(self._config, self._state, now)
         if (
@@ -473,6 +524,17 @@ class EnforcementController(QtCore.QObject):
                 counter_field="tamper_events",
                 now=now,
             )
+
+        guarded_config, guarded_message = self._guard_against_continuous_strict_lock(
+            self._config,
+            now=now,
+            source="evaluate",
+        )
+        if guarded_message is not None:
+            self._config = guarded_config
+            self._store.save(self._config)
+            self.config_changed.emit(self._config)
+            state_changed = True
 
         if self._apply_pending_config_if_due(now):
             self._config = self._store.load()
@@ -673,14 +735,20 @@ class EnforcementController(QtCore.QObject):
         if pending is None:
             return False
 
-        self._config = AppConfig.from_dict(pending.payload)
+        candidate = AppConfig.from_dict(pending.payload)
+        candidate, guarded_message = self._guard_against_continuous_strict_lock(
+            candidate,
+            now=now,
+            source="pending_config",
+        )
+        self._config = candidate
         self._store.save(self._config)
         self._state.pending_config = None
         self._save_state()
         self._log_event(
             self._state,
             "pending_config_applied",
-            "Thay đổi trì hoãn đã được áp dụng.",
+            guarded_message or "Thay đổi trì hoãn đã được áp dụng.",
             now=now,
         )
         self.config_changed.emit(self._config)

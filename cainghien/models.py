@@ -854,6 +854,14 @@ class AppConfig:
     def has_recovery_key(self) -> bool:
         return self.recovery_key is not None
 
+    def creates_continuous_strict_lock(self) -> bool:
+        if self.mode != "strict":
+            return False
+        return all(
+            schedule.enabled and schedule.start_time == schedule.end_time
+            for schedule in self.weekly_schedule.values()
+        )
+
     @property
     def study_warning_offsets_sorted(self) -> list[int]:
         return _parse_warning_offsets(self.study_warning_offsets)

@@ -104,8 +104,8 @@ def main() -> int:
             break
     if not existing_notes:
         existing_notes = [
-            "Sửa lỗi gỡ cài đặt không ổn định khi approval hoặc close-request bị lệch giữa Roaming và ProgramData.",
-            "Bộ gỡ cài đặt giờ dọn sạch hơn: xóa cờ tạm, service bundle dùng chung, marker shared mode và hỗ trợ purge cả hai vùng dữ liệu khi cần.",
+            "Chặn lỗ hổng lịch nghiêm khắc 24/7: app không cho lưu cấu hình có thể tự khóa vĩnh viễn.",
+            "Nếu file cấu hình hoặc pending change cũ chứa lịch nghiêm khắc 24/7, app sẽ tự hạ về chế độ bình thường để mở đường thoát an toàn.",
         ]
 
     release = {

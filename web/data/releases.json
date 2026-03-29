@@ -1,25 +1,45 @@
 {
   "latest": {
-    "version": "0.3.8",
+    "version": "0.3.9",
     "published_at": "2026-03-29",
     "notes": [
-      "Sửa lỗi gỡ cài đặt không ổn định khi approval hoặc close-request bị lệch giữa Roaming và ProgramData.",
-      "Bộ gỡ cài đặt giờ dọn sạch hơn: xóa cờ tạm, service bundle dùng chung, marker shared mode và hỗ trợ purge cả hai vùng dữ liệu khi cần."
+      "Chặn lỗ hổng lịch nghiêm khắc 24/7: app không cho lưu cấu hình có thể tự khóa vĩnh viễn.",
+      "Nếu file cấu hình hoặc pending change cũ chứa lịch nghiêm khắc 24/7, app sẽ tự hạ về chế độ bình thường để mở đường thoát an toàn."
     ],
     "files": {
       "installer": {
-        "url": "../downloads/0.3.8/CaiNghienFocusGuard-Setup-0.3.8.exe",
-        "size_bytes": 33258000,
-        "sha256": "2db458565cdd872e6d1a10da4953971c6b9f5d92df48073eab269fafec8a081b"
+        "url": "../downloads/0.3.9/CaiNghienFocusGuard-Setup-0.3.9.exe",
+        "size_bytes": 33254048,
+        "sha256": "96e1c17a3b2addec6ecca58d228f30988c6d0f12793794b8a814b2e44f9db92d"
       },
       "portable": {
-        "url": "../downloads/0.3.8/CaiNghienFocusGuard-0.3.8.exe",
-        "size_bytes": 47178121,
-        "sha256": "4aa0269a156fd544c3642d170ba88565f6c257ecf46e4609d40c4d11b3599ed9"
+        "url": "../downloads/0.3.9/CaiNghienFocusGuard-0.3.9.exe",
+        "size_bytes": 47181398,
+        "sha256": "ef7d0aea3a8c1b357544f76ce6e9e0649e569b97c8978cd4fb5870246fb97dee"
       }
     }
   },
   "releases": [
+    {
+      "version": "0.3.9",
+      "published_at": "2026-03-29",
+      "notes": [
+        "Chặn lỗ hổng lịch nghiêm khắc 24/7: app không cho lưu cấu hình có thể tự khóa vĩnh viễn.",
+        "Nếu file cấu hình hoặc pending change cũ chứa lịch nghiêm khắc 24/7, app sẽ tự hạ về chế độ bình thường để mở đường thoát an toàn."
+      ],
+      "files": {
+        "installer": {
+          "url": "../downloads/0.3.9/CaiNghienFocusGuard-Setup-0.3.9.exe",
+          "size_bytes": 33254048,
+          "sha256": "96e1c17a3b2addec6ecca58d228f30988c6d0f12793794b8a814b2e44f9db92d"
+        },
+        "portable": {
+          "url": "../downloads/0.3.9/CaiNghienFocusGuard-0.3.9.exe",
+          "size_bytes": 47181398,
+          "sha256": "ef7d0aea3a8c1b357544f76ce6e9e0649e569b97c8978cd4fb5870246fb97dee"
+        }
+      }
+    },
     {
       "version": "0.3.8",
       "published_at": "2026-03-29",
