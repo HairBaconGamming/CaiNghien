@@ -1,25 +1,45 @@
 {
   "latest": {
-    "version": "0.3.6",
+    "version": "0.3.7",
     "published_at": "2026-03-29",
     "notes": [
-      "Installer có luồng Cập nhật / Sửa chữa rõ ràng hơn, giữ đúng thư mục cài cũ và tự làm sạch file bundle trước khi chép bản mới.",
-      "Service được kiểm tra cả trạng thái lẫn đường dẫn binary; nếu service đang trỏ sai file cũ, app sẽ ưu tiên tự repair trước khi báo lỗi."
+      "Sửa lỗi installer crash ở bước mở wizard khi script cố đọc đường dẫn {app} quá sớm, trước khi thư mục cài đặt được khởi tạo.",
+      "Phát hành lại bộ cài để bản tải về mở wizard ổn định ngay, đồng thời giữ nguyên các cải tiến repair/update và service bundle dùng chung."
     ],
     "files": {
       "installer": {
-        "url": "../downloads/0.3.6/CaiNghienFocusGuard-Setup-0.3.6.exe",
-        "size_bytes": 33239459,
-        "sha256": "3070fd2e24b47272c35400647aa03accfa3fb9df3fb607a3573cdc72fb121e96"
+        "url": "../downloads/0.3.7/CaiNghienFocusGuard-Setup-0.3.7.exe",
+        "size_bytes": 33241953,
+        "sha256": "e700dd69b8481bc5d68edee86e79649ff3e741bbdf5915e43f73f0a8687a1c40"
       },
       "portable": {
-        "url": "../downloads/0.3.6/CaiNghienFocusGuard-0.3.6.exe",
-        "size_bytes": 47145753,
-        "sha256": "b6359783c7e07289e1de878d3d8f060c4998924713cca7aa2984dad2a980d348"
+        "url": "../downloads/0.3.7/CaiNghienFocusGuard-0.3.7.exe",
+        "size_bytes": 47153055,
+        "sha256": "692b7d1f747348935b8f3fa1026a8705820af82f6172e5249fd169711a467035"
       }
     }
   },
   "releases": [
+    {
+      "version": "0.3.7",
+      "published_at": "2026-03-29",
+      "notes": [
+        "Sửa lỗi installer crash ở bước mở wizard khi script cố đọc đường dẫn {app} quá sớm, trước khi thư mục cài đặt được khởi tạo.",
+        "Phát hành lại bộ cài để bản tải về mở wizard ổn định ngay, đồng thời giữ nguyên các cải tiến repair/update và service bundle dùng chung."
+      ],
+      "files": {
+        "installer": {
+          "url": "../downloads/0.3.7/CaiNghienFocusGuard-Setup-0.3.7.exe",
+          "size_bytes": 33241953,
+          "sha256": "e700dd69b8481bc5d68edee86e79649ff3e741bbdf5915e43f73f0a8687a1c40"
+        },
+        "portable": {
+          "url": "../downloads/0.3.7/CaiNghienFocusGuard-0.3.7.exe",
+          "size_bytes": 47153055,
+          "sha256": "692b7d1f747348935b8f3fa1026a8705820af82f6172e5249fd169711a467035"
+        }
+      }
+    },
     {
       "version": "0.3.6",
       "published_at": "2026-03-29",

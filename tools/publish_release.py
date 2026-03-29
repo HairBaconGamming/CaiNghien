@@ -104,8 +104,8 @@ def main() -> int:
             break
     if not existing_notes:
         existing_notes = [
-            "Installer có luồng Cập nhật / Sửa chữa rõ ràng hơn, giữ đúng thư mục cài cũ và tự làm sạch file bundle trước khi chép bản mới.",
-            "Service được kiểm tra cả trạng thái lẫn đường dẫn binary; nếu service đang trỏ sai file cũ, app sẽ ưu tiên tự repair trước khi báo lỗi.",
+            "Sửa lỗi installer crash ở bước mở wizard khi script cố đọc đường dẫn {app} quá sớm, trước khi thư mục cài đặt được khởi tạo.",
+            "Phát hành lại bộ cài để bản tải về mở wizard ổn định ngay, đồng thời giữ nguyên các cải tiến repair/update và service bundle dùng chung.",
         ]
 
     release = {
