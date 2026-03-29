@@ -9,6 +9,7 @@ from pathlib import Path
 import winreg
 
 from ..config import ConfigStore
+from ..windows_subprocess import run_hidden
 
 try:
     import pywintypes
@@ -159,7 +160,7 @@ class WindowsServiceManager:
 
     def query_configuration(self) -> dict[str, str]:
         try:
-            result = subprocess.run(
+            result = run_hidden(
                 ["sc", "qc", SERVICE_NAME],
                 capture_output=True,
                 text=True,
@@ -368,7 +369,7 @@ class WindowsServiceManager:
         if not self.is_available():
             return False, "Không tìm thấy file service để thực thi lệnh."
         try:
-            result = subprocess.run(
+            result = run_hidden(
                 self._command_tokens(*args, prefer_shared=prefer_shared),
                 capture_output=True,
                 text=True,
@@ -451,7 +452,7 @@ class WindowsServiceManager:
 
     def _query_status_with_sc(self) -> tuple[bool, str]:
         try:
-            result = subprocess.run(
+            result = run_hidden(
                 ["sc", "query", SERVICE_NAME],
                 capture_output=True,
                 text=True,

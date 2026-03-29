@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from .models import AppConfig, RuntimeState, WeeklyStats
+from .windows_subprocess import run_hidden
 
 
 APP_FOLDER_NAME = "CaiNghienFocusGuard"
@@ -570,7 +571,7 @@ class ConfigStore:
         if os.getenv("CAINGHIEN_FORCE_SHARED_STORE") == "1":
             return True
         try:
-            result = subprocess.run(
+            result = run_hidden(
                 ["sc", "query", SERVICE_NAME],
                 capture_output=True,
                 text=True,

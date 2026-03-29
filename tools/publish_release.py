@@ -104,8 +104,8 @@ def main() -> int:
             break
     if not existing_notes:
         existing_notes = [
-            "Sửa lỗi installer crash ở bước mở wizard khi script cố đọc đường dẫn {app} quá sớm, trước khi thư mục cài đặt được khởi tạo.",
-            "Phát hành lại bộ cài để bản tải về mở wizard ổn định ngay, đồng thời giữ nguyên các cải tiến repair/update và service bundle dùng chung.",
+            "Sửa lỗi gỡ cài đặt không ổn định khi approval hoặc close-request bị lệch giữa Roaming và ProgramData.",
+            "Bộ gỡ cài đặt giờ dọn sạch hơn: xóa cờ tạm, service bundle dùng chung, marker shared mode và hỗ trợ purge cả hai vùng dữ liệu khi cần.",
         ]
 
     release = {

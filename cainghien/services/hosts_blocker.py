@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import ctypes
 import os
-import subprocess
 from pathlib import Path
 from typing import Iterable
 
 from ..models import dedupe_domains, normalize_domain
+from ..windows_subprocess import run_hidden
 
 
 class HostsBlocker:
@@ -84,7 +84,7 @@ class HostsBlocker:
 
     def _flush_dns(self) -> None:
         try:
-            subprocess.run(
+            run_hidden(
                 ["ipconfig", "/flushdns"],
                 capture_output=True,
                 text=True,
@@ -93,4 +93,3 @@ class HostsBlocker:
             )
         except Exception:
             pass
-

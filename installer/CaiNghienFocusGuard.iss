@@ -1,5 +1,5 @@
 #define MyAppName "CaiNghien Focus Guard"
-#define MyAppVersion "0.3.7"
+#define MyAppVersion "0.3.8"
 #define MyAppPublisher "CaiNghien Project"
 #define MyAppExeName "CaiNghienFocusGuard.exe"
 #define MyServiceExeName "CaiNghienFocusGuardService.exe"
@@ -176,9 +176,29 @@ begin
   Result := AppDataRoot() + '\uninstall-approval.ini';
 end;
 
+function UserApprovalFilePath: string;
+begin
+  Result := UserAppDataRoot() + '\uninstall-approval.ini';
+end;
+
+function SharedApprovalFilePath: string;
+begin
+  Result := SharedAppDataRoot() + '\uninstall-approval.ini';
+end;
+
 function CloseRequestPath: string;
 begin
   Result := AppDataRoot() + '\installer-close-request.flag';
+end;
+
+function UserCloseRequestPath: string;
+begin
+  Result := UserAppDataRoot() + '\installer-close-request.flag';
+end;
+
+function SharedCloseRequestPath: string;
+begin
+  Result := SharedAppDataRoot() + '\installer-close-request.flag';
 end;
 
 function CloseDeniedPath: string;
@@ -186,33 +206,54 @@ begin
   Result := AppDataRoot() + '\installer-close-denied.flag';
 end;
 
+function UserCloseDeniedPath: string;
+begin
+  Result := UserAppDataRoot() + '\installer-close-denied.flag';
+end;
+
+function SharedCloseDeniedPath: string;
+begin
+  Result := SharedAppDataRoot() + '\installer-close-denied.flag';
+end;
+
+procedure DeleteFileIfExists(const TargetPath: string);
+begin
+  if FileExists(TargetPath) then
+    DeleteFile(TargetPath);
+end;
+
 procedure ClearApprovalFile;
 begin
-  if FileExists(ApprovalFilePath()) then
-    DeleteFile(ApprovalFilePath());
+  DeleteFileIfExists(ApprovalFilePath());
+  DeleteFileIfExists(UserApprovalFilePath());
+  DeleteFileIfExists(SharedApprovalFilePath());
 end;
 
 procedure ClearCloseRequest;
 begin
-  if FileExists(CloseRequestPath()) then
-    DeleteFile(CloseRequestPath());
+  DeleteFileIfExists(CloseRequestPath());
+  DeleteFileIfExists(UserCloseRequestPath());
+  DeleteFileIfExists(SharedCloseRequestPath());
 end;
 
 procedure ClearCloseDenied;
 begin
-  if FileExists(CloseDeniedPath()) then
-    DeleteFile(CloseDeniedPath());
+  DeleteFileIfExists(CloseDeniedPath());
+  DeleteFileIfExists(UserCloseDeniedPath());
+  DeleteFileIfExists(SharedCloseDeniedPath());
 end;
 
 function CloseWasDenied: Boolean;
 begin
-  Result := FileExists(CloseDeniedPath());
+  Result := FileExists(CloseDeniedPath()) or FileExists(UserCloseDeniedPath()) or FileExists(SharedCloseDeniedPath());
 end;
 
 procedure WriteCloseRequest;
 begin
-  ForceDirectories(AppDataRoot());
-  SaveStringToFile(CloseRequestPath(), GetDateTimeString('yyyy-mm-dd hh:nn:ss', #0, #0), False);
+  ForceDirectories(UserAppDataRoot());
+  ForceDirectories(SharedAppDataRoot());
+  SaveStringToFile(UserCloseRequestPath(), GetDateTimeString('yyyy-mm-dd hh:nn:ss', #0, #0), False);
+  SaveStringToFile(SharedCloseRequestPath(), GetDateTimeString('yyyy-mm-dd hh:nn:ss', #0, #0), False);
 end;
 
 function PreserveInstalledFile(const FileName: string): Boolean;
@@ -272,6 +313,22 @@ procedure CleanupSharedServiceBundle;
 begin
   if DirExists(SharedServiceBundleDir('')) then
     DelTree(SharedServiceBundleDir(''), True, True, True);
+end;
+
+procedure CleanupAllAppData(const IncludeData: Boolean);
+begin
+  ClearApprovalFile();
+  ClearCloseRequest();
+  ClearCloseDenied();
+  DeleteFileIfExists(SharedModeMarkerPath());
+  CleanupSharedServiceBundle();
+  if IncludeData then
+  begin
+    if DirExists(UserAppDataRoot()) then
+      DelTree(UserAppDataRoot(), True, True, True);
+    if DirExists(SharedAppDataRoot()) then
+      DelTree(SharedAppDataRoot(), True, True, True);
+  end;
 end;
 
 function ProcessRunning(const ImageName: string): Boolean;
@@ -455,13 +512,19 @@ function ApprovalStillValid: Boolean;
 var
   ExpireStamp: string;
   NowStamp: string;
+  ApprovalPath: string;
 begin
-  if not FileExists(ApprovalFilePath()) then
+  ApprovalPath := ApprovalFilePath();
+  if not FileExists(ApprovalPath) then
+    ApprovalPath := UserApprovalFilePath();
+  if not FileExists(ApprovalPath) then
+    ApprovalPath := SharedApprovalFilePath();
+  if not FileExists(ApprovalPath) then
   begin
     Result := False;
     exit;
   end;
-  ExpireStamp := GetIniString('approval', 'expires_stamp', '', ApprovalFilePath());
+  ExpireStamp := GetIniString('approval', 'expires_stamp', '', ApprovalPath);
   if ExpireStamp = '' then
   begin
     Result := False;
@@ -474,8 +537,14 @@ end;
 procedure LoadApprovalSettings;
 var
   PurgeValue: string;
+  ApprovalPath: string;
 begin
-  PurgeValue := GetIniString('approval', 'purge_data', '0', ApprovalFilePath());
+  ApprovalPath := ApprovalFilePath();
+  if not FileExists(ApprovalPath) then
+    ApprovalPath := UserApprovalFilePath();
+  if not FileExists(ApprovalPath) then
+    ApprovalPath := SharedApprovalFilePath();
+  PurgeValue := GetIniString('approval', 'purge_data', '0', ApprovalPath);
   PurgeLocalData := PurgeValue = '1';
   ClearApprovalFile();
 end;
@@ -655,11 +724,9 @@ begin
   if CurUninstallStep = usPostUninstall then
   begin
     RegDeleteValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Run', 'CaiNghienFocusGuard');
-    ClearApprovalFile();
-    ClearCloseRequest();
-    ClearCloseDenied();
-    if PurgeLocalData then
-      DelTree(AppDataRoot(), True, True, True);
+    if IsAdmin() then
+      RegDeleteValue(HKLM, 'Software\Microsoft\Windows\CurrentVersion\Run', 'CaiNghienFocusGuard');
+    CleanupAllAppData(PurgeLocalData);
   end;
 end;
 

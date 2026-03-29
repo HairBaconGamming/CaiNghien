@@ -9,7 +9,7 @@ from .services.enforcement import EnforcementController
 from .services.uninstall_flow import (
     clear_close_denied,
     clear_close_request,
-    close_request_file_path,
+    close_request_file_paths,
     write_uninstall_approval,
     write_close_denied,
 )
@@ -558,8 +558,8 @@ def install_external_close_watcher(
     timer.setInterval(1000)
 
     def handle_close_request() -> None:
-        request_path = close_request_file_path(controller.store)
-        if not request_path.exists():
+        request_found = any(path.exists() for path in close_request_file_paths(controller.store))
+        if not request_found:
             return
 
         clear_close_request(controller.store)

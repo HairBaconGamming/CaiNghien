@@ -1,14 +1,14 @@
 {
   "product": "CaiNghien Focus Guard",
   "latest": {
-    "version": "0.3.7",
+    "version": "0.3.8",
     "published_at": "2026-03-29",
-    "installer": "../downloads/0.3.7/CaiNghienFocusGuard-Setup-0.3.7.exe",
+    "installer": "../downloads/0.3.8/CaiNghienFocusGuard-Setup-0.3.8.exe",
     "notes": [
-      "Sửa lỗi installer crash ở bước mở wizard khi script cố đọc đường dẫn {app} quá sớm, trước khi thư mục cài đặt được khởi tạo.",
-      "Phát hành lại bộ cài để bản tải về mở wizard ổn định ngay, đồng thời giữ nguyên các cải tiến repair/update và service bundle dùng chung."
+      "Sửa lỗi gỡ cài đặt không ổn định khi approval hoặc close-request bị lệch giữa Roaming và ProgramData.",
+      "Bộ gỡ cài đặt giờ dọn sạch hơn: xóa cờ tạm, service bundle dùng chung, marker shared mode và hỗ trợ purge cả hai vùng dữ liệu khi cần."
     ],
-    "sha256": "e700dd69b8481bc5d68edee86e79649ff3e741bbdf5915e43f73f0a8687a1c40",
-    "size_bytes": 33241953
+    "sha256": "01e9820e3ee52f879e52e1e85ad5705439ffec56ba3aa75ce942e21c03364449",
+    "size_bytes": 33251305
   }
 }
