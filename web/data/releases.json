@@ -1,25 +1,125 @@
 {
   "latest": {
-    "version": "0.3.1",
+    "version": "0.3.6",
     "published_at": "2026-03-29",
     "notes": [
-      "Vá trạng thái installer unable to close application: installer giờ chủ động yêu cầu app thoát, dừng service trước khi nâng cấp và không force-close nếu strict mode đang yêu cầu mật khẩu.",
-      "Nâng cấp web release hub với giao diện gọn hơn, thông tin file tải rõ ràng hơn và lịch sử phiên bản dễ quét mắt."
+      "Installer có luồng Cập nhật / Sửa chữa rõ ràng hơn, giữ đúng thư mục cài cũ và tự làm sạch file bundle trước khi chép bản mới.",
+      "Service được kiểm tra cả trạng thái lẫn đường dẫn binary; nếu service đang trỏ sai file cũ, app sẽ ưu tiên tự repair trước khi báo lỗi."
     ],
     "files": {
       "installer": {
-        "url": "../downloads/0.3.1/CaiNghienFocusGuard-Setup-0.3.1.exe",
-        "size_bytes": 48679743,
-        "sha256": "7317a4009740449c368e7cbfac7f2361a251927acea0e53d4d94308e675c9b4e"
+        "url": "../downloads/0.3.6/CaiNghienFocusGuard-Setup-0.3.6.exe",
+        "size_bytes": 33239459,
+        "sha256": "3070fd2e24b47272c35400647aa03accfa3fb9df3fb607a3573cdc72fb121e96"
       },
       "portable": {
-        "url": "../downloads/0.3.1/CaiNghienFocusGuard-0.3.1.exe",
-        "size_bytes": 47087763,
-        "sha256": "09b23bd4b773fec13ba4b9d6c9995754102a99313f0e85f63167a4424129ad40"
+        "url": "../downloads/0.3.6/CaiNghienFocusGuard-0.3.6.exe",
+        "size_bytes": 47145753,
+        "sha256": "b6359783c7e07289e1de878d3d8f060c4998924713cca7aa2984dad2a980d348"
       }
     }
   },
   "releases": [
+    {
+      "version": "0.3.6",
+      "published_at": "2026-03-29",
+      "notes": [
+        "Installer có luồng Cập nhật / Sửa chữa rõ ràng hơn, giữ đúng thư mục cài cũ và tự làm sạch file bundle trước khi chép bản mới.",
+        "Service được kiểm tra cả trạng thái lẫn đường dẫn binary; nếu service đang trỏ sai file cũ, app sẽ ưu tiên tự repair trước khi báo lỗi."
+      ],
+      "files": {
+        "installer": {
+          "url": "../downloads/0.3.6/CaiNghienFocusGuard-Setup-0.3.6.exe",
+          "size_bytes": 33239459,
+          "sha256": "3070fd2e24b47272c35400647aa03accfa3fb9df3fb607a3573cdc72fb121e96"
+        },
+        "portable": {
+          "url": "../downloads/0.3.6/CaiNghienFocusGuard-0.3.6.exe",
+          "size_bytes": 47145753,
+          "sha256": "b6359783c7e07289e1de878d3d8f060c4998924713cca7aa2984dad2a980d348"
+        }
+      }
+    },
+    {
+      "version": "0.3.5",
+      "published_at": "2026-03-29",
+      "notes": [
+        "Bộ cài chuyển sang đóng gói onedir cho app đã cài, giúp giảm false positive từ anti-virus và tránh lỗi self-extract ở thư mục tạm.",
+        "Bản portable vẫn giữ riêng để tải nhanh, còn installer mở app theo cách ổn định hơn sau khi cài xong."
+      ],
+      "files": {
+        "installer": {
+          "url": "../downloads/0.3.5/CaiNghienFocusGuard-Setup-0.3.5.exe",
+          "size_bytes": 33231099,
+          "sha256": "734dda2a3428c94dfd83b407ef6b8b3e3228b2cba2113382d027ca8f357949d5"
+        },
+        "portable": {
+          "url": "../downloads/0.3.5/CaiNghienFocusGuard-0.3.5.exe",
+          "size_bytes": 47143585,
+          "sha256": "f99905a0f21d1850b4e2940e80758476bddfc8a3fce0d172a3993eeee32d11fb"
+        }
+      }
+    },
+    {
+      "version": "0.3.4",
+      "published_at": "2026-03-29",
+      "notes": [
+        "Sửa lỗi cài dịch vụ: app gọi đúng cú pháp serviceutil và báo đúng lỗi quyền Admin thay vì bật màn hình Usage.",
+        "Bộ cài mở cửa sổ app đúng cách sau khi cài, đồng thời tắt UPX để giảm lỗi khởi động PySide6/Shiboken trên bản cài đặt."
+      ],
+      "files": {
+        "installer": {
+          "url": "../downloads/0.3.4/CaiNghienFocusGuard-Setup-0.3.4.exe",
+          "size_bytes": 48679520,
+          "sha256": "3218d3329bfeeb5032683bdafb77965b7ff1757c3ffa8be8188687288d3fcf01"
+        },
+        "portable": {
+          "url": "../downloads/0.3.4/CaiNghienFocusGuard-0.3.4.exe",
+          "size_bytes": 47143532,
+          "sha256": "2cc72043a257a76bed45c9f83782261c45bceb368fe83fefab8445326cb4ffa6"
+        }
+      }
+    },
+    {
+      "version": "0.3.3",
+      "published_at": "2026-03-29",
+      "notes": [
+        "Sửa lỗi cài dịch vụ: app giờ gọi đúng cú pháp serviceutil nên nút Cài / Mở dịch vụ không còn bật ra màn hình Usage.",
+        "Bộ cài vẫn hỗ trợ cài cho user thường, còn service sẽ chỉ xin quyền Admin đúng lúc cần thiết."
+      ],
+      "files": {
+        "installer": {
+          "url": "../downloads/0.3.3/CaiNghienFocusGuard-Setup-0.3.3.exe",
+          "size_bytes": 48681264,
+          "sha256": "02cedaaca7bc6e491c0940c4fdebc63066998cc02bbdd2b9c3b393e4ff975338"
+        },
+        "portable": {
+          "url": "../downloads/0.3.3/CaiNghienFocusGuard-0.3.3.exe",
+          "size_bytes": 47144772,
+          "sha256": "fa627b69d18c0257efdcc945f621387d1c2297707467374de27e787d7c586283"
+        }
+      }
+    },
+    {
+      "version": "0.3.2",
+      "published_at": "2026-03-29",
+      "notes": [
+        "Bộ cài giờ hỗ trợ cài cho user thường, không còn chặn ngay từ bước yêu cầu Admin.",
+        "Cải thiện service, helper trong app, scroll an toàn và dọn dẹp khẩn cấp khi dữ liệu lõi bị lỗi."
+      ],
+      "files": {
+        "installer": {
+          "url": "../downloads/0.3.2/CaiNghienFocusGuard-Setup-0.3.2.exe",
+          "size_bytes": 48680918,
+          "sha256": "4cb51aa0adfc44f1dbf9cf6eebe38fe1b495b1992747329950696be1922619e8"
+        },
+        "portable": {
+          "url": "../downloads/0.3.2/CaiNghienFocusGuard-0.3.2.exe",
+          "size_bytes": 47089164,
+          "sha256": "e68dcf949aab1d9536eb9d4f56788d59d6dc6d722168b97f0e843302be2e6459"
+        }
+      }
+    },
     {
       "version": "0.3.1",
       "published_at": "2026-03-29",
