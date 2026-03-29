@@ -2,13 +2,13 @@
   "product": "CaiNghien Focus Guard",
   "latest": {
     "version": "0.3.1",
-    "published_at": "2026-03-28",
+    "published_at": "2026-03-29",
     "installer": "../downloads/0.3.1/CaiNghienFocusGuard-Setup-0.3.1.exe",
     "notes": [
       "Vá trạng thái installer unable to close application: installer giờ chủ động yêu cầu app thoát, dừng service trước khi nâng cấp và không force-close nếu strict mode đang yêu cầu mật khẩu.",
       "Nâng cấp web release hub với giao diện gọn hơn, thông tin file tải rõ ràng hơn và lịch sử phiên bản dễ quét mắt."
     ],
-    "sha256": "df9141495357c1d74624c4b274de54d675de32b3e4c3610163870cfa36664f04",
-    "size_bytes": 48667286
+    "sha256": "7317a4009740449c368e7cbfac7f2361a251927acea0e53d4d94308e675c9b4e",
+    "size_bytes": 48679743
   }
 }

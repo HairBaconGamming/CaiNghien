@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import subprocess
+import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -60,6 +61,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self._study_day_editors: dict[str, tuple[QtWidgets.QCheckBox, QtWidgets.QTimeEdit, QtWidgets.QTimeEdit, QtWidgets.QComboBox]] = {}
         self._stats_labels: dict[str, QtWidgets.QLabel] = {}
         self._side_panel: QtWidgets.QFrame | None = None
+        self._side_panel_scroll: QtWidgets.QScrollArea | None = None
         self._workspace_scroll: QtWidgets.QWidget | None = None
         self._metrics_grid: QtWidgets.QGridLayout | None = None
         self._metric_cards: list[QtWidgets.QFrame] = []
@@ -86,16 +88,29 @@ class MainWindow(QtWidgets.QMainWindow):
         shell.setContentsMargins(22, 22, 22, 22)
         shell.setSpacing(18)
         self._side_panel = self._create_side_panel()
+        self._side_panel_scroll = self._wrap_side_panel(self._side_panel)
         self._workspace_scroll = self._create_workspace()
         splitter = QtWidgets.QSplitter(QtCore.Qt.Orientation.Horizontal)
         splitter.setChildrenCollapsible(False)
         splitter.setHandleWidth(10)
-        splitter.addWidget(self._side_panel)
+        splitter.addWidget(self._side_panel_scroll)
         splitter.addWidget(self._workspace_scroll)
         splitter.setStretchFactor(0, 0)
         splitter.setStretchFactor(1, 1)
         splitter.setSizes([348, 1100])
         shell.addWidget(splitter, 1)
+
+    def _wrap_side_panel(self, panel: QtWidgets.QFrame) -> QtWidgets.QScrollArea:
+        scroll = QtWidgets.QScrollArea()
+        scroll.setObjectName("SidePanelScroll")
+        scroll.setFrameShape(QtWidgets.QFrame.Shape.NoFrame)
+        scroll.setWidgetResizable(True)
+        scroll.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        scroll.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        scroll.setMinimumWidth(320)
+        scroll.setMaximumWidth(400)
+        scroll.setWidget(panel)
+        return scroll
 
     def _create_side_panel(self) -> QtWidgets.QFrame:
         panel = SidePanelFrame()
@@ -236,7 +251,7 @@ class MainWindow(QtWidgets.QMainWindow):
         tabs = QtWidgets.QTabWidget()
         tabs.setObjectName("WorkspaceTabs")
         tabs.setDocumentMode(True)
-        tabs.setUsesScrollButtons(False)
+        tabs.setUsesScrollButtons(True)
         tabs.setElideMode(QtCore.Qt.TextElideMode.ElideRight)
         tabs.setTabPosition(QtWidgets.QTabWidget.TabPosition.North)
         tabs.setSizePolicy(
@@ -245,13 +260,14 @@ class MainWindow(QtWidgets.QMainWindow):
         )
         tabs.tabBar().setObjectName("WorkspaceTabBar")
 
-        tabs.addTab(self._create_overview_tab(), "Tổng quan")
-        tabs.addTab(self._create_study_tab(), "Học tập")
-        tabs.addTab(self._create_schedule_tab(), "Lịch")
-        tabs.addTab(self._create_sites_tab(), "Trang web")
-        tabs.addTab(self._create_strict_tab(), "Nghiêm khắc")
-        tabs.addTab(self._create_system_tab(), "Hệ thống")
-        tabs.addTab(self._create_log_tab(), "Nhật ký")
+        tabs.addTab(self._wrap_tab_page(self._create_overview_tab()), "Tổng quan")
+        tabs.addTab(self._wrap_tab_page(self._create_study_tab()), "Học tập")
+        tabs.addTab(self._wrap_tab_page(self._create_schedule_tab()), "Lịch")
+        tabs.addTab(self._wrap_tab_page(self._create_sites_tab()), "Trang web")
+        tabs.addTab(self._wrap_tab_page(self._create_strict_tab()), "Nghiêm khắc")
+        tabs.addTab(self._wrap_tab_page(self._create_system_tab()), "Hệ thống")
+        tabs.addTab(self._wrap_tab_page(self._create_help_tab()), "Trợ giúp")
+        tabs.addTab(self._wrap_tab_page(self._create_log_tab()), "Nhật ký")
 
         layout.addWidget(tabs, 1)
         return content
@@ -263,6 +279,16 @@ class MainWindow(QtWidgets.QMainWindow):
         layout.setContentsMargins(0, 4, 0, 0)
         layout.setSpacing(18)
         return page, layout
+
+    def _wrap_tab_page(self, page: QtWidgets.QWidget) -> QtWidgets.QScrollArea:
+        scroll = QtWidgets.QScrollArea()
+        scroll.setObjectName("WorkspaceScroll")
+        scroll.setFrameShape(QtWidgets.QFrame.Shape.NoFrame)
+        scroll.setWidgetResizable(True)
+        scroll.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        scroll.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        scroll.setWidget(page)
+        return scroll
 
     def _create_overview_tab(self) -> QtWidgets.QWidget:
         page, layout = self._create_tab_page()
@@ -319,6 +345,19 @@ class MainWindow(QtWidgets.QMainWindow):
     def _create_system_tab(self) -> QtWidgets.QWidget:
         page, layout = self._create_tab_page()
         layout.addWidget(self._create_system_card())
+        layout.addStretch()
+        return page
+
+    def _create_help_tab(self) -> QtWidgets.QWidget:
+        page, layout = self._create_tab_page()
+        grid = QtWidgets.QGridLayout()
+        grid.setHorizontalSpacing(18)
+        grid.setVerticalSpacing(18)
+        grid.addWidget(self._create_helper_card(), 0, 0)
+        grid.addWidget(self._create_docs_card(), 0, 1)
+        grid.setColumnStretch(0, 1)
+        grid.setColumnStretch(1, 1)
+        layout.addLayout(grid)
         layout.addStretch()
         return page
 
@@ -590,6 +629,58 @@ class MainWindow(QtWidgets.QMainWindow):
         self.uninstall_button = QtWidgets.QPushButton("Gỡ cài đặt chuyên nghiệp")
         self.uninstall_button.setObjectName("DangerButton")
         layout.addWidget(self.uninstall_button)
+        return frame
+
+    def _create_helper_card(self) -> QtWidgets.QFrame:
+        frame, layout = self._card(
+            "Helper và chẩn đoán",
+            "Kiểm tra nhanh quyền Admin, dịch vụ, file dữ liệu và các đường cứu hộ an toàn nếu hệ thống mật khẩu hoặc runtime bị lỗi.",
+        )
+        self.helper_summary_label = QtWidgets.QLabel("Đang tải chẩn đoán hệ thống.")
+        self.helper_summary_label.setObjectName("MutedLabel")
+        self.helper_summary_label.setWordWrap(True)
+        layout.addWidget(self._labeled_value("Kết luận nhanh", self.helper_summary_label))
+
+        self.helper_paths_label = QtWidgets.QLabel("Đang tải đường dẫn dữ liệu.")
+        self.helper_paths_label.setObjectName("MutedLabel")
+        self.helper_paths_label.setWordWrap(True)
+        layout.addWidget(self._labeled_value("Đường dẫn quan trọng", self.helper_paths_label))
+
+        action_row = QtWidgets.QGridLayout()
+        action_row.setHorizontalSpacing(12)
+        action_row.setVerticalSpacing(12)
+        self.refresh_helper_button = QtWidgets.QPushButton("Làm mới helper")
+        self.refresh_helper_button.setObjectName("SecondaryButton")
+        action_row.addWidget(self.refresh_helper_button, 0, 0)
+        self.open_data_folder_button = QtWidgets.QPushButton("Mở thư mục dữ liệu")
+        self.open_data_folder_button.setObjectName("SecondaryButton")
+        action_row.addWidget(self.open_data_folder_button, 0, 1)
+        self.open_readme_button = QtWidgets.QPushButton("Mở README")
+        self.open_readme_button.setObjectName("SecondaryButton")
+        action_row.addWidget(self.open_readme_button, 1, 0)
+        self.emergency_cleanup_button = QtWidgets.QPushButton("Dọn dẹp khẩn cấp")
+        self.emergency_cleanup_button.setObjectName("DangerButton")
+        action_row.addWidget(self.emergency_cleanup_button, 1, 1)
+        layout.addLayout(action_row)
+
+        self.helper_report_output = QtWidgets.QPlainTextEdit()
+        self.helper_report_output.setReadOnly(True)
+        self.helper_report_output.setObjectName("LogOutput")
+        self.helper_report_output.setMinimumHeight(300)
+        layout.addWidget(self.helper_report_output)
+        return frame
+
+    def _create_docs_card(self) -> QtWidgets.QFrame:
+        frame, layout = self._card(
+            "Tài liệu ngay trong app",
+            "Không cần mở trình duyệt để nhớ cách dùng. Phần này gom những thao tác cốt lõi và lưu ý an toàn quan trọng nhất.",
+        )
+        self.documentation_browser = QtWidgets.QTextBrowser()
+        self.documentation_browser.setObjectName("HelpBrowser")
+        self.documentation_browser.setOpenExternalLinks(True)
+        self.documentation_browser.setMinimumHeight(420)
+        self.documentation_browser.setHtml(self._documentation_html())
+        layout.addWidget(self.documentation_browser)
         return frame
 
     def _create_guardrail_card(self) -> QtWidgets.QFrame:
@@ -892,6 +983,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.check_update_button.clicked.connect(self.check_for_updates_manual)
         self.cleanup_versions_button.clicked.connect(self.cleanup_cached_updates)
         self.uninstall_button.clicked.connect(self.start_professional_uninstall)
+        self.refresh_helper_button.clicked.connect(self.refresh_helper_panel)
+        self.open_data_folder_button.clicked.connect(self.open_data_folder)
+        self.open_readme_button.clicked.connect(self.open_readme_file)
+        self.emergency_cleanup_button.clicked.connect(self.start_emergency_cleanup)
 
         self.update_manager.check_completed.connect(self._on_update_check_completed)
         self.update_manager.download_completed.connect(self._on_update_download_completed)
@@ -956,6 +1051,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.recovery_status_label.setText(recovery_state)
         self._refresh_schedule_preview()
         self._refresh_log_view()
+        self.refresh_helper_panel()
 
     def _apply_status(self, status: EnforcementStatus) -> None:
         self._last_status = status
@@ -1058,9 +1154,11 @@ class MainWindow(QtWidgets.QMainWindow):
             self._refresh_study_resource_buttons(status.study_resources, status.study_allowed_apps)
         else:
             self._refresh_study_manual_profile_preview()
+        self.refresh_helper_panel()
 
     def _append_log(self, message: str) -> None:
         self._refresh_log_view()
+        self.refresh_helper_panel()
 
     def _show_attention(self, title: str, message: str) -> None:
         self.tray_icon.showMessage(title, message, self.windowIcon(), 6000)
@@ -1719,10 +1817,23 @@ class MainWindow(QtWidgets.QMainWindow):
     def ensure_service_running(self) -> None:
         ok, message = self.service_manager.ensure_running()
         if not ok:
+            self.refresh_helper_panel()
+            if "Admin" in message:
+                answer = QtWidgets.QMessageBox.question(
+                    self,
+                    "Cần quyền Admin",
+                    message + "\n\nBạn có muốn mở lại app với quyền Admin ngay bây giờ không?",
+                    QtWidgets.QMessageBox.StandardButton.Yes | QtWidgets.QMessageBox.StandardButton.No,
+                    QtWidgets.QMessageBox.StandardButton.Yes,
+                )
+                if answer == QtWidgets.QMessageBox.StandardButton.Yes:
+                    self.relaunch_as_admin()
+                    return
             self._show_warning("Không thể cài hoặc mở dịch vụ", message)
             return
         self._append_log("Dịch vụ đã được cài hoặc khởi động.")
         self.controller.evaluate(force=True)
+        self.refresh_helper_panel()
 
     def check_for_updates_silent(self) -> None:
         if not self.auto_check_updates_checkbox.isChecked():
@@ -1743,6 +1854,162 @@ class MainWindow(QtWidgets.QMainWindow):
     def cleanup_cached_updates(self) -> None:
         message = self.update_manager.cleanup_cached_versions()
         self._append_log(message)
+
+    def refresh_helper_panel(self) -> None:
+        if not hasattr(self, "helper_report_output"):
+            return
+        snapshot = self.controller.store.integrity_snapshot()
+        service = self.service_manager.diagnostics()
+        paths = self.controller.store.path_summary()
+        critical = self._critical_integrity_issue(snapshot)
+        summary = critical or "Hệ thống đang ở trạng thái ổn định, có thể tiếp tục dùng bình thường."
+        self.helper_summary_label.setText(summary)
+        self.helper_paths_label.setText(
+            "\n".join(
+                [
+                    f"Data: {paths['root']}",
+                    f"Config: {paths['config']}",
+                    f"State: {paths['state']}",
+                    f"Updates: {paths['updates']}",
+                ]
+            )
+        )
+
+        report_lines = [
+            "TÓM TẮT HELPER",
+            f"- Quyền Admin: {'Có' if WindowsSessionController.is_admin() else 'Không'}",
+            f"- Service khả dụng: {service['available']}",
+            f"- Service đã cài: {service['installed']}",
+            f"- Service đang chạy: {service['running']}",
+            f"- Dịch vụ báo: {service['message']}",
+            f"- Startup cùng Windows: {'Bật' if self.startup_manager.is_enabled() else 'Tắt'}",
+            f"- Safe mode: {self.controller.state.safe_mode_reason or 'Không có'}",
+            f"- Recovery: {self.controller.emergency_recovery_status_text()}",
+            "",
+            "TÌNH TRẠNG FILE",
+        ]
+        for key, label in (
+            ("config", "config.json"),
+            ("state", "state.json"),
+            ("config_backup", "config.backup.json"),
+            ("state_backup", "state.backup.json"),
+            ("events", "events.jsonl"),
+        ):
+            item = snapshot[key]
+            report_lines.append(f"- {label}: {item['status']} - {item['detail']}")
+
+        self.helper_report_output.setPlainText("\n".join(report_lines))
+
+    def open_data_folder(self) -> None:
+        target = self.controller.store.root_dir
+        QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(str(target)))
+
+    def open_readme_file(self) -> None:
+        readme_path = self._readme_path()
+        if readme_path is None or not readme_path.exists():
+            self._show_warning("Không tìm thấy README", "Không tìm thấy file hướng dẫn đi kèm app.")
+            return
+        QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(str(readme_path)))
+
+    def _readme_path(self) -> Path | None:
+        if getattr(sys, "frozen", False):
+            candidate = Path(sys.executable).resolve().parent / "README.txt"
+            return candidate if candidate.exists() else None
+        return Path(__file__).resolve().parents[2] / "README.md"
+
+    def _documentation_html(self) -> str:
+        return """
+        <h2>CaiNghiện Focus Guard</h2>
+        <p><b>Bình thường</b>: chặn website xao nhãng theo lịch và giữ lại các điểm vào học tập thật sự cần thiết.</p>
+        <p><b>Nghiêm khắc</b>: có thể khóa máy và mọi thao tác tắt bảo vệ hoặc thoát app đều cần đúng mật khẩu.</p>
+        <p><b>Học tập</b>: dùng profile học để siết web, chặn process xao nhãng, mở nhanh tài nguyên học và ghi streak 7 ngày.</p>
+        <h3>Khi nào cần quyền Admin?</h3>
+        <ul>
+          <li>Cài hoặc sửa dịch vụ nền Windows.</li>
+          <li>Ghi trực tiếp file hosts để chặn web chắc hơn.</li>
+          <li>Dọn dẹp khẩn cấp ở mức sâu nếu hệ thống bị lỗi.</li>
+        </ul>
+        <h3>Khôi phục và dọn dẹp</h3>
+        <ul>
+          <li>Nếu quên mật khẩu, ưu tiên dùng recovery key hoặc chờ emergency recovery tới hạn.</li>
+          <li>Dọn dẹp khẩn cấp chỉ dùng khi file mật khẩu, state hoặc service bị lỗi nghiêm trọng.</li>
+          <li>App sẽ sao lưu mọi thứ trước khi reset để tránh mất dấu vết.</li>
+        </ul>
+        <h3>Mẹo vận hành an toàn</h3>
+        <ul>
+          <li>Bật startup cùng Windows để enforcement có mặt sớm.</li>
+          <li>Dùng tab Trợ giúp khi service không chạy, app không mở lại bằng Admin, hoặc dữ liệu có dấu hiệu hỏng.</li>
+          <li>Khi strict mode đang bật, thoát app sẽ yêu cầu mật khẩu.</li>
+        </ul>
+        """
+
+    def _critical_integrity_issue(self, snapshot: dict[str, dict[str, str]]) -> str | None:
+        for key in ("config", "state"):
+            if snapshot[key]["status"] == "invalid":
+                return f"Phát hiện {key}.json đang lỗi hoặc không đọc được. Có thể cần dọn dẹp khẩn cấp."
+        if self.controller.config.mode == "strict" and self.controller.config.protection_enabled and not self.controller.config.has_password:
+            return "Strict mode đang bật nhưng không còn dữ liệu mật khẩu hợp lệ."
+        if self.controller.state.last_integrity_issue:
+            return f"Hệ thống đang báo lỗi an toàn: {self.controller.state.last_integrity_issue}."
+        return None
+
+    def start_emergency_cleanup(self) -> None:
+        snapshot = self.controller.store.integrity_snapshot()
+        critical = self._critical_integrity_issue(snapshot)
+        service = self.service_manager.diagnostics()
+        if service["installed"] == "Có" and not WindowsSessionController.is_admin():
+            self._show_warning(
+                "Cần quyền Admin",
+                "Máy đang còn dịch vụ nền. Hãy mở lại app với quyền Admin rồi mới dọn dẹp khẩn cấp để tránh sót service.",
+            )
+            return
+        requires_password = bool(
+            self.controller.config.has_password
+            and not critical
+            and self.controller.requires_exit_password()
+        )
+
+        if requires_password:
+            password = self._prompt_password(
+                "Nhập mật khẩu để xác nhận dọn dẹp khẩn cấp khi strict mode hoặc khóa thủ công đang bật."
+            )
+            if password is None or not self.controller.verify_strict_password(password):
+                self._show_warning("Không thể dọn dẹp", "Mật khẩu không đúng.")
+                return
+
+        phrase, ok = QtWidgets.QInputDialog.getText(
+            self,
+            "Dọn dẹp khẩn cấp",
+            (
+                "Tính năng này sẽ dừng enforcement, gỡ startup/service theo khả năng hiện có, sao lưu dữ liệu rồi tạo lại cấu hình mặc định.\n"
+                "Gõ DONDEP để xác nhận."
+            ),
+        )
+        if not ok:
+            return
+        if phrase.strip().upper() != "DONDEP":
+            self._show_warning("Chưa xác nhận", "Cần gõ đúng DONDEP để tránh thao tác nhầm.")
+            return
+
+        try:
+            self.startup_manager.set_enabled(False)
+        except OSError:
+            pass
+        self.service_manager.stop()
+        self.service_manager.remove()
+        self.controller.shutdown()
+        backup_dir = self.controller.store.emergency_reset()
+        QtWidgets.QMessageBox.information(
+            self,
+            "Đã dọn dẹp khẩn cấp",
+            (
+                "Hệ thống đã được đưa về cấu hình mặc định.\n"
+                f"Bản sao lưu nằm tại:\n{backup_dir}\n\n"
+                "Ứng dụng sẽ thoát để bạn mở lại với trạng thái sạch."
+            ),
+        )
+        self._ignore_close_to_tray = True
+        QtWidgets.QApplication.quit()
 
     def _on_update_check_completed(self, update: object, error: str, silent: bool) -> None:
         if error:
@@ -1824,6 +2091,36 @@ class MainWindow(QtWidgets.QMainWindow):
         if self._ignore_close_to_tray:
             super().closeEvent(event)
             return
+        if self.controller.requires_exit_password():
+            dialog = QtWidgets.QMessageBox(self)
+            dialog.setIcon(QtWidgets.QMessageBox.Icon.Question)
+            dialog.setWindowTitle("Strict mode đang bật")
+            dialog.setText("Chế độ nghiêm khắc hoặc khóa thủ công đang hoạt động.")
+            dialog.setInformativeText(
+                "Bạn có thể ẩn app xuống khay, hoặc nhập mật khẩu để thoát hẳn ứng dụng."
+            )
+            hide_button = dialog.addButton("Ẩn xuống khay", QtWidgets.QMessageBox.ButtonRole.AcceptRole)
+            exit_button = dialog.addButton("Thoát có mật khẩu", QtWidgets.QMessageBox.ButtonRole.ActionRole)
+            dialog.addButton(QtWidgets.QMessageBox.StandardButton.Cancel)
+            dialog.exec()
+
+            if dialog.clickedButton() is exit_button:
+                password = self._prompt_password(
+                    "Nhập mật khẩu để thoát app khi chế độ nghiêm khắc hoặc khóa thủ công đang bật."
+                )
+                if password is None or not self.controller.verify_strict_password(password):
+                    self._show_warning("Không thể thoát", "Mật khẩu không đúng.")
+                    event.ignore()
+                    return
+                self._ignore_close_to_tray = True
+                self.controller.shutdown()
+                QtWidgets.QApplication.quit()
+                event.accept()
+                return
+
+            if dialog.clickedButton() is not hide_button:
+                event.ignore()
+                return
         event.ignore()
         self.hide()
         if self.controller.requires_strict_access_password():

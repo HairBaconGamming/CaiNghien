@@ -56,6 +56,13 @@ def service_launch_tokens(*extra_args: str) -> list[str]:
 
 class WindowsSessionController:
     @staticmethod
+    def is_admin() -> bool:
+        try:
+            return bool(ctypes.windll.shell32.IsUserAnAdmin())
+        except Exception:
+            return False
+
+    @staticmethod
     def relaunch_as_admin() -> bool:
         try:
             if getattr(sys, "frozen", False):
@@ -124,18 +131,31 @@ class WindowsStartupManager:
 
 class WindowsServiceManager:
     def is_available(self) -> bool:
-        path = Path(service_launch_tokens()[0])
-        return path.exists()
+        if getattr(sys, "frozen", False):
+            return Path(service_launch_tokens()[0]).exists()
+        return (Path(__file__).resolve().parents[2] / "service.py").exists()
+
+    def diagnostics(self) -> dict[str, str]:
+        ok, message = self.query_status()
+        normalized = message.lower()
+        return {
+            "available": "Có" if self.is_available() else "Không",
+            "installed": "Không" if "chưa được cài" in normalized else "Có",
+            "running": "Có" if ok else "Không",
+            "message": message,
+        }
 
     def query_status(self) -> tuple[bool, str]:
         if win32serviceutil is None or win32service is None:
-            return False, "PyWin32 chưa sẵn sàng."
+            return self._query_status_with_sc()
         try:
             status = win32serviceutil.QueryServiceStatus(SERVICE_NAME)[1]
         except Exception as exc:
-            if pywintypes is not None and isinstance(exc, pywintypes.error):
-                if exc.winerror == 1060:
-                    return False, "Dịch vụ chưa được cài."
+            if pywintypes is not None and isinstance(exc, pywintypes.error) and exc.winerror == 1060:
+                return False, "Dịch vụ chưa được cài."
+            fallback_ok, fallback_message = self._query_status_with_sc()
+            if "chưa được cài" in fallback_message.lower():
+                return fallback_ok, fallback_message
             return False, str(exc)
 
         if status == win32service.SERVICE_RUNNING:
@@ -148,23 +168,40 @@ class WindowsServiceManager:
 
     def install_and_start(self) -> tuple[bool, str]:
         if not self.is_available():
-            return False, "Không tìm thấy tệp chương trình hoặc service.py để cài dịch vụ."
+            return False, "Không tìm thấy file service để cài đặt."
+        if not WindowsSessionController.is_admin():
+            return False, "Cần chạy app với quyền Admin để cài hoặc sửa dịch vụ."
 
-        installed, message = self.query_status()
+        _installed, message = self.query_status()
         if "chưa được cài" in message.lower():
             ok, install_message = self._run_command("install", "--startup", "auto")
             if not ok:
                 return False, install_message
         ok, start_message = self.start()
-        return ok, start_message
+        if not ok:
+            return False, start_message
+        return self.query_status()
 
     def ensure_running(self) -> tuple[bool, str]:
+        if not self.is_available():
+            return False, "Không tìm thấy file service để cài hoặc khởi động."
+        if not WindowsSessionController.is_admin():
+            return False, "Cần chạy app với quyền Admin để cài hoặc mở dịch vụ."
+
         running, message = self.query_status()
         if running:
             return True, message
         if "chưa được cài" in message.lower():
             return self.install_and_start()
-        return self.start()
+
+        ok, start_message = self.start()
+        post_running, post_message = self.query_status()
+        if ok and post_running:
+            return True, post_message
+        repair_ok, repair_message = self.repair_installation()
+        if repair_ok:
+            return True, repair_message
+        return False, start_message or repair_message
 
     def start(self) -> tuple[bool, str]:
         return self._run_command("start")
@@ -175,7 +212,22 @@ class WindowsServiceManager:
     def remove(self) -> tuple[bool, str]:
         return self._run_command("remove")
 
+    def repair_installation(self) -> tuple[bool, str]:
+        if not self.is_available():
+            return False, "Không tìm thấy file service để sửa."
+        if not WindowsSessionController.is_admin():
+            return False, "Cần quyền Admin để sửa dịch vụ."
+
+        self.stop()
+        self.remove()
+        ok, message = self.install_and_start()
+        if ok:
+            return True, "Dịch vụ đã được sửa và khởi động lại."
+        return False, message
+
     def _run_command(self, *args: str) -> tuple[bool, str]:
+        if not self.is_available():
+            return False, "Không tìm thấy file service để thực thi lệnh."
         try:
             result = subprocess.run(
                 service_launch_tokens(*args),
@@ -188,3 +240,30 @@ class WindowsServiceManager:
             return False, str(exc)
         output = (result.stdout or result.stderr or "").strip() or "Không có output."
         return result.returncode == 0, output
+
+    def _query_status_with_sc(self) -> tuple[bool, str]:
+        try:
+            result = subprocess.run(
+                ["sc", "query", SERVICE_NAME],
+                capture_output=True,
+                text=True,
+                timeout=15,
+                check=False,
+            )
+        except OSError as exc:
+            return False, str(exc)
+
+        output = ((result.stdout or "") + "\n" + (result.stderr or "")).strip().lower()
+        if "1060" in output or "does not exist as an installed service" in output:
+            return False, "Dịch vụ chưa được cài."
+        if "running" in output:
+            return True, "Dịch vụ đang chạy."
+        if "start pending" in output:
+            return False, "Dịch vụ đang khởi động."
+        if "stop pending" in output:
+            return False, "Dịch vụ đang dừng."
+        if "stopped" in output:
+            return False, "Dịch vụ đang tắt."
+        if result.returncode == 0:
+            return False, "Dịch vụ đang tắt hoặc chưa sẵn sàng."
+        return False, (result.stderr or result.stdout or "Không truy vấn được service.").strip()

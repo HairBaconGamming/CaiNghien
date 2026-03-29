@@ -35,7 +35,7 @@ WizardStyle=modern
 Compression=lzma2/ultra64
 SolidCompression=yes
 ChangesAssociations=no
-CloseApplications=yes
+CloseApplications=no
 CloseApplicationsFilter={#MyAppExeName},{#MyServiceExeName}
 RestartApplications=no
 

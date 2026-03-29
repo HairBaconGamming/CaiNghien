@@ -1,7 +1,7 @@
 {
   "latest": {
     "version": "0.3.1",
-    "published_at": "2026-03-28",
+    "published_at": "2026-03-29",
     "notes": [
       "Vá trạng thái installer unable to close application: installer giờ chủ động yêu cầu app thoát, dừng service trước khi nâng cấp và không force-close nếu strict mode đang yêu cầu mật khẩu.",
       "Nâng cấp web release hub với giao diện gọn hơn, thông tin file tải rõ ràng hơn và lịch sử phiên bản dễ quét mắt."
@@ -9,20 +9,20 @@
     "files": {
       "installer": {
         "url": "../downloads/0.3.1/CaiNghienFocusGuard-Setup-0.3.1.exe",
-        "size_bytes": 48667286,
-        "sha256": "df9141495357c1d74624c4b274de54d675de32b3e4c3610163870cfa36664f04"
+        "size_bytes": 48679743,
+        "sha256": "7317a4009740449c368e7cbfac7f2361a251927acea0e53d4d94308e675c9b4e"
       },
       "portable": {
         "url": "../downloads/0.3.1/CaiNghienFocusGuard-0.3.1.exe",
-        "size_bytes": 47076139,
-        "sha256": "38e7ce1efef21fb1b5c1bcc49487086d5a9d4cb0ffca3a4f1b32c771c394e7a9"
+        "size_bytes": 47087763,
+        "sha256": "09b23bd4b773fec13ba4b9d6c9995754102a99313f0e85f63167a4424129ad40"
       }
     }
   },
   "releases": [
     {
       "version": "0.3.1",
-      "published_at": "2026-03-28",
+      "published_at": "2026-03-29",
       "notes": [
         "Vá trạng thái installer unable to close application: installer giờ chủ động yêu cầu app thoát, dừng service trước khi nâng cấp và không force-close nếu strict mode đang yêu cầu mật khẩu.",
         "Nâng cấp web release hub với giao diện gọn hơn, thông tin file tải rõ ràng hơn và lịch sử phiên bản dễ quét mắt."
@@ -30,13 +30,13 @@
       "files": {
         "installer": {
           "url": "../downloads/0.3.1/CaiNghienFocusGuard-Setup-0.3.1.exe",
-          "size_bytes": 48667286,
-          "sha256": "df9141495357c1d74624c4b274de54d675de32b3e4c3610163870cfa36664f04"
+          "size_bytes": 48679743,
+          "sha256": "7317a4009740449c368e7cbfac7f2361a251927acea0e53d4d94308e675c9b4e"
         },
         "portable": {
           "url": "../downloads/0.3.1/CaiNghienFocusGuard-0.3.1.exe",
-          "size_bytes": 47076139,
-          "sha256": "38e7ce1efef21fb1b5c1bcc49487086d5a9d4cb0ffca3a4f1b32c771c394e7a9"
+          "size_bytes": 47087763,
+          "sha256": "09b23bd4b773fec13ba4b9d6c9995754102a99313f0e85f63167a4424129ad40"
         }
       }
     },

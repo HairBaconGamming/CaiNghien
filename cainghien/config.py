@@ -31,6 +31,7 @@ class ConfigStore:
         self.events_path = self.root_dir / "events.jsonl"
         self.events_backup_path = self.root_dir / "events.previous.jsonl"
         self.updates_dir = self.root_dir / "updates"
+        self.cleanup_backups_dir = self.root_dir / "cleanup-backups"
         self.legacy_config_paths = self._legacy_config_paths()
         self._ensure_root()
 
@@ -166,7 +167,96 @@ class ConfigStore:
             "config": str(self.config_path),
             "state": str(self.state_path),
             "events": str(self.events_path),
+            "updates": str(self.updates_dir),
+            "cleanup_backups": str(self.cleanup_backups_dir),
         }
+
+    def integrity_snapshot(self) -> dict[str, dict[str, str]]:
+        config_status, config_detail = self._payload_health(self.config_path)
+        state_status, state_detail = self._payload_health(self.state_path)
+        config_backup_status, config_backup_detail = self._payload_health(self.config_backup_path)
+        state_backup_status, state_backup_detail = self._payload_health(self.state_backup_path)
+        events_status = "ok"
+        events_detail = "Nhật ký sự kiện đang sẵn sàng."
+        if not self.events_path.exists() and not self.events_backup_path.exists():
+            events_status = "missing"
+            events_detail = "Chưa có file nhật ký."
+        return {
+            "config": {"status": config_status, "detail": config_detail},
+            "state": {"status": state_status, "detail": state_detail},
+            "config_backup": {"status": config_backup_status, "detail": config_backup_detail},
+            "state_backup": {"status": state_backup_status, "detail": state_backup_detail},
+            "events": {"status": events_status, "detail": events_detail},
+        }
+
+    def create_cleanup_backup(self) -> Path:
+        timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+        target = self.cleanup_backups_dir / timestamp
+        target.mkdir(parents=True, exist_ok=True)
+
+        for path in (
+            self.config_path,
+            self.config_backup_path,
+            self.state_path,
+            self.state_backup_path,
+            self.events_path,
+            self.events_backup_path,
+        ):
+            if not path.exists():
+                continue
+            try:
+                shutil.copy2(path, target / path.name)
+            except OSError:
+                continue
+
+        if self.updates_dir.exists():
+            updates_target = target / "updates"
+            updates_target.mkdir(parents=True, exist_ok=True)
+            for item in self.updates_dir.iterdir():
+                destination = updates_target / item.name
+                try:
+                    if item.is_dir():
+                        shutil.copytree(item, destination, dirs_exist_ok=True)
+                    else:
+                        shutil.copy2(item, destination)
+                except OSError:
+                    continue
+        return target
+
+    def emergency_reset(self) -> Path:
+        backup_dir = self.create_cleanup_backup()
+        for path in (
+            self.config_path,
+            self.config_backup_path,
+            self.state_path,
+            self.state_backup_path,
+            self.events_path,
+            self.events_backup_path,
+        ):
+            try:
+                path.unlink()
+            except FileNotFoundError:
+                pass
+            except OSError:
+                pass
+
+        if self.updates_dir.exists():
+            for item in self.updates_dir.iterdir():
+                try:
+                    if item.is_dir():
+                        shutil.rmtree(item, ignore_errors=True)
+                    else:
+                        item.unlink()
+                except OSError:
+                    continue
+
+        self._write_payload(self.config_path, self.config_backup_path, AppConfig().to_dict())
+        self._write_payload(self.state_path, self.state_backup_path, RuntimeState().to_dict())
+        self.append_event(
+            "emergency_cleanup_completed",
+            f"Đã dọn dẹp khẩn cấp và tạo lại dữ liệu mặc định. Bản sao lưu nằm ở {backup_dir}.",
+        )
+        return backup_dir
 
     def _resolve_root_dir(self) -> Path:
         candidates = [
@@ -194,6 +284,7 @@ class ConfigStore:
     def _ensure_root(self) -> None:
         self.root_dir.mkdir(parents=True, exist_ok=True)
         self.updates_dir.mkdir(parents=True, exist_ok=True)
+        self.cleanup_backups_dir.mkdir(parents=True, exist_ok=True)
 
     def _load_payload(
         self,
@@ -247,6 +338,14 @@ class ConfigStore:
         if isinstance(raw, dict):
             return raw
         return None
+
+    def _payload_health(self, path: Path) -> tuple[str, str]:
+        if not path.exists():
+            return "missing", "Chưa có file."
+        payload = self._read_payload(path)
+        if payload is None:
+            return "invalid", "File tồn tại nhưng không đọc được hoặc đã hỏng."
+        return "ok", "Đọc dữ liệu thành công."
 
     def _write_payload(
         self,

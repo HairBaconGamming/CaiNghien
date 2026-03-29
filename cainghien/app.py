@@ -151,7 +151,7 @@ QLabel#MiniValue {
 /* =========================================================
    3. PANELS & CARDS
 ========================================================= */
-QScrollArea#WorkspaceScroll, QWidget#Workspace {
+QScrollArea#WorkspaceScroll, QScrollArea#SidePanelScroll, QWidget#Workspace {
     background: transparent;
     border: none;
 }
@@ -365,7 +365,7 @@ QTimeEdit::up-button, QTimeEdit::down-button, QSpinBox::up-button, QSpinBox::dow
 ========================================================= */
 QLineEdit, QTimeEdit, QSpinBox, QComboBox { min-height: 44px; }
 
-QLineEdit#SoftInput, QTimeEdit#SoftInput, QSpinBox#SoftInput, QComboBox#SoftInput, QPlainTextEdit#CodeLikeEdit, QPlainTextEdit#LogOutput {
+QLineEdit#SoftInput, QTimeEdit#SoftInput, QSpinBox#SoftInput, QComboBox#SoftInput, QPlainTextEdit#CodeLikeEdit, QPlainTextEdit#LogOutput, QTextBrowser#HelpBrowser {
     background: #fffaf4;
     border: 1px solid #d8cdbf;
     border-radius: 16px;
@@ -373,7 +373,7 @@ QLineEdit#SoftInput, QTimeEdit#SoftInput, QSpinBox#SoftInput, QComboBox#SoftInpu
     selection-background-color: #bd6b2d;
     selection-color: white;
 }
-QLineEdit#SoftInput:focus, QTimeEdit#SoftInput:focus, QSpinBox#SoftInput:focus, QComboBox#SoftInput:focus, QPlainTextEdit#CodeLikeEdit:focus, QPlainTextEdit#LogOutput:focus {
+QLineEdit#SoftInput:focus, QTimeEdit#SoftInput:focus, QSpinBox#SoftInput:focus, QComboBox#SoftInput:focus, QPlainTextEdit#CodeLikeEdit:focus, QPlainTextEdit#LogOutput:focus, QTextBrowser#HelpBrowser:focus {
     border: 1px solid #b96a37;
     background: #ffffff;
 }
