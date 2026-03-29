@@ -9,13 +9,13 @@
     "files": {
       "installer": {
         "url": "../downloads/0.3.8/CaiNghienFocusGuard-Setup-0.3.8.exe",
-        "size_bytes": 33251305,
-        "sha256": "01e9820e3ee52f879e52e1e85ad5705439ffec56ba3aa75ce942e21c03364449"
+        "size_bytes": 33254232,
+        "sha256": "b531c32730d35caa9f974ad341acaa24e1569326a951ce753342672efad9fdef"
       },
       "portable": {
         "url": "../downloads/0.3.8/CaiNghienFocusGuard-0.3.8.exe",
-        "size_bytes": 47177417,
-        "sha256": "efae3d0aa361a3f96039a4530a371c2201e95284fc15f1b1860273d85e11732d"
+        "size_bytes": 47177654,
+        "sha256": "189b524d012fcd9b7a1aedf9166d0605039f02d9c8c84d1efb6abf05fb44d4ca"
       }
     }
   },
@@ -30,13 +30,13 @@
       "files": {
         "installer": {
           "url": "../downloads/0.3.8/CaiNghienFocusGuard-Setup-0.3.8.exe",
-          "size_bytes": 33251305,
-          "sha256": "01e9820e3ee52f879e52e1e85ad5705439ffec56ba3aa75ce942e21c03364449"
+          "size_bytes": 33254232,
+          "sha256": "b531c32730d35caa9f974ad341acaa24e1569326a951ce753342672efad9fdef"
         },
         "portable": {
           "url": "../downloads/0.3.8/CaiNghienFocusGuard-0.3.8.exe",
-          "size_bytes": 47177417,
-          "sha256": "efae3d0aa361a3f96039a4530a371c2201e95284fc15f1b1860273d85e11732d"
+          "size_bytes": 47177654,
+          "sha256": "189b524d012fcd9b7a1aedf9166d0605039f02d9c8c84d1efb6abf05fb44d4ca"
         }
       }
     },

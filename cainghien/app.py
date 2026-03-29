@@ -64,7 +64,7 @@ QLabel#FocusEyebrow, QLabel#SectionCaption, QLabel#InsetTitle {
 QLabel#PanelTitle, QLabel#LockTitle {
     color: #fff7ed;
     font-family: "Bahnschrift SemiBold", "Segoe UI Variable", sans-serif;
-    font-size: 34px;
+    font-size: 30px;
     font-weight: 700;
 }
 
@@ -115,11 +115,13 @@ QLabel#LockFormTitle {
     color: #fff5ea;
     font-size: 16px;
     font-weight: 700;
+    padding-bottom: 2px;
 }
 
 QLabel#LockMessage {
     color: #f3eadf;
-    font-size: 16px;
+    font-size: 15px;
+    line-height: 1.35;
 }
 
 QLabel#LockSchedule {
@@ -246,7 +248,7 @@ QTabBar#WorkspaceTabBar::tab:selected {
     border-color: #ccb79d;
 }
 
-QWidget#LockScreen {
+QWidget#LockScreen, QScrollArea#LockScroll, QWidget#LockContainer, QWidget#LockViewport {
     background: qradialgradient(
         cx: 0.22, cy: 0.18, radius: 1.15,
         fx: 0.22, fy: 0.18,
@@ -254,6 +256,10 @@ QWidget#LockScreen {
         stop: 0.42 #0f1815,
         stop: 1 #060a09
     );
+}
+
+QScrollArea#LockScroll {
+    border: none;
 }
 
 QFrame#LockShell {
@@ -498,6 +504,7 @@ QLabel#LockFeedback {
     font-size: 13px;
     font-weight: 600;
     padding-top: 2px;
+    padding-bottom: 2px;
 }
 QLabel#LockFeedback[error="true"] { 
     color: #ffb4ab; /* Đỏ ấm dễ đọc hơn trên nền tối */
