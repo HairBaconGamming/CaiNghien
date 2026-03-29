@@ -174,10 +174,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.normal_mode_button.setText("Bình thường\nChặn web xã hội trong khung giờ.")
         self.normal_mode_button.setCheckable(True)
         self.normal_mode_button.setObjectName("ModeButton")
-        self.normal_mode_button.setMinimumHeight(102)
         self.normal_mode_button.setSizePolicy(
             QtWidgets.QSizePolicy.Policy.Expanding,
-            QtWidgets.QSizePolicy.Policy.Fixed,
+            QtWidgets.QSizePolicy.Policy.Minimum,
         )
         layout.addWidget(self.normal_mode_button)
 
@@ -185,10 +184,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.strict_mode_button.setText("Nghiêm khắc\nKhóa máy tính và chỉ mở bằng mật khẩu.")
         self.strict_mode_button.setCheckable(True)
         self.strict_mode_button.setObjectName("ModeButton")
-        self.strict_mode_button.setMinimumHeight(102)
         self.strict_mode_button.setSizePolicy(
             QtWidgets.QSizePolicy.Policy.Expanding,
-            QtWidgets.QSizePolicy.Policy.Fixed,
+            QtWidgets.QSizePolicy.Policy.Minimum,
         )
         layout.addWidget(self.strict_mode_button)
 
@@ -2248,14 +2246,14 @@ class MainWindow(QtWidgets.QMainWindow):
         frame.setObjectName("Card")
         frame.setMinimumWidth(340)
         layout = QtWidgets.QVBoxLayout(frame)
-        layout.setContentsMargins(22, 22, 22, 22)
-        layout.setSpacing(14)
+        layout.setContentsMargins(28, 28, 28, 28)
+        layout.setSpacing(12)
         heading = QtWidgets.QLabel(title)
         heading.setObjectName("CardTitle")
         heading.setWordWrap(True)
         heading.setSizePolicy(
             QtWidgets.QSizePolicy.Policy.Expanding,
-            QtWidgets.QSizePolicy.Policy.Minimum,
+            QtWidgets.QSizePolicy.Policy.MinimumExpanding,
         )
         layout.addWidget(heading)
         caption = QtWidgets.QLabel(subtitle)
@@ -2263,7 +2261,7 @@ class MainWindow(QtWidgets.QMainWindow):
         caption.setObjectName("CardSubtitle")
         caption.setSizePolicy(
             QtWidgets.QSizePolicy.Policy.Expanding,
-            QtWidgets.QSizePolicy.Policy.Minimum,
+            QtWidgets.QSizePolicy.Policy.MinimumExpanding,
         )
         layout.addWidget(caption)
         return frame, layout

@@ -45,18 +45,21 @@ class StrictLockWindow(QtWidgets.QWidget):
         container_layout = QtWidgets.QVBoxLayout(container)
         container_layout.setContentsMargins(16, 16, 16, 16)
         container_layout.setSpacing(0)
-        container_layout.addStretch()
+
+        # Dùng addStretch với weight=1 để đẩy form ra giữa màn hình
+        container_layout.addStretch(1)
 
         shell = QtWidgets.QFrame()
         shell.setObjectName("LockShell")
         shell.setMaximumWidth(860)
+        # SỬA LỖI: Đổi Policy dọc thành Minimum để nó luôn giãn đủ chiều cao cho nội dung bên trong
         shell.setSizePolicy(
             QtWidgets.QSizePolicy.Policy.Preferred,
-            QtWidgets.QSizePolicy.Policy.Maximum,
+            QtWidgets.QSizePolicy.Policy.Minimum,
         )
         shell_layout = QtWidgets.QVBoxLayout(shell)
-        shell_layout.setContentsMargins(30, 28, 30, 30)
-        shell_layout.setSpacing(14)
+        shell_layout.setContentsMargins(40, 36, 40, 40)  # Tăng margin cho thoáng giống UI hiện đại
+        shell_layout.setSpacing(18)
 
         badge = QtWidgets.QLabel("CHẾ ĐỘ NGHIÊM KHẮC")
         badge.setObjectName("LockBadge")
@@ -65,10 +68,7 @@ class StrictLockWindow(QtWidgets.QWidget):
         title = QtWidgets.QLabel("Máy tính đang nằm trong khung giờ nghiêm khắc")
         title.setObjectName("LockTitle")
         title.setWordWrap(True)
-        title.setSizePolicy(
-            QtWidgets.QSizePolicy.Policy.Preferred,
-            QtWidgets.QSizePolicy.Policy.Maximum,
-        )
+        # Đã bỏ setSizePolicy(Maximum) gây bóp chữ
         shell_layout.addWidget(title)
 
         accent = QtWidgets.QFrame()
@@ -86,8 +86,8 @@ class StrictLockWindow(QtWidgets.QWidget):
         info_card = QtWidgets.QFrame()
         info_card.setObjectName("LockInfoCard")
         info_layout = QtWidgets.QVBoxLayout(info_card)
-        info_layout.setContentsMargins(18, 16, 18, 16)
-        info_layout.setSpacing(6)
+        info_layout.setContentsMargins(22, 20, 22, 20)  # Tăng margin thẻ info
+        info_layout.setSpacing(8)
 
         schedule_caption = QtWidgets.QLabel("KHUNG GIỜ ĐANG ÁP DỤNG")
         schedule_caption.setObjectName("LockCardCaption")
@@ -111,28 +111,20 @@ class StrictLockWindow(QtWidgets.QWidget):
             form = QtWidgets.QFrame()
             form.setObjectName("LockForm")
             form_layout = QtWidgets.QVBoxLayout(form)
-            form_layout.setContentsMargins(18, 18, 18, 18)
-            form_layout.setSpacing(10)
+            form_layout.setContentsMargins(24, 24, 24, 24)  # Tăng padding cho form nhập liệu
+            form_layout.setSpacing(12)
 
             form_title = QtWidgets.QLabel("Nhập mật khẩu để tắt chế độ nghiêm khắc")
             form_title.setObjectName("LockFormTitle")
             form_title.setWordWrap(True)
-            form_title.setSizePolicy(
-                QtWidgets.QSizePolicy.Policy.Preferred,
-                QtWidgets.QSizePolicy.Policy.Maximum,
-            )
-            form_title.setMinimumHeight(form_title.fontMetrics().lineSpacing() * 2 + 6)
+            # SỬA LỖI TEXT-CLIP: Bỏ ép cứng setMinimumHeight(fontMetrics) và setSizePolicy
             form_layout.addWidget(form_title)
 
             self.password_edit = QtWidgets.QLineEdit()
             self.password_edit.setEchoMode(QtWidgets.QLineEdit.EchoMode.Password)
             self.password_edit.setPlaceholderText("Mật khẩu nghiêm khắc")
             self.password_edit.setObjectName("LockInput")
-            self.password_edit.setMinimumHeight(52)
-            self.password_edit.setSizePolicy(
-                QtWidgets.QSizePolicy.Policy.Expanding,
-                QtWidgets.QSizePolicy.Policy.Fixed,
-            )
+            # Đã bỏ setMinimumHeight(52), nhường việc tính toán lại cho CSS Padding
             self.password_edit.returnPressed.connect(self._submit_password)
             form_layout.addWidget(self.password_edit)
 
@@ -140,28 +132,20 @@ class StrictLockWindow(QtWidgets.QWidget):
             self.feedback_label.setObjectName("LockFeedback")
             self.feedback_label.setProperty("error", "false")
             self.feedback_label.setWordWrap(True)
-            self.feedback_label.setMinimumHeight(self.feedback_label.fontMetrics().lineSpacing() + 6)
-            self.feedback_label.setSizePolicy(
-                QtWidgets.QSizePolicy.Policy.Preferred,
-                QtWidgets.QSizePolicy.Policy.Maximum,
-            )
+            # SỬA LỖI TEXT-CLIP: Bỏ ép cứng setMinimumHeight(fontMetrics)
             form_layout.addWidget(self.feedback_label)
 
             submit_button = QtWidgets.QPushButton("Tắt chế độ nghiêm khắc")
             submit_button.clicked.connect(self._submit_password)
             submit_button.setObjectName("LockPrimaryButton")
-            submit_button.setMinimumHeight(48)
-            submit_button.setSizePolicy(
-                QtWidgets.QSizePolicy.Policy.Expanding,
-                QtWidgets.QSizePolicy.Policy.Fixed,
-            )
+            # Đã bỏ setMinimumHeight(48), nhường cho CSS Padding
             self.submit_button = submit_button
             form_layout.addWidget(submit_button)
 
             shell_layout.addWidget(form)
 
         container_layout.addWidget(shell, 0, QtCore.Qt.AlignmentFlag.AlignHCenter)
-        container_layout.addStretch()
+        container_layout.addStretch(1)
 
     def refresh_copy(
         self,

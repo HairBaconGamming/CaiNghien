@@ -248,7 +248,7 @@ QTabBar#WorkspaceTabBar::tab:selected {
     border-color: #ccb79d;
 }
 
-QWidget#LockScreen, QScrollArea#LockScroll, QWidget#LockContainer, QWidget#LockViewport {
+QWidget#LockScreen {
     background: qradialgradient(
         cx: 0.22, cy: 0.18, radius: 1.15,
         fx: 0.22, fy: 0.18,
@@ -258,7 +258,8 @@ QWidget#LockScreen, QScrollArea#LockScroll, QWidget#LockContainer, QWidget#LockV
     );
 }
 
-QScrollArea#LockScroll {
+QScrollArea#LockScroll, QWidget#LockContainer, QWidget#LockViewport {
+    background: transparent;
     border: none;
 }
 
@@ -479,38 +480,443 @@ QMenu::item:selected {
 }
 
 /* =========================================================
-   7. STRICT LOCK SCREEN OVERRIDES
+   7. STRICT LOCK SCREEN OVERRIDES (UPGRADED GLASSMORPHISM)
 ========================================================= */
-QLineEdit#LockInput {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.22);
-    border-radius: 16px;
-    padding: 14px 18px;
-    color: #ffffff;
-    font-size: 16px;
-    letter-spacing: 2px; /* Mật khẩu nên gĩãn chữ ra chút cho đẹp */
-}
-QLineEdit#LockInput:focus {
-    border: 1px solid #d98946;
-    background: rgba(255, 255, 255, 0.12);
-}
-QLineEdit#LockInput:disabled {
-    background: rgba(255, 255, 255, 0.04);
-    color: rgba(255, 255, 255, 0.52);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+/* Form bọc ngoài cùng - Tạo hiệu ứng kính nổi 3D với ánh sáng viền */
+QFrame#LockShell {
+    background: qlineargradient(
+        x1: 0, y1: 0, x2: 1, y2: 1,
+        stop: 0 rgba(33, 52, 45, 0.85),
+        stop: 1 rgba(10, 15, 13, 0.95)
+    );
+    /* Giả lập ánh sáng hắt từ góc trên trái xuống */
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    border-left: 1px solid rgba(255, 255, 255, 0.10);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+    border-radius: 32px;
 }
 
+/* Các thẻ thông tin bên trong - Hiệu ứng kính chìm */
+QFrame#LockInfoCard, QFrame#LockForm {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 20px;
+}
+QFrame#LockInfoCard:hover, QFrame#LockForm:hover {
+    background: rgba(255, 255, 255, 0.05); /* Sáng lên một chút khi di chuột qua */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Ô nhập mật khẩu - Đậm, sâu và gõ sướng mắt hơn */
+QLineEdit#LockInput {
+    background: rgba(0, 0, 0, 0.25); /* Nền đen mờ tạo cảm giác lõm xuống */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    padding: 16px 20px;
+    color: #ffffff;
+    font-size: 18px;
+    letter-spacing: 6px; /* Giãn cách các dấu chấm mật khẩu rộng ra */
+}
+QLineEdit#LockInput:focus {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid #d98946;
+    border-bottom: 3px solid #d98946; /* Điểm nhấn mạnh ở viền dưới khi focus */
+}
+QLineEdit#LockInput:disabled {
+    background: rgba(0, 0, 0, 0.1);
+    color: rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Nút bấm chính - Gradient nổi bật và bo góc đồng bộ */
+QPushButton#LockPrimaryButton {
+    background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 #d98946, stop: 1 #b55d22);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 14px;
+    padding: 16px 20px;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+QPushButton#LockPrimaryButton:hover { 
+    background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 #e59e60, stop: 1 #cc7439); 
+}
+QPushButton#LockPrimaryButton:pressed { 
+    background: #934919; 
+    border-top: 2px solid rgba(0, 0, 0, 0.2); /* Cảm giác lún nút khi bấm */
+}
+QPushButton#LockPrimaryButton:disabled {
+    background: rgba(123, 93, 70, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    color: rgba(255, 247, 237, 0.4);
+}
+
+/* Căn chỉnh lại Feedback Text cho gọn gàng */
 QLabel#LockFeedback {
     font-size: 13px;
     font-weight: 600;
-    padding-top: 2px;
-    padding-bottom: 2px;
+    padding: 4px 8px;
+    border-radius: 6px;
 }
 QLabel#LockFeedback[error="true"] { 
-    color: #ffb4ab; /* Đỏ ấm dễ đọc hơn trên nền tối */
+    color: #ffb4ab; 
+    background: rgba(147, 44, 34, 0.2); /* Nền đỏ mờ cảnh báo mạnh hơn */
 }
 QLabel#LockFeedback[error="false"] { 
-    color: #b7e4b0; /* Xanh sáng hơn cho nền tối */
+    color: #b7e4b0; 
+}
+
+/* =========================================================
+   9. MASTER OVERRIDES (FLUENT & GLASS REFRESH)
+========================================================= */
+QMainWindow {
+    background: #F4EBE1;
+}
+
+QWidget {
+    font-family: "Segoe UI Variable Text", "Segoe UI", sans-serif;
+    font-size: 14px;
+    color: #1A2621;
+}
+
+QLabel, QCheckBox {
+    background: transparent;
+}
+
+QWidget#AppShell {
+    background: qradialgradient(
+        cx: 0.1, cy: 0.1, radius: 1.5,
+        fx: 0.1, fy: 0.1,
+        stop: 0 #FBF7F2,
+        stop: 0.5 #F4EBE1,
+        stop: 1 #EADDD0
+    );
+}
+
+QLabel#PanelEyebrow, QLabel#PanelSection, QLabel#FocusEyebrow, QLabel#SectionCaption, QLabel#InsetTitle {
+    color: rgba(255, 255, 255, 0.6);
+    font-family: "Segoe UI Variable Display", "Segoe UI", sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding-bottom: 4px;
+}
+
+QLabel#FocusEyebrow, QLabel#SectionCaption, QLabel#InsetTitle {
+    color: #8C6A53;
+}
+
+QLabel#PanelTitle {
+    color: #FFFFFF;
+    font-family: "Segoe UI Variable Display", "Segoe UI", sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+QLabel#FocusTitle {
+    color: #111A16;
+    font-family: "Segoe UI Variable Display", "Segoe UI", sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+QLabel#CardTitle {
+    color: #16221C;
+    font-family: "Segoe UI Variable Display", "Segoe UI", sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+QLabel#PanelSubtitle, QLabel#SideNoteBody, QLabel#PanelSummary {
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.5;
+}
+
+QLabel#CardSubtitle, QLabel#MutedLabel, QLabel#FocusTimeBody, QLabel#FocusBody {
+    color: #5C6E65;
+}
+
+QLabel#SideNoteTitle {
+    font-weight: 700;
+    color: #FFFFFF;
+}
+
+QLabel#FocusTimeCaption {
+    font-weight: 700;
+    color: #16221C;
+}
+
+QLabel#FocusTime {
+    font-family: "Segoe UI Variable Display", "Segoe UI", sans-serif;
+    font-size: 24px;
+    color: #D36A22;
+    font-weight: 800;
+}
+
+QFrame#SidePanel {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #16241E, stop:1 #0F1814);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 28px;
+}
+
+QFrame#Card {
+    background: #FFFFFF;
+    border: 1px solid #E2D7CB;
+    border-radius: 24px;
+    border-bottom: 2px solid #D5C9BD;
+}
+
+QFrame#InsetCard {
+    background: #FAF5F0;
+    border: 1px solid #EAE1D6;
+    border-radius: 16px;
+}
+
+QFrame#MiniCard {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+QLabel#MiniCaption {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+QLabel#MiniValue {
+    color: #FFFFFF;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+QFrame#FocusBanner {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #FFFFFF, stop:1 #F2ECE4);
+    border: 1px solid #E2D7CB;
+    border-bottom: 2px solid #D5C9BD;
+    border-radius: 28px;
+}
+
+QFrame#FocusTimeCard {
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 20px;
+    border: 1px solid #EAE1D6;
+}
+
+QFrame#SideNote {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+QTabWidget#WorkspaceTabs::pane {
+    border: none;
+    background: transparent;
+    top: 10px;
+}
+
+QTabBar#WorkspaceTabBar {
+    background: transparent;
+}
+
+QTabBar#WorkspaceTabBar::tab {
+    background: transparent;
+    color: #7A8C83;
+    padding: 10px 16px;
+    margin-right: 8px;
+    border-radius: 18px;
+    font-size: 14px;
+    font-weight: 700;
+    border: 1px solid transparent;
+    min-width: 0px;
+}
+
+QTabBar#WorkspaceTabBar::tab:hover {
+    background: rgba(0, 0, 0, 0.04);
+    color: #16221C;
+}
+
+QTabBar#WorkspaceTabBar::tab:selected {
+    background: #FFFFFF;
+    color: #16221C;
+    border: 1px solid #E2D7CB;
+    border-bottom: 2px solid #D5C9BD;
+}
+
+QPushButton#PrimaryButton {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #D36A22, stop:1 #B85616);
+    color: white;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 18px;
+    padding: 14px 24px;
+    font-size: 14px;
+    font-weight: 700;
+}
+QPushButton#PrimaryButton:hover { background: #E07833; }
+QPushButton#PrimaryButton:pressed { background: #A34A10; }
+
+QPushButton#SecondaryButton {
+    background: rgba(255, 255, 255, 0.05);
+    color: #FFFFFF;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 18px;
+    padding: 14px 24px;
+    font-size: 14px;
+    font-weight: 700;
+}
+QPushButton#SecondaryButton:hover { background: rgba(255, 255, 255, 0.1); }
+QPushButton#SecondaryButton:pressed { background: rgba(255, 255, 255, 0.02); }
+
+QPushButton#DangerButton {
+    background: #FFEDEA;
+    color: #BA2D1D;
+    border: 1px solid #F5C6C1;
+    border-radius: 18px;
+    padding: 14px 24px;
+    font-size: 14px;
+    font-weight: 700;
+}
+QPushButton#DangerButton:hover { background: #FADBD7; }
+QPushButton#DangerButton:pressed { background: #E8B4AE; }
+
+QToolButton#ModeButton {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 16px 16px;
+    text-align: left;
+    color: #FFFFFF;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+QToolButton#ModeButton:hover { background: rgba(255, 255, 255, 0.08); }
+QToolButton#ModeButton:checked {
+    background: rgba(211, 106, 34, 0.15);
+    border: 1px solid rgba(211, 106, 34, 0.6);
+    color: #FFF2E8;
+}
+
+QLineEdit#SoftInput, QTimeEdit#SoftInput, QSpinBox#SoftInput, QComboBox#SoftInput {
+    background: #FAEBDE;
+    border: 1px solid #E2D2C3;
+    border-radius: 16px;
+    padding: 12px 16px;
+    selection-background-color: #D36A22;
+    selection-color: white;
+    font-size: 14px;
+    min-height: 0px;
+}
+QLineEdit#SoftInput:focus, QTimeEdit#SoftInput:focus, QSpinBox#SoftInput:focus, QComboBox#SoftInput:focus {
+    background: #FFFFFF;
+    border: 1px solid #D36A22;
+}
+
+QPlainTextEdit#CodeLikeEdit, QPlainTextEdit#LogOutput, QTextBrowser#HelpBrowser {
+    background: #FAEBDE;
+    border: 1px solid #E2D2C3;
+    border-radius: 16px;
+    padding: 16px;
+    font-family: "Consolas", monospace;
+    font-size: 13px;
+}
+QPlainTextEdit#CodeLikeEdit:focus, QPlainTextEdit#LogOutput:focus, QTextBrowser#HelpBrowser:focus {
+    background: #FFFFFF;
+    border: 1px solid #D36A22;
+}
+
+QComboBox#SoftInput::drop-down { border: none; width: 36px; }
+QComboBox#SoftInput::down-arrow {
+    image: none;
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid #8C6A53;
+}
+QComboBox#SoftInput QAbstractItemView {
+    background: #FFFFFF;
+    border: 1px solid #E2D2C3;
+    border-radius: 12px;
+    padding: 8px;
+}
+
+QCheckBox#SoftCheck {
+    color: #16221C;
+    font-size: 14px;
+    font-weight: 500;
+    spacing: 12px;
+}
+QCheckBox#SoftCheck::indicator {
+    width: 24px;
+    height: 24px;
+    border-radius: 8px;
+    border: 2px solid #D1C5B8;
+    background: #FFFFFF;
+}
+QCheckBox#SoftCheck::indicator:hover { border: 2px solid #D36A22; }
+QCheckBox#SoftCheck::indicator:checked {
+    background: #D36A22;
+    border: 2px solid #D36A22;
+    image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'><polyline points='20 6 9 17 4 12'></polyline></svg>");
+}
+
+QTimeEdit::up-button, QTimeEdit::down-button, QSpinBox::up-button, QSpinBox::down-button {
+    background: transparent;
+    border: none;
+    width: 24px;
+}
+
+QLabel#Badge {
+    border-radius: 12px;
+    padding: 6px 14px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+QLabel#Badge[badgeVariant="secondary"] { background: rgba(255, 255, 255, 0.1); color: #FFFFFF; }
+QLabel#Badge[badgeVariant="warm"] { background: #FFE6D6; color: #9E4A10; }
+QLabel#Badge[badgeVariant="danger"] { background: #FFEDEA; color: #BA2D1D; }
+QLabel#Badge[badgeVariant="success"] { background: #E3F2E8; color: #2B6642; }
+QLabel#Badge[badgeVariant="soft"] { background: #EDF2EF; color: #375443; }
+
+QScrollBar:vertical {
+    background: transparent;
+    width: 12px;
+    margin: 0px;
+}
+QScrollBar::handle:vertical {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 6px;
+    min-height: 40px;
+    margin: 3px;
+}
+QScrollBar::handle:vertical:hover { background: rgba(0, 0, 0, 0.3); }
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { background: transparent; border: none; height: 0px; }
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical { background: transparent; }
+
+QMenu {
+    background: #FFFFFF;
+    border: 1px solid #E2D7CB;
+    padding: 6px;
+    border-radius: 12px;
+}
+QMenu::item {
+    padding: 8px 16px;
+    border-radius: 6px;
+    margin: 2px 0px;
+}
+QMenu::item:selected {
+    background: #F1E4D5;
+    color: #16221D;
 }
 """
 
