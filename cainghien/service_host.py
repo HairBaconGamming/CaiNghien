@@ -35,7 +35,7 @@ class FocusGuardService(win32serviceutil.ServiceFramework):
     def __init__(self, args) -> None:
         super().__init__(args)
         self._stop_event = win32event.CreateEvent(None, 0, 0, None)
-        self._store = ConfigStore()
+        self._store = ConfigStore(root_dir=ConfigStore.shared_root_path())
         self._hosts = HostsBlocker()
         self._startup = WindowsStartupManager()
         self._hosts_applied = False

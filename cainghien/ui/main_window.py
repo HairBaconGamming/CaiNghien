@@ -209,7 +209,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.save_button.setObjectName("SecondaryButton")
         layout.addWidget(self.save_button)
 
-        self.service_button = QtWidgets.QPushButton("Cài / Mở dịch vụ")
+        self.service_button = QtWidgets.QPushButton("Cài / Mở / Sửa dịch vụ")
         self.service_button.setObjectName("SecondaryButton")
         layout.addWidget(self.service_button)
 
@@ -1831,6 +1831,17 @@ class MainWindow(QtWidgets.QMainWindow):
                     return
             self._show_warning("Không thể cài hoặc mở dịch vụ", message)
             return
+        if not self.controller.store.shared_mode:
+            try:
+                shared_root = self.controller.store.activate_shared_root()
+                self._append_log(f"Đã chuyển dữ liệu sang kho dùng chung cho service: {shared_root}")
+            except OSError as exc:
+                self._show_warning(
+                    "Dịch vụ đã chạy nhưng chưa đồng bộ dữ liệu",
+                    f"{message}\n\nKhông thể chuyển kho dữ liệu dùng chung: {exc}",
+                )
+                self.refresh_helper_panel()
+                return
         self._append_log("Dịch vụ đã được cài hoặc khởi động.")
         self.controller.evaluate(force=True)
         self.refresh_helper_panel()
@@ -1882,6 +1893,10 @@ class MainWindow(QtWidgets.QMainWindow):
             f"- Service đã cài: {service['installed']}",
             f"- Service đang chạy: {service['running']}",
             f"- Dịch vụ báo: {service['message']}",
+            f"- Service trỏ đúng file hiện tại: {service.get('path_ok', 'Không rõ')}",
+            f"- Đường dẫn service: {service.get('image_path') or 'Không rõ'}",
+            f"- Startup type: {service.get('start_type') or 'Không rõ'}",
+            f"- Chẩn đoán service: {service.get('path_message') or 'Không có'}",
             f"- Startup cùng Windows: {'Bật' if self.startup_manager.is_enabled() else 'Tắt'}",
             f"- Safe mode: {self.controller.state.safe_mode_reason or 'Không có'}",
             f"- Recovery: {self.controller.emergency_recovery_status_text()}",

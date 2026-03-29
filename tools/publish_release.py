@@ -104,8 +104,8 @@ def main() -> int:
             break
     if not existing_notes:
         existing_notes = [
-            "Thêm web release hub và updater có hỏi ý kiến.",
-            "Thêm dọn dẹp cache bản cập nhật cũ.",
+            "Installer có luồng Cập nhật / Sửa chữa rõ ràng hơn, giữ đúng thư mục cài cũ và tự làm sạch file bundle trước khi chép bản mới.",
+            "Service được kiểm tra cả trạng thái lẫn đường dẫn binary; nếu service đang trỏ sai file cũ, app sẽ ưu tiên tự repair trước khi báo lỗi.",
         ]
 
     release = {

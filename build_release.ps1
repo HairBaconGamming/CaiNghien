@@ -26,8 +26,8 @@ $releaseDistRoot = Join-Path $root ".release_dist"
 $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
 $workPath = Join-Path $releaseWorkRoot $timestamp
 $distPath = Join-Path $releaseDistRoot $timestamp
-$exePath = Join-Path $distPath "CaiNghienFocusGuard.exe"
-$serviceExePath = Join-Path $distPath "CaiNghienFocusGuardService.exe"
+$portableExePath = Join-Path $distPath "CaiNghienFocusGuardPortable.exe"
+$bundlePath = Join-Path $distPath "CaiNghienFocusGuardBundle"
 $installerName = "CaiNghienFocusGuard-Setup-" + $timestamp
 $installerExePath = Join-Path $root "dist\installer\$installerName.exe"
 
@@ -54,10 +54,10 @@ try {
         & $python -m PyInstaller --noconfirm --clean --distpath $distPath --workpath $workPath $spec
     }
     Invoke-Step -StepName "Build installer" -Action {
-        & $candidateIscc "/DSourceExe=$exePath" "/DSourceServiceExe=$serviceExePath" "/DOutputFileName=$installerName" $issScript
+        & $candidateIscc "/DSourceAppDir=$bundlePath" "/DOutputFileName=$installerName" $issScript
     }
     Invoke-Step -StepName "Publish release metadata" -Action {
-        & $python $publishScript --portable $exePath --installer $installerExePath
+        & $python $publishScript --portable $portableExePath --installer $installerExePath
     }
 }
 finally {

@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import shutil
+import subprocess
 from collections import Counter
 from datetime import date, datetime, timedelta
 from pathlib import Path
@@ -15,6 +16,8 @@ APP_FOLDER_NAME = "CaiNghienFocusGuard"
 LEGACY_FOLDER_NAME = "CaiNghien"
 SCHEMA_VERSION = 2
 EVENT_LOG_LIMIT_BYTES = 2 * 1024 * 1024
+SERVICE_NAME = "CaiNghienFocusGuardService"
+SHARED_MODE_MARKER_NAME = "service-mode.json"
 
 
 def now_iso() -> str:
@@ -23,17 +26,48 @@ def now_iso() -> str:
 
 class ConfigStore:
     def __init__(self, root_dir: Path | None = None) -> None:
-        self.root_dir = root_dir or self._resolve_root_dir()
-        self.config_path = self.root_dir / "config.json"
-        self.config_backup_path = self.root_dir / "config.backup.json"
-        self.state_path = self.root_dir / "state.json"
-        self.state_backup_path = self.root_dir / "state.backup.json"
-        self.events_path = self.root_dir / "events.jsonl"
-        self.events_backup_path = self.root_dir / "events.previous.jsonl"
-        self.updates_dir = self.root_dir / "updates"
-        self.cleanup_backups_dir = self.root_dir / "cleanup-backups"
-        self.legacy_config_paths = self._legacy_config_paths()
-        self._ensure_root()
+        self._user_root = self.user_root_path()
+        self._shared_root = self.shared_root_path()
+        self._set_root(root_dir or self._resolve_root_dir())
+
+    @classmethod
+    def user_root_path(cls) -> Path:
+        return Path(os.getenv("APPDATA", Path.home() / "AppData" / "Roaming")) / APP_FOLDER_NAME
+
+    @classmethod
+    def shared_root_path(cls) -> Path:
+        return Path(os.getenv("PROGRAMDATA", r"C:\ProgramData")) / APP_FOLDER_NAME
+
+    @classmethod
+    def shared_mode_marker_path(cls) -> Path:
+        return cls.shared_root_path() / SHARED_MODE_MARKER_NAME
+
+    @classmethod
+    def mark_shared_mode(cls) -> None:
+        marker = cls.shared_mode_marker_path()
+        marker.parent.mkdir(parents=True, exist_ok=True)
+        payload = {
+            "enabled": True,
+            "saved_at": now_iso(),
+            "schema": SCHEMA_VERSION,
+        }
+        marker.write_text(
+            json.dumps(payload, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+
+    @classmethod
+    def clear_shared_mode(cls) -> None:
+        try:
+            cls.shared_mode_marker_path().unlink()
+        except FileNotFoundError:
+            pass
+        except OSError:
+            pass
+
+    @property
+    def shared_mode(self) -> bool:
+        return self.root_dir == self._shared_root
 
     def load(self) -> AppConfig:
         payload = self._load_payload(
@@ -90,24 +124,7 @@ class ConfigStore:
             handle.write(json.dumps(record, ensure_ascii=False) + "\n")
 
     def recent_events(self, *, limit: int = 200) -> list[dict[str, Any]]:
-        records: list[dict[str, Any]] = []
-        for path in (self.events_backup_path, self.events_path):
-            if not path.exists():
-                continue
-            try:
-                with path.open("r", encoding="utf-8", errors="ignore") as handle:
-                    for line in handle:
-                        line = line.strip()
-                        if not line:
-                            continue
-                        try:
-                            parsed = json.loads(line)
-                        except json.JSONDecodeError:
-                            continue
-                        if isinstance(parsed, dict):
-                            records.append(parsed)
-            except OSError:
-                continue
+        records = self._iter_all_events()
         return records[-limit:]
 
     def weekly_stats(
@@ -164,6 +181,9 @@ class ConfigStore:
     def path_summary(self) -> dict[str, str]:
         return {
             "root": str(self.root_dir),
+            "user_root": str(self._user_root),
+            "shared_root": str(self._shared_root),
+            "shared_mode": "Có" if self.shared_mode else "Không",
             "config": str(self.config_path),
             "state": str(self.state_path),
             "events": str(self.events_path),
@@ -258,33 +278,72 @@ class ConfigStore:
         )
         return backup_dir
 
+    def activate_shared_root(self) -> Path:
+        target = self._shared_root
+        self._copy_store_contents(self.root_dir, target)
+        self.mark_shared_mode()
+        self._set_root(target)
+        return target
+
+    def activate_user_root(self) -> Path:
+        target = self._user_root
+        if self.root_dir != target:
+            self._copy_store_contents(self.root_dir, target)
+        self.clear_shared_mode()
+        self._set_root(target)
+        return target
+
     def _resolve_root_dir(self) -> Path:
-        candidates = [
-            Path(os.getenv("PROGRAMDATA", r"C:\ProgramData")) / APP_FOLDER_NAME,
-            Path(os.getenv("APPDATA", Path.home() / "AppData" / "Roaming")) / APP_FOLDER_NAME,
-        ]
-        last_error: OSError | None = None
-        for candidate in candidates:
-            try:
-                candidate.mkdir(parents=True, exist_ok=True)
-                return candidate
-            except OSError as exc:
-                last_error = exc
-        if last_error:
-            raise last_error
-        return candidates[-1]
+        roaming_candidate = self._user_root
+        shared_candidate = self._shared_root
+        user_has_data = self._has_store_artifacts(roaming_candidate)
+        shared_has_data = self._has_store_artifacts(shared_candidate)
+        service_registered = self._service_is_registered()
+
+        if self.shared_mode_marker_path().exists() or service_registered:
+            if user_has_data and not shared_has_data:
+                self._copy_store_contents(roaming_candidate, shared_candidate)
+            shared_candidate.mkdir(parents=True, exist_ok=True)
+            self.mark_shared_mode()
+            return shared_candidate
+        if user_has_data:
+            roaming_candidate.mkdir(parents=True, exist_ok=True)
+            return roaming_candidate
+        if shared_has_data:
+            self._copy_store_contents(shared_candidate, roaming_candidate)
+            self.clear_shared_mode()
+            roaming_candidate.mkdir(parents=True, exist_ok=True)
+            return roaming_candidate
+        roaming_candidate.mkdir(parents=True, exist_ok=True)
+        return roaming_candidate
 
     def _legacy_config_paths(self) -> list[Path]:
         app_data = Path(os.getenv("APPDATA", Path.home() / "AppData" / "Roaming"))
+        program_data = Path(os.getenv("PROGRAMDATA", r"C:\ProgramData"))
         return [
             app_data / LEGACY_FOLDER_NAME / "config.json",
             app_data / APP_FOLDER_NAME / "config.json",
+            program_data / LEGACY_FOLDER_NAME / "config.json",
+            program_data / APP_FOLDER_NAME / "config.json",
         ]
 
     def _ensure_root(self) -> None:
         self.root_dir.mkdir(parents=True, exist_ok=True)
         self.updates_dir.mkdir(parents=True, exist_ok=True)
         self.cleanup_backups_dir.mkdir(parents=True, exist_ok=True)
+
+    def _set_root(self, root_dir: Path) -> None:
+        self.root_dir = root_dir
+        self.config_path = self.root_dir / "config.json"
+        self.config_backup_path = self.root_dir / "config.backup.json"
+        self.state_path = self.root_dir / "state.json"
+        self.state_backup_path = self.root_dir / "state.backup.json"
+        self.events_path = self.root_dir / "events.jsonl"
+        self.events_backup_path = self.root_dir / "events.previous.jsonl"
+        self.updates_dir = self.root_dir / "updates"
+        self.cleanup_backups_dir = self.root_dir / "cleanup-backups"
+        self.legacy_config_paths = self._legacy_config_paths()
+        self._ensure_root()
 
     def _load_payload(
         self,
@@ -372,7 +431,7 @@ class ConfigStore:
 
     def _events_since(self, since: datetime) -> list[dict[str, Any]]:
         records: list[dict[str, Any]] = []
-        for record in self.recent_events(limit=600):
+        for record in self._iter_all_events():
             try:
                 moment = datetime.fromisoformat(str(record.get("at", "")))
             except ValueError:
@@ -431,7 +490,7 @@ class ConfigStore:
         for record in self._events_since(since):
             kind = str(record.get("kind", ""))
             meta = record.get("meta") if isinstance(record.get("meta"), dict) else {}
-            if kind in {"study_session_started", "study_session_completed", "study_session_aborted"}:
+            if kind in {"study_session_completed", "study_session_aborted"}:
                 profile_name = str(meta.get("profile_name", "")).strip()
                 if profile_name:
                     profile_counter[profile_name] += 1
@@ -448,3 +507,77 @@ class ConfigStore:
             [name for name, _ in domain_counter.most_common(3)],
             [name for name, _ in app_counter.most_common(3)],
         )
+
+    def _iter_all_events(self) -> list[dict[str, Any]]:
+        records: list[dict[str, Any]] = []
+        for path in (self.events_backup_path, self.events_path):
+            if not path.exists():
+                continue
+            try:
+                with path.open("r", encoding="utf-8", errors="ignore") as handle:
+                    for line in handle:
+                        line = line.strip()
+                        if not line:
+                            continue
+                        try:
+                            parsed = json.loads(line)
+                        except json.JSONDecodeError:
+                            continue
+                        if isinstance(parsed, dict):
+                            records.append(parsed)
+            except OSError:
+                continue
+        return records
+
+    def _has_store_artifacts(self, candidate: Path) -> bool:
+        return any((candidate / name).exists() for name in ("config.json", "state.json", "events.jsonl"))
+
+    def _copy_store_contents(self, source: Path, target: Path) -> None:
+        if source == target:
+            target.mkdir(parents=True, exist_ok=True)
+            return
+        target.mkdir(parents=True, exist_ok=True)
+        for name in (
+            "config.json",
+            "config.backup.json",
+            "state.json",
+            "state.backup.json",
+            "events.jsonl",
+            "events.previous.jsonl",
+        ):
+            source_path = source / name
+            if not source_path.exists():
+                continue
+            try:
+                shutil.copy2(source_path, target / name)
+            except OSError:
+                continue
+        source_updates = source / "updates"
+        target_updates = target / "updates"
+        if source_updates.exists():
+            target_updates.mkdir(parents=True, exist_ok=True)
+            for item in source_updates.iterdir():
+                destination = target_updates / item.name
+                try:
+                    if item.is_dir():
+                        shutil.copytree(item, destination, dirs_exist_ok=True)
+                    else:
+                        shutil.copy2(item, destination)
+                except OSError:
+                    continue
+
+    def _service_is_registered(self) -> bool:
+        if os.getenv("CAINGHIEN_FORCE_SHARED_STORE") == "1":
+            return True
+        try:
+            result = subprocess.run(
+                ["sc", "query", SERVICE_NAME],
+                capture_output=True,
+                text=True,
+                timeout=10,
+                check=False,
+            )
+        except OSError:
+            return False
+        output = ((result.stdout or "") + "\n" + (result.stderr or "")).lower()
+        return result.returncode == 0 and "does not exist as an installed service" not in output and "1060" not in output
