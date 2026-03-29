@@ -78,7 +78,10 @@ function ServiceInstalled: Boolean; forward;
 
 function AppInstallDir: string;
 begin
-  Result := ExpandConstant('{app}');
+  if WizardForm <> nil then
+    Result := WizardDirValue()
+  else
+    Result := ExpandConstant('{localappdata}\Programs\{#MyAppName}');
 end;
 
 function MainAppExePath: string;
