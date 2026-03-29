@@ -8,7 +8,7 @@
       "Sửa lỗi gỡ cài đặt không ổn định khi approval hoặc close-request bị lệch giữa Roaming và ProgramData.",
       "Bộ gỡ cài đặt giờ dọn sạch hơn: xóa cờ tạm, service bundle dùng chung, marker shared mode và hỗ trợ purge cả hai vùng dữ liệu khi cần."
     ],
-    "sha256": "c496815c02d6ef86cb67f279ecefa7d2d0e9f6946cff1a956a296715f29295ee",
-    "size_bytes": 33252479
+    "sha256": "2db458565cdd872e6d1a10da4953971c6b9f5d92df48073eab269fafec8a081b",
+    "size_bytes": 33258000
   }
 }

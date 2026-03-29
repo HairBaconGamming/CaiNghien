@@ -510,18 +510,19 @@ QFrame#LockInfoCard:hover, QFrame#LockForm:hover {
 
 /* Ô nhập mật khẩu - Đậm, sâu và gõ sướng mắt hơn */
 QLineEdit#LockInput {
-    background: rgba(0, 0, 0, 0.25); /* Nền đen mờ tạo cảm giác lõm xuống */
+    background: rgba(0, 0, 0, 0.25);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 14px;
-    padding: 16px 20px;
+    padding: 0px 20px;
+    min-height: 56px;
     color: #ffffff;
-    font-size: 18px;
-    letter-spacing: 6px; /* Giãn cách các dấu chấm mật khẩu rộng ra */
+    font-size: 16px;
+    font-weight: 600;
 }
 QLineEdit#LockInput:focus {
     background: rgba(0, 0, 0, 0.4);
     border: 1px solid #d98946;
-    border-bottom: 3px solid #d98946; /* Điểm nhấn mạnh ở viền dưới khi focus */
+    border-bottom: 3px solid #d98946;
 }
 QLineEdit#LockInput:disabled {
     background: rgba(0, 0, 0, 0.1);
@@ -529,13 +530,14 @@ QLineEdit#LockInput:disabled {
     border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* Nút bấm chính - Gradient nổi bật và bo góc đồng bộ */
+/* Nút bấm chính - Ép height */
 QPushButton#LockPrimaryButton {
     background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 #d98946, stop: 1 #b55d22);
     color: white;
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 14px;
-    padding: 16px 20px;
+    padding: 0px 20px;
+    min-height: 56px;
     font-size: 15px;
     font-weight: 800;
     letter-spacing: 0.5px;

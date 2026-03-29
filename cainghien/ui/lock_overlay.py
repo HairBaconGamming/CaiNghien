@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
+
 class StrictLockWindow(QtWidgets.QWidget):
     password_submitted = QtCore.Signal(str)
 
@@ -35,31 +36,34 @@ class StrictLockWindow(QtWidgets.QWidget):
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QtWidgets.QFrame.Shape.NoFrame)
         scroll.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        scroll.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         scroll.viewport().setObjectName("LockViewport")
         root.addWidget(scroll)
 
         container = QtWidgets.QWidget()
         container.setObjectName("LockContainer")
+        container.setSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Expanding,
+            QtWidgets.QSizePolicy.Policy.Expanding,
+        )
         scroll.setWidget(container)
 
         container_layout = QtWidgets.QVBoxLayout(container)
-        container_layout.setContentsMargins(16, 16, 16, 16)
-        container_layout.setSpacing(0)
-
-        # Dùng addStretch với weight=1 để đẩy form ra giữa màn hình
-        container_layout.addStretch(1)
+        container_layout.setContentsMargins(24, 40, 24, 40)
+        container_layout.setAlignment(
+            QtCore.Qt.AlignmentFlag.AlignHCenter | QtCore.Qt.AlignmentFlag.AlignVCenter
+        )
 
         shell = QtWidgets.QFrame()
         shell.setObjectName("LockShell")
-        shell.setMaximumWidth(860)
-        # SỬA LỖI: Đổi Policy dọc thành Minimum để nó luôn giãn đủ chiều cao cho nội dung bên trong
+        shell.setMaximumWidth(580)
         shell.setSizePolicy(
-            QtWidgets.QSizePolicy.Policy.Preferred,
+            QtWidgets.QSizePolicy.Policy.Expanding,
             QtWidgets.QSizePolicy.Policy.Minimum,
         )
         shell_layout = QtWidgets.QVBoxLayout(shell)
-        shell_layout.setContentsMargins(40, 36, 40, 40)  # Tăng margin cho thoáng giống UI hiện đại
-        shell_layout.setSpacing(18)
+        shell_layout.setContentsMargins(40, 40, 40, 40)
+        shell_layout.setSpacing(20)
 
         badge = QtWidgets.QLabel("CHẾ ĐỘ NGHIÊM KHẮC")
         badge.setObjectName("LockBadge")
@@ -68,7 +72,10 @@ class StrictLockWindow(QtWidgets.QWidget):
         title = QtWidgets.QLabel("Máy tính đang nằm trong khung giờ nghiêm khắc")
         title.setObjectName("LockTitle")
         title.setWordWrap(True)
-        # Đã bỏ setSizePolicy(Maximum) gây bóp chữ
+        title.setSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Preferred,
+            QtWidgets.QSizePolicy.Policy.Minimum,
+        )
         shell_layout.addWidget(title)
 
         accent = QtWidgets.QFrame()
@@ -86,7 +93,7 @@ class StrictLockWindow(QtWidgets.QWidget):
         info_card = QtWidgets.QFrame()
         info_card.setObjectName("LockInfoCard")
         info_layout = QtWidgets.QVBoxLayout(info_card)
-        info_layout.setContentsMargins(22, 20, 22, 20)  # Tăng margin thẻ info
+        info_layout.setContentsMargins(24, 20, 24, 20)
         info_layout.setSpacing(8)
 
         schedule_caption = QtWidgets.QLabel("KHUNG GIỜ ĐANG ÁP DỤNG")
@@ -98,9 +105,7 @@ class StrictLockWindow(QtWidgets.QWidget):
         self.schedule_label.setWordWrap(True)
         info_layout.addWidget(self.schedule_label)
 
-        self.lock_hint_label = QtWidgets.QLabel(
-            "Sai mật khẩu sẽ bị khóa thử lại 60 giây."
-        )
+        self.lock_hint_label = QtWidgets.QLabel("Sai mật khẩu sẽ bị khóa thử lại 60 giây.")
         self.lock_hint_label.setObjectName("LockHint")
         self.lock_hint_label.setWordWrap(True)
         info_layout.addWidget(self.lock_hint_label)
@@ -111,20 +116,26 @@ class StrictLockWindow(QtWidgets.QWidget):
             form = QtWidgets.QFrame()
             form.setObjectName("LockForm")
             form_layout = QtWidgets.QVBoxLayout(form)
-            form_layout.setContentsMargins(24, 24, 24, 24)  # Tăng padding cho form nhập liệu
-            form_layout.setSpacing(12)
+            form_layout.setContentsMargins(24, 24, 24, 24)
+            form_layout.setSpacing(14)
 
             form_title = QtWidgets.QLabel("Nhập mật khẩu để tắt chế độ nghiêm khắc")
             form_title.setObjectName("LockFormTitle")
             form_title.setWordWrap(True)
-            # SỬA LỖI TEXT-CLIP: Bỏ ép cứng setMinimumHeight(fontMetrics) và setSizePolicy
+            form_title.setSizePolicy(
+                QtWidgets.QSizePolicy.Policy.Preferred,
+                QtWidgets.QSizePolicy.Policy.Minimum,
+            )
             form_layout.addWidget(form_title)
 
             self.password_edit = QtWidgets.QLineEdit()
             self.password_edit.setEchoMode(QtWidgets.QLineEdit.EchoMode.Password)
             self.password_edit.setPlaceholderText("Mật khẩu nghiêm khắc")
             self.password_edit.setObjectName("LockInput")
-            # Đã bỏ setMinimumHeight(52), nhường việc tính toán lại cho CSS Padding
+            self.password_edit.setSizePolicy(
+                QtWidgets.QSizePolicy.Policy.Expanding,
+                QtWidgets.QSizePolicy.Policy.Fixed,
+            )
             self.password_edit.returnPressed.connect(self._submit_password)
             form_layout.addWidget(self.password_edit)
 
@@ -132,20 +143,25 @@ class StrictLockWindow(QtWidgets.QWidget):
             self.feedback_label.setObjectName("LockFeedback")
             self.feedback_label.setProperty("error", "false")
             self.feedback_label.setWordWrap(True)
-            # SỬA LỖI TEXT-CLIP: Bỏ ép cứng setMinimumHeight(fontMetrics)
+            self.feedback_label.setSizePolicy(
+                QtWidgets.QSizePolicy.Policy.Preferred,
+                QtWidgets.QSizePolicy.Policy.Minimum,
+            )
             form_layout.addWidget(self.feedback_label)
 
             submit_button = QtWidgets.QPushButton("Tắt chế độ nghiêm khắc")
             submit_button.clicked.connect(self._submit_password)
             submit_button.setObjectName("LockPrimaryButton")
-            # Đã bỏ setMinimumHeight(48), nhường cho CSS Padding
+            submit_button.setSizePolicy(
+                QtWidgets.QSizePolicy.Policy.Expanding,
+                QtWidgets.QSizePolicy.Policy.Fixed,
+            )
             self.submit_button = submit_button
             form_layout.addWidget(submit_button)
 
             shell_layout.addWidget(form)
 
-        container_layout.addWidget(shell, 0, QtCore.Qt.AlignmentFlag.AlignHCenter)
-        container_layout.addStretch(1)
+        container_layout.addWidget(shell)
 
     def refresh_copy(
         self,
@@ -209,9 +225,7 @@ class StrictLockWindow(QtWidgets.QWidget):
             self.feedback_label.setText("")
             self.password_edit.setFocus()
         else:
-            self.feedback_label.setText(
-                f"Chờ {self.penalty_seconds}s trước khi thử lại"
-            )
+            self.feedback_label.setText(f"Chờ {self.penalty_seconds}s trước khi thử lại")
 
     def _submit_password(self) -> None:
         if not self.interactive:
