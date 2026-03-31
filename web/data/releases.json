@@ -1,25 +1,65 @@
 {
   "latest": {
-    "version": "0.3.9",
-    "published_at": "2026-03-29",
+    "version": "0.3.11",
+    "published_at": "2026-03-31",
     "notes": [
-      "Chặn lỗ hổng lịch nghiêm khắc 24/7: app không cho lưu cấu hình có thể tự khóa vĩnh viễn.",
-      "Nếu file cấu hình hoặc pending change cũ chứa lịch nghiêm khắc 24/7, app sẽ tự hạ về chế độ bình thường để mở đường thoát an toàn."
+      "Sửa gốc lỗi service timeout khi khởi động: service host giờ đi đúng lifecycle của Windows Service Manager.",
+      "Service không còn tự can thiệp vào startup người dùng, tăng timeout lệnh start/update và tự chặn pending config nghiêm khắc 24/7."
     ],
     "files": {
       "installer": {
-        "url": "../downloads/0.3.9/CaiNghienFocusGuard-Setup-0.3.9.exe",
-        "size_bytes": 33254048,
-        "sha256": "96e1c17a3b2addec6ecca58d228f30988c6d0f12793794b8a814b2e44f9db92d"
+        "url": "../downloads/0.3.11/CaiNghienFocusGuard-Setup-0.3.11.exe",
+        "size_bytes": 33252667,
+        "sha256": "56cf5b638ea70d96fbb6b7e4e45293590141554814264d314e99abefc1f3ed6f"
       },
       "portable": {
-        "url": "../downloads/0.3.9/CaiNghienFocusGuard-0.3.9.exe",
-        "size_bytes": 47181398,
-        "sha256": "ef7d0aea3a8c1b357544f76ce6e9e0649e569b97c8978cd4fb5870246fb97dee"
+        "url": "../downloads/0.3.11/CaiNghienFocusGuard-0.3.11.exe",
+        "size_bytes": 47183671,
+        "sha256": "d41876bb0efcfae68ca8093bfded1d4778afeed359b0cc6d600cfc3733d79ef7"
       }
     }
   },
   "releases": [
+    {
+      "version": "0.3.11",
+      "published_at": "2026-03-31",
+      "notes": [
+        "Sửa gốc lỗi service timeout khi khởi động: service host giờ đi đúng lifecycle của Windows Service Manager.",
+        "Service không còn tự can thiệp vào startup người dùng, tăng timeout lệnh start/update và tự chặn pending config nghiêm khắc 24/7."
+      ],
+      "files": {
+        "installer": {
+          "url": "../downloads/0.3.11/CaiNghienFocusGuard-Setup-0.3.11.exe",
+          "size_bytes": 33252667,
+          "sha256": "56cf5b638ea70d96fbb6b7e4e45293590141554814264d314e99abefc1f3ed6f"
+        },
+        "portable": {
+          "url": "../downloads/0.3.11/CaiNghienFocusGuard-0.3.11.exe",
+          "size_bytes": 47183671,
+          "sha256": "d41876bb0efcfae68ca8093bfded1d4778afeed359b0cc6d600cfc3733d79ef7"
+        }
+      }
+    },
+    {
+      "version": "0.3.10",
+      "published_at": "2026-03-31",
+      "notes": [
+        "Sửa gốc lỗi service timeout khi khởi động: service host giờ đi đúng lifecycle của Windows Service Manager.",
+        "Service không còn tự can thiệp vào startup người dùng, tăng timeout lệnh start/update và tự chặn pending config nghiêm khắc 24/7."
+      ],
+      "files": {
+        "installer": {
+          "url": "../downloads/0.3.10/CaiNghienFocusGuard-Setup-0.3.10.exe",
+          "size_bytes": 33257602,
+          "sha256": "69c2fa3a77a0b6e7527ba86ebb947aa616c9bc9da9539e76f9b7ef7c1200697f"
+        },
+        "portable": {
+          "url": "../downloads/0.3.10/CaiNghienFocusGuard-0.3.10.exe",
+          "size_bytes": 47182242,
+          "sha256": "6bc2990d6ba40cd0dedb532ed1179a55cfd8f24f1ff32f07522ab93d1f7a6f98"
+        }
+      }
+    },
     {
       "version": "0.3.9",
       "published_at": "2026-03-29",

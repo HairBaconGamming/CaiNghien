@@ -146,7 +146,10 @@ class WindowsServiceManager:
         return Path(__file__).resolve().parents[2]
 
     def shared_bundle_dir(self) -> Path:
-        return ConfigStore.shared_root_path() / "service-bundle"
+        return ConfigStore.shared_container_root_path() / "service-bundle"
+
+    def shared_data_dir(self) -> Path:
+        return ConfigStore.shared_root_path()
 
     def shared_service_path(self) -> Path:
         if getattr(sys, "frozen", False):
@@ -161,7 +164,7 @@ class WindowsServiceManager:
     def query_configuration(self) -> dict[str, str]:
         try:
             result = run_hidden(
-                ["sc", "qc", SERVICE_NAME],
+                ["sc.exe", "qc", SERVICE_NAME],
                 capture_output=True,
                 text=True,
                 timeout=15,
@@ -218,6 +221,9 @@ class WindowsServiceManager:
                 f"Hiện tại: {actual}"
             )
 
+        if not getattr(sys, "frozen", False):
+            return True, "Đang chạy từ source checkout; bỏ qua kiểm tra đường dẫn service tuyệt đối."
+
         expected = str(self.expected_service_path())
         if actual.lower() != expected.lower():
             return False, (
@@ -264,13 +270,13 @@ class WindowsServiceManager:
             return False, "Dịch vụ đang dừng."
         return False, "Dịch vụ đang tắt."
 
-    def install_and_start(self) -> tuple[bool, str]:
+    def install_and_start(self, store: ConfigStore | None = None) -> tuple[bool, str]:
         if not self.is_available():
             return False, "Không tìm thấy file service để cài đặt."
         if not WindowsSessionController.is_admin():
             return False, "Cần chạy app với quyền Admin để cài hoặc sửa dịch vụ."
 
-        prepared, prepare_message = self._prepare_shared_installation()
+        prepared, prepare_message = self._prepare_shared_installation(store=store)
         if not prepared:
             return False, prepare_message
 
@@ -289,7 +295,7 @@ class WindowsServiceManager:
             return False, start_message
         return self.query_status()
 
-    def ensure_running(self) -> tuple[bool, str]:
+    def ensure_running(self, store: ConfigStore | None = None) -> tuple[bool, str]:
         if not self.is_available():
             return False, "Không tìm thấy file service để cài hoặc khởi động."
         if not WindowsSessionController.is_admin():
@@ -300,28 +306,29 @@ class WindowsServiceManager:
         if running and install_ok:
             return True, message
         if running and not install_ok:
-            return self.repair_installation(reason=install_message)
+            return self.repair_installation(reason=install_message, store=store)
         if "chưa được cài" in message.lower():
-            return self.install_and_start()
+            return self.install_and_start(store=store)
         if not install_ok:
-            return self.repair_installation(reason=install_message)
+            return self.repair_installation(reason=install_message, store=store)
 
         ok, start_message = self.start()
         post_running, post_message = self.query_status()
         if ok and post_running:
             return True, post_message
         repair_ok, repair_message = self.repair_installation(
-            reason=start_message or post_message
+            reason=start_message or post_message,
+            store=store,
         )
         if repair_ok:
             return True, repair_message
         return False, start_message or repair_message
 
     def start(self) -> tuple[bool, str]:
-        return self._run_command("--wait", "15", "start", prefer_shared=True)
+        return self._run_command("--wait", "45", "start", prefer_shared=True)
 
     def stop(self) -> tuple[bool, str]:
-        return self._run_command("--wait", "15", "stop", prefer_shared=True)
+        return self._run_command("--wait", "30", "stop", prefer_shared=True)
 
     def remove(self) -> tuple[bool, str]:
         ok, message = self._run_command("remove", prefer_shared=True)
@@ -329,13 +336,18 @@ class WindowsServiceManager:
             ConfigStore.clear_shared_mode()
         return ok, message
 
-    def repair_installation(self, *, reason: str | None = None) -> tuple[bool, str]:
+    def repair_installation(
+        self,
+        *,
+        reason: str | None = None,
+        store: ConfigStore | None = None,
+    ) -> tuple[bool, str]:
         if not self.is_available():
             return False, "Không tìm thấy file service để sửa."
         if not WindowsSessionController.is_admin():
             return False, "Cần quyền Admin để sửa dịch vụ."
 
-        prepared, prepare_message = self._prepare_shared_installation()
+        prepared, prepare_message = self._prepare_shared_installation(store=store)
         if not prepared:
             return False, prepare_message
 
@@ -358,7 +370,7 @@ class WindowsServiceManager:
 
         self.stop()
         self.remove()
-        ok, message = self.install_and_start()
+        ok, message = self.install_and_start(store=store)
         if ok:
             return True, "Dịch vụ đã được sửa và khởi động lại."
         if reason:
@@ -373,7 +385,7 @@ class WindowsServiceManager:
                 self._command_tokens(*args, prefer_shared=prefer_shared),
                 capture_output=True,
                 text=True,
-                timeout=30,
+                timeout=self._command_timeout(*args),
                 check=False,
             )
         except OSError as exc:
@@ -391,11 +403,25 @@ class WindowsServiceManager:
         )
         if result.returncode != 0:
             return False, output
+        if "timely fashion" in normalized or "1053" in normalized:
+            return (
+                False,
+                "Dịch vụ không phản hồi kịp khi khởi động. Hãy sửa hoặc cài lại dịch vụ "
+                "để đồng bộ đúng service host mới nhất.",
+            )
         if any(marker in normalized for marker in known_error_markers):
             return False, output
         if normalized.startswith("error ") or "\nerror " in normalized:
             return False, output
         return True, output
+
+    def _command_timeout(self, *args: str) -> int:
+        verbs = {arg.lower() for arg in args}
+        if "start" in verbs or "restart" in verbs:
+            return 90
+        if "install" in verbs or "update" in verbs:
+            return 60
+        return 30
 
     def _command_tokens(self, *args: str, prefer_shared: bool = False) -> list[str]:
         if prefer_shared and getattr(sys, "frozen", False):
@@ -404,7 +430,11 @@ class WindowsServiceManager:
                 return [str(shared_executable), *args]
         return service_launch_tokens(*args)
 
-    def _prepare_shared_installation(self) -> tuple[bool, str]:
+    def _prepare_shared_installation(
+        self,
+        *,
+        store: ConfigStore | None = None,
+    ) -> tuple[bool, str]:
         if not getattr(sys, "frozen", False):
             return True, str(self.current_service_source_path())
 
@@ -414,7 +444,13 @@ class WindowsServiceManager:
 
         target_bundle = self.shared_bundle_dir()
         if source_bundle == target_bundle:
-            ConfigStore.mark_shared_mode()
+            access_ok, access_message = self._harden_service_storage()
+            if not access_ok:
+                return False, access_message
+            if store is not None:
+                sync_ok, sync_message = self.sync_service_store(store)
+                if not sync_ok:
+                    return False, sync_message
             return True, str(self.shared_service_path())
 
         staging_bundle = target_bundle.with_name(target_bundle.name + ".staging")
@@ -439,7 +475,13 @@ class WindowsServiceManager:
                 target_bundle.replace(backup_bundle)
             staging_bundle.replace(target_bundle)
             shutil.rmtree(backup_bundle, ignore_errors=True)
-            ConfigStore.mark_shared_mode()
+            access_ok, access_message = self._harden_service_storage()
+            if not access_ok:
+                return False, access_message
+            if store is not None:
+                sync_ok, sync_message = self.sync_service_store(store)
+                if not sync_ok:
+                    return False, sync_message
             return True, str(self.shared_service_path())
         except OSError as exc:
             shutil.rmtree(staging_bundle, ignore_errors=True)
@@ -450,10 +492,91 @@ class WindowsServiceManager:
                     pass
             return False, f"Không thể đồng bộ bundle dịch vụ dùng chung: {exc}"
 
+    def sync_service_store(self, store: ConfigStore) -> tuple[bool, str]:
+        access_ok, access_message = self._harden_service_storage(bundle_only=False)
+        if not access_ok:
+            return False, access_message
+        try:
+            target = store.sync_to_shared_root()
+        except OSError as exc:
+            return False, f"KhÃ´ng thá»ƒ Ä‘á»“ng bá»™ service-data: {exc}"
+        return True, str(target)
+
+        shared_root = ConfigStore.shared_root_path()
+        try:
+            shared_root.mkdir(parents=True, exist_ok=True)
+        except OSError as exc:
+            return False, f"Không thể tạo thư mục dùng chung cho service: {exc}"
+
+        try:
+            result = run_hidden(
+                [
+                    "icacls.exe",
+                    str(shared_root),
+                    "/grant",
+                    "*S-1-5-32-545:(OI)(CI)M",
+                    "/T",
+                    "/C",
+                ],
+                capture_output=True,
+                text=True,
+                timeout=45,
+                check=False,
+            )
+        except OSError as exc:
+            return False, f"Không thể cấp quyền cho kho service dùng chung: {exc}"
+
+        output = ((result.stdout or "") + "\n" + (result.stderr or "")).strip()
+        if result.returncode != 0:
+            return False, output or "Không thể cấp quyền ghi cho thư mục dùng chung của service."
+        return True, output or "Đã cấp quyền cho thư mục dùng chung của service."
+
+    def _harden_service_storage(self, *, bundle_only: bool = False) -> tuple[bool, str]:
+        bundle_ok, bundle_message = self._lock_down_directory(self.shared_bundle_dir())
+        if not bundle_ok:
+            return False, bundle_message
+        if bundle_only:
+            return True, bundle_message
+        data_ok, data_message = self._lock_down_directory(self.shared_data_dir())
+        if not data_ok:
+            return False, data_message
+        return True, data_message
+
+    def _lock_down_directory(self, target: Path) -> tuple[bool, str]:
+        try:
+            target.mkdir(parents=True, exist_ok=True)
+        except OSError as exc:
+            return False, f"KhÃ´ng thá»ƒ táº¡o thÆ° má»¥c báº£o vá»‡ cho service: {exc}"
+
+        try:
+            result = run_hidden(
+                [
+                    "icacls.exe",
+                    str(target),
+                    "/inheritance:r",
+                    "/grant:r",
+                    "*S-1-5-18:(OI)(CI)F",
+                    "*S-1-5-32-544:(OI)(CI)F",
+                    "/T",
+                    "/C",
+                ],
+                capture_output=True,
+                text=True,
+                timeout=45,
+                check=False,
+            )
+        except OSError as exc:
+            return False, f"KhÃ´ng thá»ƒ siáº¿t ACL cho service storage: {exc}"
+
+        output = ((result.stdout or "") + "\n" + (result.stderr or "")).strip()
+        if result.returncode != 0:
+            return False, output or "KhÃ´ng thá»ƒ siáº¿t ACL cho service storage."
+        return True, output or f"ÄÃ£ siáº¿t ACL an toÃ n cho {target}."
+
     def _query_status_with_sc(self) -> tuple[bool, str]:
         try:
             result = run_hidden(
-                ["sc", "query", SERVICE_NAME],
+                ["sc.exe", "query", SERVICE_NAME],
                 capture_output=True,
                 text=True,
                 timeout=15,

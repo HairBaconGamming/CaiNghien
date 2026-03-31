@@ -1023,6 +1023,11 @@ def main(argv: list[str] | None = None) -> int:
     if uninstall_guard:
         return run_uninstall_guard(controller)
 
+    if background:
+        # On login/startup, enforce strict mode before the full management window finishes building.
+        controller.start()
+        app.processEvents()
+
     window = MainWindow(controller)
     show_window = not background
     if show_window and controller.requires_strict_access_password():
@@ -1031,7 +1036,8 @@ def main(argv: list[str] | None = None) -> int:
             reevaluate=False,
         )
 
-    controller.start()
+    if not background:
+        controller.start()
     close_watcher = install_external_close_watcher(app, controller, window)
     app.setProperty("installer_close_watcher", close_watcher)
     if show_window:

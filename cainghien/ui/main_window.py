@@ -1016,6 +1016,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.allowed_edit.setPlainText("\n".join(config.allowed_domains))
         self.password_edit.clear()
         self.password_confirm_edit.clear()
+        self._sync_service_store_if_possible()
         self.start_with_windows_checkbox.setChecked(
             config.start_with_windows or self.startup_manager.is_enabled()
         )
@@ -1611,12 +1612,29 @@ class MainWindow(QtWidgets.QMainWindow):
             "background: rgba(129, 199, 132, 0.2); color: #81c784; border-color: #81c784;"
         )
         QtCore.QTimer.singleShot(2200, self._reset_save_button)
+        self._sync_service_store_if_possible()
         if recovery_code:
             self._show_recovery_code(recovery_code, reason="Bạn vừa đổi mật khẩu nghiêm khắc.")
 
     def _reset_save_button(self) -> None:
         self.save_button.setText("Lưu thiết lập")
         self.save_button.setStyleSheet("")
+
+    def _sync_service_store_if_possible(self) -> None:
+        service = self.service_manager.query_configuration()
+        if service.get("installed") != "CÃ³":
+            return
+        if not WindowsSessionController.is_admin():
+            self._append_log(
+                "Dá»‹ch vá»¥ Ä‘ang dÃ¹ng service-data Ä‘Ã£ sync trÆ°á»›c Ä‘Ã³. "
+                "Muá»‘n Ã¡p cáº¥u hÃ¬nh má»›i cho service, hÃ£y má»Ÿ láº¡i app báº±ng Admin."
+            )
+            return
+        ok, message = self.service_manager.sync_service_store(self.controller.store)
+        if ok:
+            self._append_log(f"ÄÃ£ Ä‘á»“ng bá»™ service-data: {message}")
+        else:
+            self._show_warning("KhÃ´ng Ä‘á»“ng bá»™ Ä‘Æ°á»£c service-data", message)
 
     def toggle_protection(self) -> None:
         current = self.controller.config
@@ -1813,7 +1831,7 @@ class MainWindow(QtWidgets.QMainWindow):
         QtWidgets.QApplication.quit()
 
     def ensure_service_running(self) -> None:
-        ok, message = self.service_manager.ensure_running()
+        ok, message = self.service_manager.ensure_running(store=self.controller.store)
         if not ok:
             self.refresh_helper_panel()
             if "Admin" in message:
@@ -1829,6 +1847,10 @@ class MainWindow(QtWidgets.QMainWindow):
                     return
             self._show_warning("Không thể cài hoặc mở dịch vụ", message)
             return
+        self._append_log("Dá»‹ch vá»¥ Ä‘Ã£ Ä‘Æ°á»£c cÃ i hoáº·c khá»Ÿi Ä‘á»™ng, vÃ  service-data Ä‘Ã£ Ä‘Æ°á»£c Ä‘á»“ng bá»™ an toÃ n.")
+        self.controller.evaluate(force=True)
+        self.refresh_helper_panel()
+        return
         if not self.controller.store.shared_mode:
             try:
                 shared_root = self.controller.store.activate_shared_root()

@@ -21,7 +21,6 @@ def _root_candidates(store: ConfigStore) -> list[Path]:
     for root in (
         store.root_dir,
         ConfigStore.user_root_path(),
-        ConfigStore.shared_root_path(),
     ):
         key = str(root).lower()
         if key in seen:

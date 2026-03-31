@@ -104,8 +104,8 @@ def main() -> int:
             break
     if not existing_notes:
         existing_notes = [
-            "Chặn lỗ hổng lịch nghiêm khắc 24/7: app không cho lưu cấu hình có thể tự khóa vĩnh viễn.",
-            "Nếu file cấu hình hoặc pending change cũ chứa lịch nghiêm khắc 24/7, app sẽ tự hạ về chế độ bình thường để mở đường thoát an toàn.",
+            "Sửa gốc lỗi service timeout khi khởi động: service host giờ đi đúng lifecycle của Windows Service Manager.",
+            "Service không còn tự can thiệp vào startup người dùng, tăng timeout lệnh start/update và tự chặn pending config nghiêm khắc 24/7.",
         ]
 
     release = {

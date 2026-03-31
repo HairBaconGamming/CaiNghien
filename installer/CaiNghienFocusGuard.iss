@@ -1,5 +1,5 @@
 #define MyAppName "CaiNghien Focus Guard"
-#define MyAppVersion "0.3.9"
+#define MyAppVersion "0.3.11"
 #define MyAppPublisher "CaiNghien Project"
 #define MyAppExeName "CaiNghienFocusGuard.exe"
 #define MyServiceExeName "CaiNghienFocusGuardService.exe"
@@ -96,10 +96,7 @@ end;
 
 function AppDataRoot: string;
 begin
-  if FileExists(SharedModeMarkerPath()) or ServiceInstalled() then
-    Result := SharedAppDataRoot()
-  else
-    Result := UserAppDataRoot();
+  Result := UserAppDataRoot();
 end;
 
 function UserAppDataRoot: string;
@@ -109,17 +106,17 @@ end;
 
 function SharedAppDataRoot: string;
 begin
-  Result := ExpandConstant('{commonappdata}\CaiNghienFocusGuard');
+  Result := ExpandConstant('{commonappdata}\CaiNghienFocusGuard\service-data');
 end;
 
 function SharedModeMarkerPath: string;
 begin
-  Result := SharedAppDataRoot() + '\service-mode.json';
+  Result := ExpandConstant('{commonappdata}\CaiNghienFocusGuard\service-mode.json');
 end;
 
 function SharedServiceBundleDir(Param: string): string;
 begin
-  Result := SharedAppDataRoot() + '\service-bundle';
+  Result := ExpandConstant('{commonappdata}\CaiNghienFocusGuard\service-bundle');
 end;
 
 function SharedServiceExePath: string;
@@ -245,15 +242,13 @@ end;
 
 function CloseWasDenied: Boolean;
 begin
-  Result := FileExists(CloseDeniedPath()) or FileExists(UserCloseDeniedPath()) or FileExists(SharedCloseDeniedPath());
+  Result := FileExists(CloseDeniedPath()) or FileExists(UserCloseDeniedPath());
 end;
 
 procedure WriteCloseRequest;
 begin
   ForceDirectories(UserAppDataRoot());
-  ForceDirectories(SharedAppDataRoot());
   SaveStringToFile(UserCloseRequestPath(), GetDateTimeString('yyyy-mm-dd hh:nn:ss', #0, #0), False);
-  SaveStringToFile(SharedCloseRequestPath(), GetDateTimeString('yyyy-mm-dd hh:nn:ss', #0, #0), False);
 end;
 
 function PreserveInstalledFile(const FileName: string): Boolean;
@@ -518,8 +513,6 @@ begin
   if not FileExists(ApprovalPath) then
     ApprovalPath := UserApprovalFilePath();
   if not FileExists(ApprovalPath) then
-    ApprovalPath := SharedApprovalFilePath();
-  if not FileExists(ApprovalPath) then
   begin
     Result := False;
     exit;
@@ -542,8 +535,6 @@ begin
   ApprovalPath := ApprovalFilePath();
   if not FileExists(ApprovalPath) then
     ApprovalPath := UserApprovalFilePath();
-  if not FileExists(ApprovalPath) then
-    ApprovalPath := SharedApprovalFilePath();
   PurgeValue := GetIniString('approval', 'purge_data', '0', ApprovalPath);
   PurgeLocalData := PurgeValue = '1';
   ClearApprovalFile();
@@ -610,12 +601,38 @@ begin
   Result := IsAdmin() and ServiceInstalledBeforeInstall;
 end;
 
+procedure GrantSharedRootAccess;
+var
+  ResultCode: Integer;
+begin
+  ForceDirectories(SharedAppDataRoot());
+  ForceDirectories(SharedServiceBundleDir(''));
+  Exec(
+    ExpandConstant('{cmd}'),
+    '/C icacls "' + SharedAppDataRoot() + '" /inheritance:r /grant:r *S-1-5-18:(OI)(CI)F *S-1-5-32-544:(OI)(CI)F /T /C >nul 2>nul',
+    '',
+    SW_HIDE,
+    ewWaitUntilTerminated,
+    ResultCode
+  );
+  Exec(
+    ExpandConstant('{cmd}'),
+    '/C icacls "' + SharedServiceBundleDir('') + '" /inheritance:r /grant:r *S-1-5-18:(OI)(CI)F *S-1-5-32-544:(OI)(CI)F /T /C >nul 2>nul',
+    '',
+    SW_HIDE,
+    ewWaitUntilTerminated,
+    ResultCode
+  );
+end;
+
 procedure RunServiceMaintenance;
 var
   ResultCode: Integer;
 begin
   if not ShouldUpdateInstalledService() then
     exit;
+
+  GrantSharedRootAccess();
 
   if RepairMode then
   begin
@@ -657,7 +674,7 @@ begin
   end;
   Exec(
     SharedServiceExePath(),
-    '--wait 15 start',
+    '--wait 45 start',
     '',
     SW_HIDE,
     ewWaitUntilTerminated,

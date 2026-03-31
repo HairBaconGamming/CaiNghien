@@ -36,26 +36,34 @@ class ConfigStore:
         return Path(os.getenv("APPDATA", Path.home() / "AppData" / "Roaming")) / APP_FOLDER_NAME
 
     @classmethod
-    def shared_root_path(cls) -> Path:
+    def shared_container_root_path(cls) -> Path:
         return Path(os.getenv("PROGRAMDATA", r"C:\ProgramData")) / APP_FOLDER_NAME
 
     @classmethod
-    def shared_mode_marker_path(cls) -> Path:
-        return cls.shared_root_path() / SHARED_MODE_MARKER_NAME
+    def shared_root_path(cls) -> Path:
+        return cls.shared_container_root_path() / "service-data"
 
     @classmethod
-    def mark_shared_mode(cls) -> None:
+    def shared_mode_marker_path(cls) -> Path:
+        return cls.shared_container_root_path() / SHARED_MODE_MARKER_NAME
+
+    @classmethod
+    def mark_shared_mode(cls) -> bool:
         marker = cls.shared_mode_marker_path()
-        marker.parent.mkdir(parents=True, exist_ok=True)
-        payload = {
-            "enabled": True,
-            "saved_at": now_iso(),
-            "schema": SCHEMA_VERSION,
-        }
-        marker.write_text(
-            json.dumps(payload, ensure_ascii=False, indent=2),
-            encoding="utf-8",
-        )
+        try:
+            marker.parent.mkdir(parents=True, exist_ok=True)
+            payload = {
+                "enabled": True,
+                "saved_at": now_iso(),
+                "schema": SCHEMA_VERSION,
+            }
+            marker.write_text(
+                json.dumps(payload, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+            return True
+        except OSError:
+            return False
 
     @classmethod
     def clear_shared_mode(cls) -> None:
@@ -105,6 +113,7 @@ class ConfigStore:
         meta: dict[str, Any] | None = None,
         at: datetime | None = None,
     ) -> None:
+        self._ensure_writable_root()
         self._ensure_root()
         if self.events_path.exists() and self.events_path.stat().st_size >= EVENT_LOG_LIMIT_BYTES:
             try:
@@ -280,17 +289,24 @@ class ConfigStore:
         return backup_dir
 
     def activate_shared_root(self) -> Path:
+        return self.sync_to_shared_root()
+
+    def sync_to_shared_root(self) -> Path:
         target = self._shared_root
         self._copy_store_contents(self.root_dir, target)
+        if not self._can_write_root(target):
+            raise PermissionError(
+                f"Không có quyền ghi vào kho dùng chung: {target}"
+            )
         self.mark_shared_mode()
-        self._set_root(target)
         return target
 
-    def activate_user_root(self) -> Path:
+    def activate_user_root(self, *, clear_shared_marker: bool = True) -> Path:
         target = self._user_root
         if self.root_dir != target:
             self._copy_store_contents(self.root_dir, target)
-        self.clear_shared_mode()
+        if clear_shared_marker:
+            self.clear_shared_mode()
         self._set_root(target)
         return target
 
@@ -299,19 +315,21 @@ class ConfigStore:
         shared_candidate = self._shared_root
         user_has_data = self._has_store_artifacts(roaming_candidate)
         shared_has_data = self._has_store_artifacts(shared_candidate)
-        service_registered = self._service_is_registered()
-
-        if self.shared_mode_marker_path().exists() or service_registered:
-            if user_has_data and not shared_has_data:
-                self._copy_store_contents(roaming_candidate, shared_candidate)
-            shared_candidate.mkdir(parents=True, exist_ok=True)
-            self.mark_shared_mode()
-            return shared_candidate
+        legacy_shared_candidate = self.shared_container_root_path()
+        legacy_shared_has_data = (
+            legacy_shared_candidate != shared_candidate
+            and self._has_store_artifacts(legacy_shared_candidate)
+        )
         if user_has_data:
             roaming_candidate.mkdir(parents=True, exist_ok=True)
             return roaming_candidate
         if shared_has_data:
             self._copy_store_contents(shared_candidate, roaming_candidate)
+            self.clear_shared_mode()
+            roaming_candidate.mkdir(parents=True, exist_ok=True)
+            return roaming_candidate
+        if legacy_shared_has_data:
+            self._copy_store_contents(legacy_shared_candidate, roaming_candidate)
             self.clear_shared_mode()
             roaming_candidate.mkdir(parents=True, exist_ok=True)
             return roaming_candidate
@@ -332,6 +350,35 @@ class ConfigStore:
         self.root_dir.mkdir(parents=True, exist_ok=True)
         self.updates_dir.mkdir(parents=True, exist_ok=True)
         self.cleanup_backups_dir.mkdir(parents=True, exist_ok=True)
+
+    def _can_write_root(self, candidate: Path) -> bool:
+        try:
+            candidate.mkdir(parents=True, exist_ok=True)
+        except OSError:
+            return False
+
+        probe = candidate / ".write-probe.tmp"
+        try:
+            probe.write_text(now_iso(), encoding="utf-8")
+            return True
+        except OSError:
+            return False
+        finally:
+            try:
+                probe.unlink()
+            except OSError:
+                pass
+
+    def _ensure_writable_root(self) -> None:
+        if self._can_write_root(self.root_dir):
+            return
+        raise PermissionError(f"KhÃ´ng cÃ³ quyá»n ghi vÃ o thÆ° má»¥c dá»¯ liá»‡u: {self.root_dir}")
+        if self.root_dir == self._shared_root:
+            fallback = self._user_root
+            self._copy_store_contents(self._shared_root, fallback)
+            self._set_root(fallback)
+            return
+        raise PermissionError(f"Không có quyền ghi vào thư mục dữ liệu: {self.root_dir}")
 
     def _set_root(self, root_dir: Path) -> None:
         self.root_dir = root_dir
@@ -413,6 +460,9 @@ class ConfigStore:
         backup_path: Path,
         payload: dict[str, Any],
     ) -> None:
+        self._ensure_writable_root()
+        path = self.root_dir / path.name
+        backup_path = self.root_dir / backup_path.name
         self._ensure_root()
         wrapper = {
             "schema": SCHEMA_VERSION,
@@ -572,7 +622,7 @@ class ConfigStore:
             return True
         try:
             result = run_hidden(
-                ["sc", "query", SERVICE_NAME],
+                ["sc.exe", "query", SERVICE_NAME],
                 capture_output=True,
                 text=True,
                 timeout=10,

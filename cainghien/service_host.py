@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import sys
+import traceback
 from datetime import datetime
 
 import win32event
@@ -12,7 +14,7 @@ except Exception:  # pragma: no cover
     servicemanager = None
 
 from .config import ConfigStore
-from .models import AppConfig, StudyProfile, StudySessionState
+from .models import AppConfig, RuntimeState, StudyProfile, StudySessionState
 from .services.hosts_blocker import HostsBlocker
 from .services.runtime_rules import (
     blocked_domains_for_config,
@@ -22,14 +24,14 @@ from .services.runtime_rules import (
     sanitize_runtime_state,
     study_window_from_session,
 )
-from .services.windows_guard import SERVICE_DISPLAY_NAME, SERVICE_NAME, WindowsStartupManager
+from .services.windows_guard import SERVICE_DISPLAY_NAME, SERVICE_NAME
 
 
 class FocusGuardService(win32serviceutil.ServiceFramework):
     _svc_name_ = SERVICE_NAME
     _svc_display_name_ = SERVICE_DISPLAY_NAME
     _svc_description_ = (
-        "Áp dụng chặn hosts, heartbeat và cấu hình trì hoãn cho CaiNghiện Focus Guard."
+        "Ap dung chan hosts, heartbeat va cau hinh tri hoan cho CaiNghien Focus Guard."
     )
 
     def __init__(self, args) -> None:
@@ -37,9 +39,9 @@ class FocusGuardService(win32serviceutil.ServiceFramework):
         self._stop_event = win32event.CreateEvent(None, 0, 0, None)
         self._store = ConfigStore(root_dir=ConfigStore.shared_root_path())
         self._hosts = HostsBlocker()
-        self._startup = WindowsStartupManager()
         self._hosts_applied = False
         self._last_signature = ""
+        self._last_runtime_error_key: str | None = None
 
     def SvcStop(self) -> None:  # noqa: N802
         self.ReportServiceStatus(win32service.SERVICE_STOP_PENDING)
@@ -47,19 +49,49 @@ class FocusGuardService(win32serviceutil.ServiceFramework):
 
     def SvcDoRun(self) -> None:  # noqa: N802
         if servicemanager is not None:
-            servicemanager.LogInfoMsg("CaiNghiện Focus Guard Service đang chạy.")
+            servicemanager.LogInfoMsg("CaiNghien Focus Guard Service dang chay.")
         self.main()
 
     def main(self) -> None:
+        self._run_once_safely()
         while True:
             wait_result = win32event.WaitForSingleObject(self._stop_event, 10_000)
             if wait_result == win32event.WAIT_OBJECT_0:
                 break
+            self._run_once_safely()
+
+    def _run_once_safely(self) -> None:
+        try:
             self.run_once()
+        except Exception as exc:  # pragma: no cover - defensive runtime guard
+            detail = traceback.format_exc(limit=8)
+            now = datetime.now()
+            error_key = f"{type(exc).__name__}:{exc}"
+            if self._last_runtime_error_key != error_key:
+                self._store.append_event(
+                    "service_runtime_failed",
+                    f"Service gap loi khi dang chay: {exc}",
+                    level="error",
+                    at=now,
+                    meta={"traceback": detail},
+                )
+                self._last_runtime_error_key = error_key
+            if servicemanager is not None:
+                servicemanager.LogErrorMsg(
+                    "CaiNghien Focus Guard Service gap loi vong lap:\n" + detail
+                )
 
     def run_once(self) -> None:
         now = datetime.now()
         config = self._store.load()
+        config, guarded_message = self._guard_against_continuous_strict_lock(
+            config,
+            now=now,
+            source="service_runtime",
+        )
+        if guarded_message is not None:
+            self._store.save(config)
+
         state = self._store.load_state()
         state, cleanup_messages = sanitize_runtime_state(state, now)
         for message in cleanup_messages:
@@ -74,27 +106,21 @@ class FocusGuardService(win32serviceutil.ServiceFramework):
         pending = pending_change_due(state, now)
         if pending is not None:
             config = AppConfig.from_dict(pending.payload)
+            config, guarded_message = self._guard_against_continuous_strict_lock(
+                config,
+                now=now,
+                source="service_pending",
+            )
             self._store.save(config)
             state.pending_config = None
             self._store.append_event(
                 "service_pending_applied",
-                "Service đã áp dụng thay đổi trì hoãn.",
+                guarded_message or "Service da ap dung thay doi tri hoan.",
                 at=now,
             )
 
         state.service_last_seen = now.isoformat(timespec="seconds")
         state.service_enabled = config.service_enabled
-
-        if config.start_with_windows and not self._startup.is_enabled():
-            try:
-                self._startup.set_enabled(True)
-            except OSError:
-                self._store.append_event(
-                    "service_startup_fix_failed",
-                    "Service không thể khôi phục startup entry.",
-                    level="warning",
-                    at=now,
-                )
 
         stale_ui = self._is_ui_stale(state, now)
         active_window = resolve_active_window(config, state, now)
@@ -131,7 +157,9 @@ class FocusGuardService(win32serviceutil.ServiceFramework):
             self._last_signature = ""
 
         if active_window and active_window.strict and not config.has_password:
-            state.safe_mode_reason = "Service phát hiện strict đang bật nhưng không có mật khẩu hợp lệ."
+            state.safe_mode_reason = (
+                "Service phat hien strict dang bat nhung khong co mat khau hop le."
+            )
             if state.last_integrity_issue != "strict_without_password":
                 state.bump_counter(now.date(), "tamper_events", 1)
                 self._store.append_event(
@@ -141,7 +169,7 @@ class FocusGuardService(win32serviceutil.ServiceFramework):
                     at=now,
                 )
             state.last_integrity_issue = "strict_without_password"
-        elif state.safe_mode_reason and "Service phát hiện strict" in state.safe_mode_reason:
+        elif state.safe_mode_reason and "Service phat hien strict" in state.safe_mode_reason:
             state.safe_mode_reason = None
             if state.last_integrity_issue == "strict_without_password":
                 state.last_integrity_issue = None
@@ -151,7 +179,7 @@ class FocusGuardService(win32serviceutil.ServiceFramework):
                 if state.last_integrity_issue != "ui_heartbeat_missing":
                     self._store.append_event(
                         "service_ui_heartbeat_missing",
-                        "Service không thấy heartbeat UI trong khi strict đang hoạt động.",
+                        "Service khong thay heartbeat UI trong khi strict dang hoat dong.",
                         level="warning",
                         at=now,
                     )
@@ -161,8 +189,34 @@ class FocusGuardService(win32serviceutil.ServiceFramework):
                 state.last_integrity_issue = None
 
         self._store.save_state(state)
+        self._last_runtime_error_key = None
 
-    def _is_ui_stale(self, state, now: datetime) -> bool:
+    def _guard_against_continuous_strict_lock(
+        self,
+        config: AppConfig,
+        *,
+        now: datetime,
+        source: str,
+    ) -> tuple[AppConfig, str | None]:
+        if not config.creates_continuous_strict_lock():
+            return config, None
+
+        updated = AppConfig.from_dict(config.to_dict())
+        updated.mode = "normal"
+        message = (
+            "Service phat hien lich nghiem khac 24/7 va da ha ve che do binh thuong "
+            "de tranh tu khoa vinh vien."
+        )
+        self._store.append_event(
+            "service_strict_schedule_guarded",
+            message,
+            level="warning",
+            at=now,
+            meta={"source": source},
+        )
+        return updated, message
+
+    def _is_ui_stale(self, state: RuntimeState, now: datetime) -> bool:
         try:
             return (
                 state.ui_last_seen is None
@@ -175,7 +229,7 @@ class FocusGuardService(win32serviceutil.ServiceFramework):
         self,
         *,
         config: AppConfig,
-        state,
+        state: RuntimeState,
         now: datetime,
         active_window,
         stale_ui: bool,
@@ -195,21 +249,30 @@ class FocusGuardService(win32serviceutil.ServiceFramework):
                     state,
                     now,
                     completed=False,
-                    reason="Bị ngắt bởi strict mode",
+                    reason="Bi ngat boi strict mode",
                 )
 
-        scheduled_occurrence = resolve_active_study_occurrence(config, now) if config.protection_enabled else None
+        scheduled_occurrence = (
+            resolve_active_study_occurrence(config, now)
+            if config.protection_enabled
+            else None
+        )
         if (
             scheduled_occurrence is not None
             and active_window is not None
             and active_window.strict
         ):
-            conflict_key = f"{scheduled_occurrence.profile_id}:{scheduled_occurrence.start.isoformat()}"
+            conflict_key = (
+                f"{scheduled_occurrence.profile_id}:{scheduled_occurrence.start.isoformat()}"
+            )
             if state.last_study_conflict_key != conflict_key:
                 state.last_study_conflict_key = conflict_key
                 self._store.append_event(
                     "study_conflict_strict",
-                    f"Phiên học “{scheduled_occurrence.title}” không thể bắt đầu vì strict mode đang hoạt động.",
+                    (
+                        f"Phien hoc '{scheduled_occurrence.title}' khong the bat dau "
+                        "vi strict mode dang hoat dong."
+                    ),
                     level="warning",
                     at=now,
                     meta={"profile_name": scheduled_occurrence.title},
@@ -217,8 +280,11 @@ class FocusGuardService(win32serviceutil.ServiceFramework):
         elif state.last_study_conflict_key:
             state.last_study_conflict_key = None
 
-        if stale_ui and state.study_session is None and scheduled_occurrence is not None and (
-            active_window is None or not active_window.strict
+        if (
+            stale_ui
+            and state.study_session is None
+            and scheduled_occurrence is not None
+            and (active_window is None or not active_window.strict)
         ):
             profile = config.study_profile(scheduled_occurrence.profile_id)
             state.study_session = StudySessionState(
@@ -242,7 +308,7 @@ class FocusGuardService(win32serviceutil.ServiceFramework):
             )
             self._store.append_event(
                 "study_session_started",
-                f"Đã bắt đầu phiên học “{profile.name}”.",
+                f"Da bat dau phien hoc '{profile.name}'.",
                 at=now,
                 meta={
                     "profile_id": profile.id,
@@ -255,7 +321,7 @@ class FocusGuardService(win32serviceutil.ServiceFramework):
                 state.bump_counter(now.date(), "study_site_blocks", 1)
                 self._store.append_event(
                     "study_site_blocked",
-                    f"Đang siết web xao nhãng {domain} trong phiên “{profile.name}”.",
+                    f"Dang siet web xao nhang {domain} trong phien '{profile.name}'.",
                     at=now,
                     meta={"source": domain, "profile_name": profile.name},
                 )
@@ -274,7 +340,7 @@ class FocusGuardService(win32serviceutil.ServiceFramework):
 
     def _finish_service_study_session(
         self,
-        state,
+        state: RuntimeState,
         now: datetime,
         *,
         completed: bool,
@@ -286,12 +352,12 @@ class FocusGuardService(win32serviceutil.ServiceFramework):
         if completed:
             state.bump_counter(now.date(), "study_sessions_completed", 1)
             kind = "study_session_completed"
-            message = f"Đã hoàn thành phiên học “{session.profile_name}”."
+            message = f"Da hoan thanh phien hoc '{session.profile_name}'."
             level = "info"
         else:
             state.bump_counter(now.date(), "study_sessions_aborted", 1)
             kind = "study_session_aborted"
-            message = f"Đã dừng sớm phiên học “{session.profile_name}”."
+            message = f"Da dung som phien hoc '{session.profile_name}'."
             level = "warning"
         state.study_session = None
         state.last_study_counted_minute = None
@@ -310,5 +376,13 @@ class FocusGuardService(win32serviceutil.ServiceFramework):
 
 
 def main() -> int:
+    if len(sys.argv) == 1:
+        if servicemanager is None:
+            raise RuntimeError("Khong tai duoc servicemanager de host Windows service.")
+        servicemanager.Initialize()
+        servicemanager.PrepareToHostSingle(FocusGuardService)
+        servicemanager.StartServiceCtrlDispatcher()
+        return 0
+
     win32serviceutil.HandleCommandLine(FocusGuardService)
     return 0
