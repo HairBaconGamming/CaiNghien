@@ -104,8 +104,8 @@ def main() -> int:
             break
     if not existing_notes:
         existing_notes = [
-            "Sửa gốc lỗi service timeout khi khởi động: service host giờ đi đúng lifecycle của Windows Service Manager.",
-            "Service không còn tự can thiệp vào startup người dùng, tăng timeout lệnh start/update và tự chặn pending config nghiêm khắc 24/7.",
+            "Khóa cứng việc đổi lịch và lưu cấu hình khi đang ở khung giờ nghiêm khắc để không còn đường vòng.",
+            "Lock screen không còn tự reset ô mật khẩu khi enforcement refresh, đồng thời thêm nút Hiện/Ẩn để kiểm tra nội dung đang gõ.",
         ]
 
     release = {

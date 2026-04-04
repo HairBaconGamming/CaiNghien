@@ -530,6 +530,30 @@ QLineEdit#LockInput:disabled {
     border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
+QToolButton#LockInputToggle {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    min-width: 76px;
+    min-height: 56px;
+    padding: 0px 14px;
+    color: #f6e6d4;
+    font-size: 13px;
+    font-weight: 700;
+}
+QToolButton#LockInputToggle:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+QToolButton#LockInputToggle:checked {
+    background: rgba(217, 137, 70, 0.20);
+    border: 1px solid rgba(217, 137, 70, 0.55);
+    color: #fff5ea;
+}
+QToolButton#LockInputToggle:disabled {
+    color: rgba(255, 247, 237, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
 /* Nút bấm chính - Ép height */
 QPushButton#LockPrimaryButton {
     background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 #d98946, stop: 1 #b55d22);

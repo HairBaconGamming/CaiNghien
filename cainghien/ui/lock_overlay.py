@@ -119,14 +119,19 @@ class StrictLockWindow(QtWidgets.QWidget):
             form_layout.setContentsMargins(24, 24, 24, 24)
             form_layout.setSpacing(14)
 
-            form_title = QtWidgets.QLabel("Nhập mật khẩu để tắt chế độ nghiêm khắc")
-            form_title.setObjectName("LockFormTitle")
-            form_title.setWordWrap(True)
-            form_title.setSizePolicy(
+            self.form_title_label = QtWidgets.QLabel(
+                "Nhập mật khẩu để tắt chế độ nghiêm khắc"
+            )
+            self.form_title_label.setObjectName("LockFormTitle")
+            self.form_title_label.setWordWrap(True)
+            self.form_title_label.setSizePolicy(
                 QtWidgets.QSizePolicy.Policy.Preferred,
                 QtWidgets.QSizePolicy.Policy.Minimum,
             )
-            form_layout.addWidget(form_title)
+            form_layout.addWidget(self.form_title_label)
+
+            input_row = QtWidgets.QHBoxLayout()
+            input_row.setSpacing(10)
 
             self.password_edit = QtWidgets.QLineEdit()
             self.password_edit.setEchoMode(QtWidgets.QLineEdit.EchoMode.Password)
@@ -137,7 +142,19 @@ class StrictLockWindow(QtWidgets.QWidget):
                 QtWidgets.QSizePolicy.Policy.Fixed,
             )
             self.password_edit.returnPressed.connect(self._submit_password)
-            form_layout.addWidget(self.password_edit)
+            input_row.addWidget(self.password_edit, 1)
+
+            self.password_toggle_button = QtWidgets.QToolButton()
+            self.password_toggle_button.setObjectName("LockInputToggle")
+            self.password_toggle_button.setCheckable(True)
+            self.password_toggle_button.setCursor(
+                QtCore.Qt.CursorShape.PointingHandCursor
+            )
+            self.password_toggle_button.clicked.connect(
+                self._toggle_password_visibility
+            )
+            input_row.addWidget(self.password_toggle_button, 0)
+            form_layout.addLayout(input_row)
 
             self.feedback_label = QtWidgets.QLabel("")
             self.feedback_label.setObjectName("LockFeedback")
@@ -149,17 +166,17 @@ class StrictLockWindow(QtWidgets.QWidget):
             )
             form_layout.addWidget(self.feedback_label)
 
-            submit_button = QtWidgets.QPushButton("Tắt chế độ nghiêm khắc")
-            submit_button.clicked.connect(self._submit_password)
-            submit_button.setObjectName("LockPrimaryButton")
-            submit_button.setSizePolicy(
+            self.submit_button = QtWidgets.QPushButton("Tắt chế độ nghiêm khắc")
+            self.submit_button.clicked.connect(self._submit_password)
+            self.submit_button.setObjectName("LockPrimaryButton")
+            self.submit_button.setSizePolicy(
                 QtWidgets.QSizePolicy.Policy.Expanding,
                 QtWidgets.QSizePolicy.Policy.Fixed,
             )
-            self.submit_button = submit_button
-            form_layout.addWidget(submit_button)
+            form_layout.addWidget(self.submit_button)
 
             shell_layout.addWidget(form)
+            self._set_password_visible(False)
 
         container_layout.addWidget(shell)
 
@@ -175,16 +192,19 @@ class StrictLockWindow(QtWidgets.QWidget):
         self.schedule_label.setText(schedule_text)
         self.message_label.setText(message_text)
         self.lock_hint_label.setText(hint_text)
-        if self.interactive and form_title and hasattr(self, "submit_button"):
-            parent_layout = self.submit_button.parentWidget().layout()
-            title_widget = parent_layout.itemAt(0).widget() if parent_layout else None
-            if isinstance(title_widget, QtWidgets.QLabel):
-                title_widget.setText(form_title)
+        if self.interactive and form_title and hasattr(self, "form_title_label"):
+            self.form_title_label.setText(form_title)
         if reset_form and self.interactive and hasattr(self, "feedback_label"):
+            self.penalty_timer.stop()
+            self.penalty_seconds = 0
             self.feedback_label.setText("")
+            self.feedback_label.setProperty("error", "false")
+            self.feedback_label.style().unpolish(self.feedback_label)
+            self.feedback_label.style().polish(self.feedback_label)
             self.password_edit.clear()
             self.password_edit.setEnabled(True)
             self.submit_button.setEnabled(True)
+            self._set_password_visible(False)
             self.password_edit.setFocus()
 
     def show_feedback(self, message: str, *, error: bool) -> None:
@@ -223,6 +243,9 @@ class StrictLockWindow(QtWidgets.QWidget):
             self.password_edit.setEnabled(True)
             self.submit_button.setEnabled(True)
             self.feedback_label.setText("")
+            self.feedback_label.setProperty("error", "false")
+            self.feedback_label.style().unpolish(self.feedback_label)
+            self.feedback_label.style().polish(self.feedback_label)
             self.password_edit.setFocus()
         else:
             self.feedback_label.setText(f"Chờ {self.penalty_seconds}s trước khi thử lại")
@@ -232,6 +255,29 @@ class StrictLockWindow(QtWidgets.QWidget):
             return
         self.password_submitted.emit(self.password_edit.text())
 
+    def _toggle_password_visibility(self, checked: bool) -> None:
+        self._set_password_visible(checked)
+
+    def _set_password_visible(self, visible: bool) -> None:
+        if not self.interactive or not hasattr(self, "password_edit"):
+            return
+        cursor_position = self.password_edit.cursorPosition()
+        self.password_edit.setEchoMode(
+            QtWidgets.QLineEdit.EchoMode.Normal
+            if visible
+            else QtWidgets.QLineEdit.EchoMode.Password
+        )
+        if hasattr(self, "password_toggle_button"):
+            self.password_toggle_button.blockSignals(True)
+            self.password_toggle_button.setChecked(visible)
+            self.password_toggle_button.blockSignals(False)
+            self.password_toggle_button.setText("Ẩn" if visible else "Hiện")
+            self.password_toggle_button.setToolTip(
+                "Ẩn nội dung mật khẩu" if visible else "Hiện nội dung mật khẩu"
+            )
+        self.password_edit.setFocus()
+        self.password_edit.setCursorPosition(cursor_position)
+
 
 class StrictLockManager(QtCore.QObject):
     unlock_attempted = QtCore.Signal(str)
@@ -239,6 +285,7 @@ class StrictLockManager(QtCore.QObject):
     def __init__(self) -> None:
         super().__init__()
         self._windows: list[StrictLockWindow] = []
+        self._lock_session_visible = False
 
     def show(
         self,
@@ -249,6 +296,7 @@ class StrictLockManager(QtCore.QObject):
         form_title: str | None = None,
     ) -> None:
         self._ensure_windows()
+        reset_form = not self._lock_session_visible
         primary = QtGui.QGuiApplication.primaryScreen()
         for window, screen in zip(self._windows, QtGui.QGuiApplication.screens()):
             window.setGeometry(screen.geometry())
@@ -257,16 +305,18 @@ class StrictLockManager(QtCore.QObject):
                 message_text=message_text,
                 hint_text=hint_text,
                 form_title=form_title,
-                reset_form=not window.isVisible(),
+                reset_form=reset_form,
             )
             window.showFullScreen()
             window.raise_()
             if screen == primary:
                 window.activateWindow()
+        self._lock_session_visible = True
 
     def hide(self) -> None:
         for window in self._windows:
             window.hide()
+        self._lock_session_visible = False
 
     def show_feedback(self, message: str, *, error: bool) -> None:
         for window in self._windows:
@@ -278,6 +328,7 @@ class StrictLockManager(QtCore.QObject):
         if len(self._windows) == len(screens):
             return
 
+        self._lock_session_visible = False
         for window in self._windows:
             window.hide()
             window.deleteLater()

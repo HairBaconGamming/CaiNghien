@@ -1,25 +1,45 @@
 {
   "latest": {
-    "version": "0.3.11",
-    "published_at": "2026-03-31",
+    "version": "0.3.12",
+    "published_at": "2026-04-04",
     "notes": [
-      "Sửa gốc lỗi service timeout khi khởi động: service host giờ đi đúng lifecycle của Windows Service Manager.",
-      "Service không còn tự can thiệp vào startup người dùng, tăng timeout lệnh start/update và tự chặn pending config nghiêm khắc 24/7."
+      "Khóa cứng việc đổi lịch và lưu cấu hình khi đang ở khung giờ nghiêm khắc để không còn đường vòng.",
+      "Lock screen không còn tự reset ô mật khẩu khi enforcement refresh, đồng thời thêm nút Hiện/Ẩn để kiểm tra nội dung đang gõ."
     ],
     "files": {
       "installer": {
-        "url": "../downloads/0.3.11/CaiNghienFocusGuard-Setup-0.3.11.exe",
-        "size_bytes": 33252667,
-        "sha256": "56cf5b638ea70d96fbb6b7e4e45293590141554814264d314e99abefc1f3ed6f"
+        "url": "../downloads/0.3.12/CaiNghienFocusGuard-Setup-0.3.12.exe",
+        "size_bytes": 33255318,
+        "sha256": "369862cb89f918d43670f2ace2b11160846db2df09721228fd42d46d96d04321"
       },
       "portable": {
-        "url": "../downloads/0.3.11/CaiNghienFocusGuard-0.3.11.exe",
-        "size_bytes": 47183671,
-        "sha256": "d41876bb0efcfae68ca8093bfded1d4778afeed359b0cc6d600cfc3733d79ef7"
+        "url": "../downloads/0.3.12/CaiNghienFocusGuard-0.3.12.exe",
+        "size_bytes": 47185839,
+        "sha256": "8c44b657c2e520c3a2f453ebae18a5fae82b08e4562d69759041c6e27768ebe9"
       }
     }
   },
   "releases": [
+    {
+      "version": "0.3.12",
+      "published_at": "2026-04-04",
+      "notes": [
+        "Khóa cứng việc đổi lịch và lưu cấu hình khi đang ở khung giờ nghiêm khắc để không còn đường vòng.",
+        "Lock screen không còn tự reset ô mật khẩu khi enforcement refresh, đồng thời thêm nút Hiện/Ẩn để kiểm tra nội dung đang gõ."
+      ],
+      "files": {
+        "installer": {
+          "url": "../downloads/0.3.12/CaiNghienFocusGuard-Setup-0.3.12.exe",
+          "size_bytes": 33255318,
+          "sha256": "369862cb89f918d43670f2ace2b11160846db2df09721228fd42d46d96d04321"
+        },
+        "portable": {
+          "url": "../downloads/0.3.12/CaiNghienFocusGuard-0.3.12.exe",
+          "size_bytes": 47185839,
+          "sha256": "8c44b657c2e520c3a2f453ebae18a5fae82b08e4562d69759041c6e27768ebe9"
+        }
+      }
+    },
     {
       "version": "0.3.11",
       "published_at": "2026-03-31",

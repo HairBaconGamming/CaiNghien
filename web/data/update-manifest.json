@@ -1,14 +1,14 @@
 {
   "product": "CaiNghien Focus Guard",
   "latest": {
-    "version": "0.3.11",
-    "published_at": "2026-03-31",
-    "installer": "../downloads/0.3.11/CaiNghienFocusGuard-Setup-0.3.11.exe",
+    "version": "0.3.12",
+    "published_at": "2026-04-04",
+    "installer": "../downloads/0.3.12/CaiNghienFocusGuard-Setup-0.3.12.exe",
     "notes": [
-      "Sửa gốc lỗi service timeout khi khởi động: service host giờ đi đúng lifecycle của Windows Service Manager.",
-      "Service không còn tự can thiệp vào startup người dùng, tăng timeout lệnh start/update và tự chặn pending config nghiêm khắc 24/7."
+      "Khóa cứng việc đổi lịch và lưu cấu hình khi đang ở khung giờ nghiêm khắc để không còn đường vòng.",
+      "Lock screen không còn tự reset ô mật khẩu khi enforcement refresh, đồng thời thêm nút Hiện/Ẩn để kiểm tra nội dung đang gõ."
     ],
-    "sha256": "56cf5b638ea70d96fbb6b7e4e45293590141554814264d314e99abefc1f3ed6f",
-    "size_bytes": 33252667
+    "sha256": "369862cb89f918d43670f2ace2b11160846db2df09721228fd42d46d96d04321",
+    "size_bytes": 33255318
   }
 }

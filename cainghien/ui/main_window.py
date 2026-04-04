@@ -1051,9 +1051,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self._refresh_schedule_preview()
         self._refresh_log_view()
         self.refresh_helper_panel()
+        self._apply_strict_config_lock(self.controller.strict_configuration_locked())
 
     def _apply_status(self, status: EnforcementStatus) -> None:
         self._last_status = status
+        self._apply_strict_config_lock(self.controller.strict_configuration_locked())
         self.toggle_button.setText("Tắt bảo vệ" if status.protection_enabled else "Bật bảo vệ")
         self.overview_badge.setText(
             "Chế độ an toàn"
@@ -1619,6 +1621,24 @@ class MainWindow(QtWidgets.QMainWindow):
     def _reset_save_button(self) -> None:
         self.save_button.setText("Lưu thiết lập")
         self.save_button.setStyleSheet("")
+        if self.controller.strict_configuration_locked():
+            self.save_button.setEnabled(False)
+
+    def _apply_strict_config_lock(self, locked: bool) -> None:
+        widgets: list[QtWidgets.QWidget] = [
+            self.normal_mode_button,
+            self.strict_mode_button,
+            self.save_button,
+        ]
+        for checkbox, start_edit, end_edit in self._day_editors.values():
+            widgets.extend([checkbox, start_edit, end_edit])
+        for widget in widgets:
+            widget.setEnabled(not locked)
+        self.save_button.setToolTip(
+            "Đang trong khung giờ nghiêm khắc nên chưa thể sửa lịch hoặc lưu cấu hình."
+            if locked
+            else ""
+        )
 
     def _sync_service_store_if_possible(self) -> None:
         service = self.service_manager.query_configuration()
@@ -2203,6 +2223,14 @@ class MainWindow(QtWidgets.QMainWindow):
         QtWidgets.QApplication.quit()
 
     def _validate_candidate(self, candidate: AppConfig) -> str | None:
+        if (
+            self.controller.strict_configuration_locked()
+            and candidate.to_dict() != self.controller.config.to_dict()
+        ):
+            return (
+                "Đang trong khung giờ nghiêm khắc nên không thể đổi lịch hoặc cấu hình. "
+                "Hãy tắt bảo vệ bằng mật khẩu trước."
+            )
         if not candidate.blocked_domains:
             return "Danh sách web bị chặn đang rỗng."
         if all(not schedule.enabled for schedule in candidate.weekly_schedule.values()):

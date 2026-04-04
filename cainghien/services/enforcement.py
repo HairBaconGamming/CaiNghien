@@ -290,6 +290,17 @@ class EnforcementController(QtCore.QObject):
             )
         )
 
+    def strict_configuration_locked(self, when: datetime | None = None) -> bool:
+        now = when or datetime.now()
+        self._config = self._store.load()
+        self._state, _ = sanitize_runtime_state(self._store.load_state(), now)
+        active_window = resolve_active_window(self._config, self._state, now)
+        return bool(
+            self._config.protection_enabled
+            and active_window is not None
+            and active_window.strict
+        )
+
     def set_ui_access_override(self, enabled: bool, *, reevaluate: bool = True) -> None:
         self._ui_access_override = enabled
         if reevaluate:
@@ -375,6 +386,21 @@ class EnforcementController(QtCore.QObject):
         )
         if guarded_message is not None:
             return False, guarded_message, False
+
+        if self.strict_configuration_locked(now):
+            message = (
+                "Đang trong khung giờ nghiêm khắc nên không thể đổi lịch hoặc cấu hình. "
+                "Hãy tắt bảo vệ bằng đúng mật khẩu trước rồi mới chỉnh."
+            )
+            self._log_event(
+                self._state,
+                "strict_config_change_blocked",
+                message,
+                level="warning",
+                counter_field="tamper_events",
+                now=now,
+            )
+            return False, message, False
 
         delay_target = delay_target_for_change(self._config, self._state, now)
         if (
