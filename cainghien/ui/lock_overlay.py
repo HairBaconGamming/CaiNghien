@@ -26,6 +26,16 @@ class StrictLockWindow(QtWidgets.QWidget):
         self.setAttribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose, False)
         self.setCursor(QtCore.Qt.CursorShape.ArrowCursor)
 
+    def changeEvent(self, event: QtCore.QEvent) -> None:
+        if event.type() == QtCore.QEvent.Type.ActivationChange:
+            if not self.isActiveWindow():
+                # Anti Virtual Desktop Bypass: If user switches desktop, hide & show pulls it to active desktop
+                self.hide()
+                self.showFullScreen()
+                self.raise_()
+                self.activateWindow()
+        super().changeEvent(event)
+
     def _build_ui(self) -> None:
         root = QtWidgets.QVBoxLayout(self)
         root.setContentsMargins(0, 0, 0, 0)

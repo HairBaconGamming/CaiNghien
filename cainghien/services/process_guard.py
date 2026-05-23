@@ -26,20 +26,4 @@ class SystemGuard:
         except Exception:
             pass
 
-    @staticmethod
-    def enforce_process_block(blocked_processes: list[str]) -> list[str]:
-        blocked = {item.strip().lower() for item in blocked_processes if item.strip()}
-        if not blocked:
-            return []
-
-        killed: list[str] = []
-        for proc in psutil.process_iter(["name"]):
-            try:
-                name = str(proc.info.get("name") or "").lower()
-                if name and name in blocked and name not in SystemGuard.CRITICAL_PROCESSES:
-                    proc.kill()
-                    killed.append(name)
-            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
-                continue
-        return killed
 
