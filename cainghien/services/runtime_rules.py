@@ -8,6 +8,9 @@ from ..models import (
     PendingConfigChange,
     RuntimeState,
     dedupe_domains,
+    SOCIAL_DOMAINS,
+    GAMING_DOMAINS,
+    NSFW_DOMAINS,
 )
 
 
@@ -28,7 +31,15 @@ def blocked_domains_for_config(
     config: AppConfig,
 ) -> list[str]:
     allowed = set(dedupe_domains(config.allowed_domains))
-    blocked = dedupe_domains(config.blocked_domains)
+    blocked = config.blocked_domains.copy()
+    if config.block_social:
+        blocked.extend(SOCIAL_DOMAINS)
+    if config.block_gaming:
+        blocked.extend(GAMING_DOMAINS)
+    if config.block_nsfw:
+        blocked.extend(NSFW_DOMAINS)
+        
+    blocked = dedupe_domains(blocked)
     return [domain for domain in blocked if domain not in allowed]
 
 
@@ -37,6 +48,20 @@ def resolve_active_window(
     state: RuntimeState,
     now: datetime,
 ) -> ProtectionWindow | None:
+    if state.manual_lock_until:
+        try:
+            lock_until = datetime.fromisoformat(state.manual_lock_until)
+            if now < lock_until:
+                return ProtectionWindow(
+                    source="manual_lock",
+                    start=now,
+                    end=lock_until,
+                    label=f"Khóa tức thì đến {lock_until.strftime('%H:%M')}",
+                    strict=True,
+                )
+        except ValueError:
+            pass
+
     if not config.protection_enabled:
         return None
 

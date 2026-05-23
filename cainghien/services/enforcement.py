@@ -71,6 +71,7 @@ class EnforcementController(QtCore.QObject):
         self._hosts = HostsBlocker()
         self._lock_manager = StrictLockManager()
         self._lock_manager.unlock_attempted.connect(self._handle_unlock_attempt)
+        self._lock_manager.penalty_passed.connect(self._handle_penalty_passed)
 
         self._timer = QtCore.QTimer(self)
         self._timer.setInterval(5_000)
@@ -251,6 +252,18 @@ class EnforcementController(QtCore.QObject):
         self.evaluate(force=True)
         return True, log_message
 
+    def trigger_instant_lock(self, minutes: int) -> None:
+        self._state = self._store.load_state()
+        lock_until = datetime.now() + timedelta(minutes=max(1, minutes))
+        self._state.manual_lock_until = lock_until.isoformat(timespec="seconds")
+        self._save_state()
+        self._log_event(
+            self._state,
+            "instant_lock_triggered",
+            f"Kích hoạt Khóa Tức Thì trong {minutes} phút.",
+        )
+        self.evaluate(force=True)
+
     def requires_strict_access_password(self, when: datetime | None = None) -> bool:
         now = when or datetime.now()
         active_window = resolve_active_window(self._config, self._state, now)
@@ -264,7 +277,7 @@ class EnforcementController(QtCore.QObject):
         return bool(
             self._config.has_password
             and (
-                self._state.manual_lock is not None
+                self._state.manual_lock_until is not None
                 or (active_window and active_window.strict)
             )
         )
@@ -404,9 +417,9 @@ class EnforcementController(QtCore.QObject):
         self._apply_config(config, now=now, log_message="Đã lưu thiết lập mới.")
         return True, "Đã lưu thiết lập.", False
 
-    def disable_protection(self, password: str | None = None) -> tuple[bool, str]:
-        if self._config.mode == "strict" and (
-            self._config.protection_enabled or self._state.manual_lock is not None
+    def disable_protection(self, password: str | None = None, *, force_unlock: bool = False) -> tuple[bool, str]:
+        if not force_unlock and self._config.mode == "strict" and (
+            self._config.protection_enabled or self._state.manual_lock_until is not None
         ):
             if not self.verify_strict_password(password or ""):
                 self._log_event(
@@ -420,8 +433,8 @@ class EnforcementController(QtCore.QObject):
 
         if (
             not self._config.protection_enabled
-            and self._state.manual_lock is None
-            and self._state.study_session is None
+            and self._state.manual_lock_until is None
+            and self._state.pending_config is None
         ):
             return True, "Bảo vệ đã tắt sẵn."
 
@@ -429,8 +442,7 @@ class EnforcementController(QtCore.QObject):
         updated.protection_enabled = False
         self._ui_access_override = False
         self._state.pending_config = None
-        self._state.manual_lock = None
-        self._state.study_session = None
+        self._state.manual_lock_until = None
         self._save_state()
         self._apply_config(updated, now=datetime.now(), log_message="Đã tắt bảo vệ.")
         return True, "Đã tắt bảo vệ."
@@ -818,7 +830,27 @@ class EnforcementController(QtCore.QObject):
         )
 
     def _handle_unlock_attempt(self, password: str) -> None:
+        if self._config.mode == "strict" and (self._config.protection_enabled or self._state.manual_lock_until is not None):
+            if self.verify_strict_password(password):
+                if self._config.stoic_penalty:
+                    self._lock_manager.show_penalty("Tôi đang đầu hàng trước cám dỗ và lãng phí thời gian của chính mình.")
+                    return
+            else:
+                self._lock_manager.show_feedback("Mật khẩu không đúng.", error=True)
+                self._log_event(
+                    self._state,
+                    "unlock_failed",
+                    "Nhập sai mật khẩu khi cố gắng tắt bảo vệ.",
+                    level="warning",
+                    counter_field="failed_unlocks",
+                )
+                return
+
         success, message = self.disable_protection(password)
+        self._lock_manager.show_feedback(message, error=not success)
+
+    def _handle_penalty_passed(self) -> None:
+        success, message = self.disable_protection(force_unlock=True)
         self._lock_manager.show_feedback(message, error=not success)
 
     def _should_lock_workstation(self, now: datetime) -> bool:

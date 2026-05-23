@@ -30,6 +30,7 @@ from ..services.windows_guard import (
     WindowsStartupManager,
 )
 from .uninstall_dialog import RecoveryCodeDialog, UninstallApprovalDialog
+from .floating_widget import FloatingFocusWidget
 
 
 class SidePanelFrame(QtWidgets.QFrame):
@@ -53,6 +54,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self._ignore_close_to_tray = False
         self._last_status: EnforcementStatus | None = None
         self._day_editors: dict[str, tuple[QtWidgets.QCheckBox, QtWidgets.QTimeEdit, QtWidgets.QTimeEdit]] = {}
+        self.floating_widget = FloatingFocusWidget()
         self._stats_labels: dict[str, QtWidgets.QLabel] = {}
         self._side_panel: QtWidgets.QFrame | None = None
         self._side_panel_scroll: QtWidgets.QScrollArea | None = None
@@ -114,7 +116,29 @@ class MainWindow(QtWidgets.QMainWindow):
         center_layout.addWidget(self.focus_substatus_label)
         
         layout.addLayout(center_layout)
-        layout.addSpacing(60)
+        layout.addSpacing(40)
+        
+        # Instant Lock Section
+        instant_lock_layout = QtWidgets.QHBoxLayout()
+        instant_lock_layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        instant_lock_layout.setSpacing(10)
+        
+        self.instant_lock_combo = QtWidgets.QComboBox()
+        self.instant_lock_combo.addItems([
+            "15 Phút", "30 Phút", "45 Phút", "60 Phút", "90 Phút", "120 Phút"
+        ])
+        self.instant_lock_combo.setObjectName("Dropdown")
+        self.instant_lock_combo.setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
+        
+        self.instant_lock_button = QtWidgets.QPushButton("Khóa Tức Thì")
+        self.instant_lock_button.setObjectName("SecondaryButton")
+        self.instant_lock_button.setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
+        
+        instant_lock_layout.addWidget(self.instant_lock_combo)
+        instant_lock_layout.addWidget(self.instant_lock_button)
+        
+        layout.addLayout(instant_lock_layout)
+        layout.addSpacing(20)
         
         self.main_focus_toggle_button = QtWidgets.QPushButton("Tắt bảo vệ")
         self.main_focus_toggle_button.setObjectName("GiantButton")
@@ -508,6 +532,16 @@ class MainWindow(QtWidgets.QMainWindow):
         badges.addStretch()
         layout.addLayout(badges)
 
+        curated_layout = QtWidgets.QHBoxLayout()
+        self.block_social_checkbox = QtWidgets.QCheckBox("Chặn Mạng Xã Hội")
+        self.block_gaming_checkbox = QtWidgets.QCheckBox("Chặn Game")
+        self.block_nsfw_checkbox = QtWidgets.QCheckBox("Chặn Web 18+")
+        for cb in (self.block_social_checkbox, self.block_gaming_checkbox, self.block_nsfw_checkbox):
+            cb.setObjectName("SoftCheck")
+            curated_layout.addWidget(cb)
+        curated_layout.addStretch()
+        layout.addLayout(curated_layout)
+
         editors = QtWidgets.QHBoxLayout()
         blocked_column = QtWidgets.QVBoxLayout()
         blocked_column.addWidget(self._section_label("Web bị chặn"))
@@ -551,6 +585,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.password_confirm_edit.setPlaceholderText("Nhập lại mật khẩu")
         self.password_confirm_edit.setObjectName("SoftInput")
         layout.addWidget(self.password_confirm_edit)
+
+        self.stoic_penalty_checkbox = QtWidgets.QCheckBox("Hình Phạt Khắc Kỷ (Chép phạt khi mở khóa)")
+        self.stoic_penalty_checkbox.setObjectName("SoftCheck")
+        layout.addWidget(self.stoic_penalty_checkbox)
 
         manual_row = QtWidgets.QGridLayout()
         manual_row.setHorizontalSpacing(12)
@@ -732,11 +770,19 @@ class MainWindow(QtWidgets.QMainWindow):
         self.recovery_key_button.clicked.connect(self.rotate_recovery_key)
         self.forgot_password_button.clicked.connect(self.start_password_recovery)
         self.uninstall_button.clicked.connect(self.start_professional_uninstall)
+        self.instant_lock_button.clicked.connect(self.trigger_instant_lock)
+        self.main_focus_toggle_button.clicked.connect(self.toggle_protection)
 
         for checkbox, start_edit, end_edit in self._day_editors.values():
             checkbox.toggled.connect(self._refresh_schedule_preview)
             start_edit.timeChanged.connect(self._refresh_schedule_preview)
             end_edit.timeChanged.connect(self._refresh_schedule_preview)
+
+    def trigger_instant_lock(self) -> None:
+        text = self.instant_lock_combo.currentText()
+        minutes = int(text.split(" ")[0])
+        self.controller.trigger_instant_lock(minutes)
+        self.show_toast(f"Đã khóa tức thì trong {minutes} phút", "info")
 
 
     def _load_config(self, config: AppConfig) -> None:
@@ -756,6 +802,10 @@ class MainWindow(QtWidgets.QMainWindow):
             config.start_with_windows or self.startup_manager.is_enabled()
         )
         self.service_enabled_checkbox.setChecked(config.service_enabled)
+        self.block_social_checkbox.setChecked(config.block_social)
+        self.block_gaming_checkbox.setChecked(config.block_gaming)
+        self.block_nsfw_checkbox.setChecked(config.block_nsfw)
+        self.stoic_penalty_checkbox.setChecked(config.stoic_penalty)
         self.warning_minutes_spin.setValue(config.warning_minutes)
         self.last_minute_guard_spin.setValue(config.last_minute_guard_minutes)
         self.change_delay_checkbox.setChecked(config.change_delay_enabled)
@@ -775,6 +825,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self._last_status = status
         self._apply_strict_config_lock(self.controller.strict_configuration_locked())
         self.toggle_button.setText("Tắt bảo vệ" if status.protection_enabled else "Bật bảo vệ")
+        
+        self.floating_widget.update_status(status.current_window_label, status.schedule_active)
 
         if status.protection_enabled:
             if status.schedule_active:
@@ -935,6 +987,10 @@ class MainWindow(QtWidgets.QMainWindow):
         config.allowed_domains = dedupe_domains(config.allowed_domains)
         config.start_with_windows = self.start_with_windows_checkbox.isChecked()
         config.service_enabled = self.service_enabled_checkbox.isChecked()
+        config.block_social = self.block_social_checkbox.isChecked()
+        config.block_gaming = self.block_gaming_checkbox.isChecked()
+        config.block_nsfw = self.block_nsfw_checkbox.isChecked()
+        config.stoic_penalty = self.stoic_penalty_checkbox.isChecked()
         config.warning_minutes = self.warning_minutes_spin.value()
         config.last_minute_guard_minutes = self.last_minute_guard_spin.value()
         config.change_delay_enabled = self.change_delay_checkbox.isChecked()

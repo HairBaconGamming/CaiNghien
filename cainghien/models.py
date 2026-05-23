@@ -30,7 +30,25 @@ DEFAULT_BLOCKED_DOMAINS = [
 ]
 
 DEFAULT_ALLOWED_DOMAINS = [
-    "gemini.google.com",
+    "wikipedia.org",
+    "github.com",
+    "stackoverflow.com",
+    "developer.mozilla.org",
+]
+
+SOCIAL_DOMAINS = [
+    "facebook.com", "instagram.com", "tiktok.com", "twitter.com", 
+    "reddit.com", "snapchat.com", "pinterest.com", "x.com"
+]
+
+GAMING_DOMAINS = [
+    "steamcommunity.com", "steampowered.com", "roblox.com", 
+    "twitch.tv", "epicgames.com", "ea.com", "ubisoft.com", "blizzard.com"
+]
+
+NSFW_DOMAINS = [
+    "pornhub.com", "xvideos.com", "xnxx.com", "xhamster.com", 
+    "onlyfans.com", "chaturbate.com", "nhentai.net", "rule34.xxx"
 ]
 
 
@@ -288,6 +306,7 @@ class RuntimeState:
     safe_mode_reason: str | None = None
     last_integrity_issue: str | None = None
     last_counted_minute: str | None = None
+    manual_lock_until: str | None = None
     daily_counters: dict[str, dict[str, int]] = field(default_factory=dict)
 
     @classmethod
@@ -313,6 +332,7 @@ class RuntimeState:
             safe_mode_reason=str(raw.get("safe_mode_reason")) if raw.get("safe_mode_reason") else None,
             last_integrity_issue=str(raw.get("last_integrity_issue")) if raw.get("last_integrity_issue") else None,
             last_counted_minute=str(raw.get("last_counted_minute")) if raw.get("last_counted_minute") else None,
+            manual_lock_until=str(raw.get("manual_lock_until")) if raw.get("manual_lock_until") else None,
             daily_counters=daily_counters,
         )
 
@@ -327,6 +347,7 @@ class RuntimeState:
             "safe_mode_reason": self.safe_mode_reason,
             "last_integrity_issue": self.last_integrity_issue,
             "last_counted_minute": self.last_counted_minute,
+            "manual_lock_until": self.manual_lock_until,
             "daily_counters": self.daily_counters,
         }
 
@@ -389,6 +410,10 @@ class AppConfig:
     last_minute_guard_minutes: int = 30
     change_delay_enabled: bool = True
     service_enabled: bool = True
+    block_social: bool = False
+    block_gaming: bool = False
+    block_nsfw: bool = False
+    stoic_penalty: bool = False
 
     @classmethod
     def from_dict(cls, raw: dict[str, Any] | None) -> AppConfig:
@@ -431,6 +456,10 @@ class AppConfig:
             ),
             change_delay_enabled=bool(raw.get("change_delay_enabled", True)),
             service_enabled=bool(raw.get("service_enabled", True)),
+            block_social=bool(raw.get("block_social", False)),
+            block_gaming=bool(raw.get("block_gaming", False)),
+            block_nsfw=bool(raw.get("block_nsfw", False)),
+            stoic_penalty=bool(raw.get("stoic_penalty", False)),
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -454,6 +483,10 @@ class AppConfig:
             "last_minute_guard_minutes": self.last_minute_guard_minutes,
             "change_delay_enabled": self.change_delay_enabled,
             "service_enabled": self.service_enabled,
+            "block_social": self.block_social,
+            "block_gaming": self.block_gaming,
+            "block_nsfw": self.block_nsfw,
+            "stoic_penalty": self.stoic_penalty,
         }
 
     @property

@@ -5,6 +5,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 class StrictLockWindow(QtWidgets.QWidget):
     password_submitted = QtCore.Signal(str)
+    penalty_passed = QtCore.Signal()
 
     def __init__(self, *, interactive: bool) -> None:
         super().__init__()
@@ -166,6 +167,20 @@ class StrictLockWindow(QtWidgets.QWidget):
             input_row.addWidget(self.password_toggle_button, 0)
             form_layout.addLayout(input_row)
 
+            # Stoic Penalty UI (Hidden by default)
+            self.penalty_text_label = QtWidgets.QLabel()
+            self.penalty_text_label.setObjectName("LockHint")
+            self.penalty_text_label.setWordWrap(True)
+            self.penalty_text_label.hide()
+            form_layout.addWidget(self.penalty_text_label)
+
+            self.penalty_input_edit = QtWidgets.QLineEdit()
+            self.penalty_input_edit.setPlaceholderText("Chép lại chính xác đoạn văn trên vào đây...")
+            self.penalty_input_edit.setObjectName("LockInput")
+            self.penalty_input_edit.hide()
+            self.penalty_input_edit.textChanged.connect(self._check_penalty_text)
+            form_layout.addWidget(self.penalty_input_edit)
+
             self.feedback_label = QtWidgets.QLabel("")
             self.feedback_label.setObjectName("LockFeedback")
             self.feedback_label.setProperty("error", "false")
@@ -211,9 +226,25 @@ class StrictLockWindow(QtWidgets.QWidget):
             self.feedback_label.setProperty("error", "false")
             self.feedback_label.style().unpolish(self.feedback_label)
             self.feedback_label.style().polish(self.feedback_label)
+            
+            self.penalty_text_label.hide()
+            self.penalty_input_edit.hide()
+            self.penalty_input_edit.clear()
+            self._expected_penalty_text = ""
+            
+            self.password_edit.show()
+            self.password_toggle_button.show()
             self.password_edit.clear()
             self.password_edit.setEnabled(True)
+            self.submit_button.setText("Tắt chế độ nghiêm khắc")
+            
             self.submit_button.setEnabled(True)
+            try:
+                self.submit_button.clicked.disconnect()
+            except RuntimeError:
+                pass
+            self.submit_button.clicked.connect(self._submit_password)
+            
             self._set_password_visible(False)
             self.password_edit.setFocus()
 
@@ -230,6 +261,37 @@ class StrictLockWindow(QtWidgets.QWidget):
             self.password_edit.setEnabled(False)
             self.submit_button.setEnabled(False)
             self.penalty_timer.start(1000)
+
+    def show_penalty(self, text: str) -> None:
+        if not self.interactive:
+            return
+        self.password_edit.hide()
+        self.password_toggle_button.hide()
+        
+        self.form_title_label.setText("Hình Phạt Khắc Kỷ")
+        self._expected_penalty_text = text
+        self.penalty_text_label.setText(f"Hãy chép lại chính xác đoạn văn sau (gồm cả dấu câu) để thoát:\n\n\"{text}\"")
+        self.penalty_text_label.show()
+        
+        self.penalty_input_edit.show()
+        self.penalty_input_edit.clear()
+        self.penalty_input_edit.setFocus()
+        
+        self.submit_button.setText("Xác Nhận Thoát")
+        self.submit_button.setEnabled(False)
+        try:
+            self.submit_button.clicked.disconnect()
+        except RuntimeError:
+            pass
+        self.submit_button.clicked.connect(self.penalty_passed.emit)
+
+    def _check_penalty_text(self, text: str) -> None:
+        if text.strip() == self._expected_penalty_text:
+            self.submit_button.setEnabled(True)
+            self.submit_button.setStyleSheet("background-color: #2e7d32; color: white;")
+        else:
+            self.submit_button.setEnabled(False)
+            self.submit_button.setStyleSheet("")
 
     def closeEvent(self, event: QtGui.QCloseEvent) -> None:
         event.ignore()
@@ -291,6 +353,7 @@ class StrictLockWindow(QtWidgets.QWidget):
 
 class StrictLockManager(QtCore.QObject):
     unlock_attempted = QtCore.Signal(str)
+    penalty_passed = QtCore.Signal()
 
     def __init__(self) -> None:
         super().__init__()
@@ -333,6 +396,11 @@ class StrictLockManager(QtCore.QObject):
             if window.interactive:
                 window.show_feedback(message, error=error)
 
+    def show_penalty(self, text: str) -> None:
+        for window in self._windows:
+            if window.interactive:
+                window.show_penalty(text)
+
     def _ensure_windows(self) -> None:
         screens = QtGui.QGuiApplication.screens()
         if len(self._windows) == len(screens):
@@ -349,4 +417,5 @@ class StrictLockManager(QtCore.QObject):
             window = StrictLockWindow(interactive=screen == primary)
             if screen == primary:
                 window.password_submitted.connect(self.unlock_attempted.emit)
+                window.penalty_passed.connect(self.penalty_passed.emit)
             self._windows.append(window)
