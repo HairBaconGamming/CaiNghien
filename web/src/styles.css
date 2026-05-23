@@ -302,17 +302,52 @@ p {
 }
 
 .dashboard-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(360px, 420px);
-  gap: 24px;
-  margin-top: 24px;
-  align-items: start;
+  display: block;
+}
+
+.site-tabs {
+  display: flex;
+  gap: 12px;
+  margin-top: 32px;
+  border-bottom: 2px solid var(--line);
+  padding-bottom: 0;
+}
+
+.tab-button {
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: 12px 24px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--muted);
+  cursor: pointer;
+  transition: var(--transition);
+  margin-bottom: -2px; /* Overlap the border-bottom of nav */
+}
+
+.tab-button:hover {
+  color: var(--ink);
+}
+
+.tab-button.active {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
+}
+
+.tab-pane {
+  display: none;
+  padding-top: 32px;
+}
+
+.tab-pane.active {
+  display: block;
+  animation: fadeInUp 0.3s ease-out forwards;
 }
 
 .col-left,
 .col-right {
-  display: grid;
-  gap: 24px;
+  display: block;
 }
 
 .feature-grid {

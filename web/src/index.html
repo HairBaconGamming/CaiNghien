@@ -49,9 +49,6 @@
               <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.3" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
               Tải bản mới nhất
             </a>
-            <a class="button secondary" href="./data/update-manifest.json" target="_blank" rel="noreferrer">
-              Xem manifest cập nhật
-            </a>
           </div>
 
           <div class="trust-row">
@@ -84,8 +81,15 @@
         </aside>
       </header>
 
-      <main class="dashboard-layout fade-in-up" style="animation-delay: 0.12s">
-        <div class="col-left">
+      <nav class="site-tabs fade-in-up" style="animation-delay: 0.1s">
+        <button class="tab-button active" data-tab="tab-overview">Tổng quan</button>
+        <button class="tab-button" data-tab="tab-downloads">Tải về</button>
+        <button class="tab-button" data-tab="tab-manifest">Phát hành</button>
+      </nav>
+
+      <main class="tab-content fade-in-up" style="animation-delay: 0.15s">
+        <!-- TAB 1: TỔNG QUAN -->
+        <div class="tab-pane active" id="tab-overview">
           <section class="feature-grid" id="features">
             <article class="feature-card">
               <div class="card-icon">BLOCK</div>
@@ -108,25 +112,10 @@
               <p>Mỗi bản vá được công bố minh bạch. Bạn có toàn quyền quyết định khi nào cần áp dụng bản cập nhật.</p>
             </article>
           </section>
-
-          <section class="manifest-section mt-4">
-            <article class="manifest-card">
-              <div>
-                <p class="eyebrow">Hệ thống phát hành</p>
-                <h3>Feed cập nhật minh bạch</h3>
-                <p class="text-sm">
-                  Trang web này đóng vai trò Release Hub tĩnh: hiển thị changelog, tải file cài đặt và phân phối manifest.
-                </p>
-              </div>
-              <div class="manifest-actions">
-                <a class="button secondary btn-sm" href="./data/update-manifest.json" target="_blank" rel="noreferrer">update-manifest.json</a>
-                <a class="button secondary btn-sm" href="./data/releases.json" target="_blank" rel="noreferrer">releases.json</a>
-              </div>
-            </article>
-          </section>
         </div>
 
-        <div class="col-right">
+        <!-- TAB 2: TẢI VỀ -->
+        <div class="tab-pane" id="tab-downloads">
           <section class="download-section" id="downloads">
             <div class="section-head">
               <p class="eyebrow">Bản ổn định</p>
@@ -146,6 +135,30 @@
               <p class="section-caption">Danh sách gọn nhẹ, minh bạch.</p>
             </div>
             <div class="version-list scrollable-box" id="version-list"></div>
+          </section>
+        </div>
+
+        <!-- TAB 3: PHÁT HÀNH -->
+        <div class="tab-pane" id="tab-manifest">
+          <section class="manifest-section">
+            <article class="manifest-card">
+              <div>
+                <p class="eyebrow">Hệ thống phát hành</p>
+                <h3>Feed cập nhật minh bạch cho Updater</h3>
+                <p class="text-sm" style="max-width: 60ch; margin-top: 12px;">
+                  Trang web này đóng vai trò Release Hub tĩnh cho ứng dụng CaiNghiện Focus Guard. App sẽ tự động truy vấn 
+                  các tệp JSON bên dưới để nhận biết bản cập nhật mới.
+                </p>
+              </div>
+              <div class="manifest-actions">
+                <a class="button secondary" href="./data/update-manifest.json" target="_blank" rel="noreferrer">
+                  update-manifest.json
+                </a>
+                <a class="button secondary" href="./data/releases.json" target="_blank" rel="noreferrer">
+                  releases.json
+                </a>
+              </div>
+            </article>
           </section>
         </div>
       </main>
