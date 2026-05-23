@@ -121,7 +121,7 @@ const renderLatestRelease = (release) => {
     <article class="latest-card">
       <div class="version-header">
         <div>
-          <p class="eyebrow">Bản ổn định mới nhất</p>
+          <p class="eyebrow text-glow">Bản ổn định mới nhất</p>
           <h3>Phiên bản ${escapeHtml(release.version)}</h3>
           <p class="download-meta">Bản phát hành khuyên dùng cho người dùng mới và cho desktop updater.</p>
         </div>
@@ -149,7 +149,7 @@ const renderHistoryRelease = (release) => `
       <span class="pill history">Lịch sử</span>
     </div>
     ${createNotes(release.notes)}
-    <div class="download-actions">
+    <div class="download-actions mt-4">
       ${
         release.files?.installer?.url
           ? `<a class="button secondary btn-sm" href="${release.files.installer.url}">${iconDownload}Installer</a>`
@@ -215,21 +215,19 @@ fetch("./data/releases.json")
     versionList.innerHTML = "";
   });
 
-// Tab Switching Logic
-document.addEventListener("DOMContentLoaded", () => {
-  const tabButtons = document.querySelectorAll(".tab-button");
-  const tabPanes = document.querySelectorAll(".tab-pane");
-
-  tabButtons.forEach(button => {
-    button.addEventListener("click", () => {
-      // Remove active class from all buttons and panes
-      tabButtons.forEach(btn => btn.classList.remove("active"));
-      tabPanes.forEach(pane => pane.classList.remove("active"));
-
-      // Add active class to clicked button and target pane
-      button.classList.add("active");
-      const targetId = button.getAttribute("data-tab");
-      document.getElementById(targetId)?.classList.add("active");
+// Handle smooth scroll for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href');
+        const targetElement = document.querySelector(targetId);
+        if (targetElement) {
+            targetElement.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+            // Update URL hash without jumping
+            history.pushState(null, null, targetId);
+        }
     });
-  });
 });
