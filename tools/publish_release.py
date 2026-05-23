@@ -104,8 +104,10 @@ def main() -> int:
             break
     if not existing_notes:
         existing_notes = [
-            "Khóa cứng việc đổi lịch và lưu cấu hình khi đang ở khung giờ nghiêm khắc để không còn đường vòng.",
-            "Lock screen không còn tự reset ô mật khẩu khi enforcement refresh, đồng thời thêm nút Hiện/Ẩn để kiểm tra nội dung đang gõ.",
+            "Khóa Tức Thì (Instant Lock): Bấm phát là khóa máy luôn theo số phút yêu cầu.",
+            "Danh Sách Chặn Một Chạm (Curated Blacklists): Tích hợp sẵn bộ lọc cho MXH, Game và Web 18+.",
+            "Hình Phạt Khắc Kỷ (Stoic Penalty): Bắt chép phạt khi cố gắng mở khóa sớm.",
+            "Widget Đếm Ngược Ám Ảnh (Floating Focus Widget): Hiện cửa sổ đếm ngược luôn ở trên cùng màn hình.",
         ]
 
     release = {
