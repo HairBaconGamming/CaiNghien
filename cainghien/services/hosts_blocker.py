@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import ctypes
 import os
+import re
 from pathlib import Path
 from typing import Iterable
 
@@ -62,13 +63,17 @@ class HostsBlocker:
         if not self.hosts_path.exists():
             return ""
         return self.hosts_path.read_text(encoding="utf-8", errors="ignore")
-
     def _without_marker_block(self, content: str) -> str:
         if self.marker_start not in content or self.marker_end not in content:
             return content
-        before, _, remainder = content.partition(self.marker_start)
-        _, _, after = remainder.partition(self.marker_end)
-        return (before + after).strip()
+        
+        # Remove all blocks between marker_start and marker_end inclusive
+        pattern = re.escape(self.marker_start) + r".*?" + re.escape(self.marker_end)
+        cleaned = re.sub(pattern, "", content, flags=re.DOTALL)
+        
+        # Clean up excessive newlines that might be left behind
+        cleaned = re.sub(r'\n{3,}', '\n\n', cleaned)
+        return cleaned.strip()
 
     def _expand_domains(self, domains: Iterable[str]) -> list[str]:
         expanded: list[str] = []

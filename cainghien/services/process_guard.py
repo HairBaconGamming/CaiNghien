@@ -7,6 +7,12 @@ import psutil
 
 
 class SystemGuard:
+    CRITICAL_PROCESSES = {
+        "svchost.exe", "csrss.exe", "wininit.exe", "smss.exe",
+        "services.exe", "lsass.exe", "winlogon.exe", "explorer.exe",
+        "taskmgr.exe", "system", "registry", "spoolsv.exe"
+    }
+
     @staticmethod
     def set_task_manager_enabled(enabled: bool) -> None:
         try:
@@ -30,9 +36,10 @@ class SystemGuard:
         for proc in psutil.process_iter(["name"]):
             try:
                 name = str(proc.info.get("name") or "").lower()
-                if name and name in blocked:
+                if name and name in blocked and name not in SystemGuard.CRITICAL_PROCESSES:
                     proc.kill()
                     killed.append(name)
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 continue
         return killed
+

@@ -756,6 +756,7 @@ begin
   if CurUninstallStep = usPostUninstall then
   begin
     RegDeleteValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Run', 'CaiNghienFocusGuard');
+    RegDeleteValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Policies\System', 'DisableTaskMgr');
     if IsAdmin() then
       RegDeleteValue(HKLM, 'Software\Microsoft\Windows\CurrentVersion\Run', 'CaiNghienFocusGuard');
     CleanupAllAppData(PurgeLocalData);
