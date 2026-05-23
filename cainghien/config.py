@@ -155,24 +155,6 @@ class ConfigStore:
             stats.failed_unlocks += int(counter.get("failed_unlocks", 0))
             stats.tamper_events += int(counter.get("tamper_events", 0))
             stats.pending_changes += int(counter.get("pending_changes", 0))
-            stats.study_sessions_completed += int(counter.get("study_sessions_completed", 0))
-            stats.study_sessions_aborted += int(counter.get("study_sessions_aborted", 0))
-            stats.study_minutes += int(counter.get("study_minutes", 0))
-            stats.study_site_blocks += int(counter.get("study_site_blocks", 0))
-            stats.study_app_blocks += int(counter.get("study_app_blocks", 0))
-        stats.current_streak = self._current_study_streak(state, today)
-        stats.best_streak = self._best_study_streak(state)
-        stats.average_study_minutes = (
-            stats.study_minutes // stats.study_sessions_completed
-            if stats.study_sessions_completed > 0
-            else 0
-        )
-        profile_distribution, top_domains, top_apps = self._recent_study_breakdown(
-            now=now or datetime.now()
-        )
-        stats.profile_distribution = profile_distribution
-        stats.top_blocked_domains = top_domains
-        stats.top_blocked_apps = top_apps
         return stats
 
     def record_counter(

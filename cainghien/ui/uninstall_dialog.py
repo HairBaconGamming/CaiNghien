@@ -104,106 +104,145 @@ class UninstallApprovalDialog(QtWidgets.QDialog):
         self._emergency_due = emergency_due
 
         self.setWindowTitle("Gỡ cài đặt CaiNghiện Focus Guard")
-        self.resize(620, 460)
+        self.resize(760, 560)
+        self.setStyleSheet("background: #F3F4F6;")
 
         layout = QtWidgets.QVBoxLayout(self)
-        layout.setContentsMargins(22, 22, 22, 22)
-        layout.setSpacing(14)
+        layout.setContentsMargins(40, 40, 40, 40)
+        layout.setSpacing(16)
+        layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        
+        layout.addStretch()
 
-        title = QtWidgets.QLabel("Trình gỡ cài đặt an toàn")
-        title.setObjectName("CardTitle")
+        title = QtWidgets.QLabel("GỠ CÀI ĐẶT")
+        title.setObjectName("GiantDangerStatus")
+        title.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(title)
 
         subtitle = QtWidgets.QLabel(
-            "App sẽ dừng enforcement, cho phép bộ gỡ cài đặt chuẩn của Windows tiếp tục, và có thể xóa cả dữ liệu cục bộ nếu bạn muốn."
+            "App sẽ dừng bảo vệ, gỡ bỏ các thay đổi hệ thống và xóa toàn bộ dữ liệu cài đặt."
         )
         subtitle.setObjectName("CardSubtitle")
+        subtitle.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         subtitle.setWordWrap(True)
         layout.addWidget(subtitle)
+        
+        layout.addSpacing(20)
 
-        checklist = QtWidgets.QLabel(
-            "- Dừng dịch vụ và khởi động cùng Windows\n"
-            "- Bỏ hosts block còn tồn\n"
-            "- Chọn giữ hoặc xóa dữ liệu cục bộ\n"
-            "- Nếu chế độ nghiêm khắc đang bật, bắt buộc xác thực trước khi gỡ"
-        )
-        checklist.setObjectName("MutedLabel")
-        checklist.setWordWrap(True)
-        layout.addWidget(checklist)
-
-        self.purge_checkbox = QtWidgets.QCheckBox("Xóa cả log, state, cache cập nhật và file phê duyệt khôi phục")
+        self.purge_checkbox = QtWidgets.QCheckBox("Xóa cả lịch sử, cấu hình và nhật ký")
         self.purge_checkbox.setObjectName("SoftCheck")
-        layout.addWidget(self.purge_checkbox)
+        self.purge_checkbox.setChecked(True)
+        cb_layout = QtWidgets.QHBoxLayout()
+        cb_layout.addStretch()
+        cb_layout.addWidget(self.purge_checkbox)
+        cb_layout.addStretch()
+        layout.addLayout(cb_layout)
+        
+        layout.addSpacing(20)
 
         if require_auth:
-            self.tabs = QtWidgets.QTabWidget()
-            self.tabs.setObjectName("InsetCard")
-
-            password_tab = QtWidgets.QWidget()
-            password_layout = QtWidgets.QVBoxLayout(password_tab)
-            password_layout.setContentsMargins(14, 14, 14, 14)
-            password_layout.setSpacing(10)
-            password_layout.addWidget(self._caption("Nhập mật khẩu nghiêm khắc"))
+            self.auth_stack = QtWidgets.QStackedWidget()
+            self.auth_stack.setObjectName("AppShell")
+            
+            # 0: Mật khẩu
+            pw_page = QtWidgets.QWidget()
+            pw_layout = QtWidgets.QVBoxLayout(pw_page)
+            pw_layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
             self.password_edit = QtWidgets.QLineEdit()
             self.password_edit.setEchoMode(QtWidgets.QLineEdit.EchoMode.Password)
-            self.password_edit.setPlaceholderText("Mật khẩu nghiêm khắc")
+            self.password_edit.setPlaceholderText("Nhập mật khẩu nghiêm khắc")
             self.password_edit.setObjectName("SoftInput")
-            password_layout.addWidget(self.password_edit)
-            self.tabs.addTab(password_tab, "Mật khẩu")
+            self.password_edit.setMinimumHeight(48)
+            pw_layout.addWidget(self.password_edit)
+            
+            btn_row = QtWidgets.QHBoxLayout()
+            btn_row.addStretch()
+            sw_rec = QtWidgets.QPushButton("Dùng mã khôi phục")
+            sw_rec.setObjectName("GhostButton")
+            sw_rec.clicked.connect(lambda: self.auth_stack.setCurrentIndex(1))
+            btn_row.addWidget(sw_rec)
+            sw_emg = QtWidgets.QPushButton("Khôi phục khẩn cấp")
+            sw_emg.setObjectName("GhostButton")
+            sw_emg.clicked.connect(lambda: self.auth_stack.setCurrentIndex(2))
+            btn_row.addWidget(sw_emg)
+            btn_row.addStretch()
+            pw_layout.addLayout(btn_row)
+            self.auth_stack.addWidget(pw_page)
 
-            recovery_tab = QtWidgets.QWidget()
-            recovery_layout = QtWidgets.QVBoxLayout(recovery_tab)
-            recovery_layout.setContentsMargins(14, 14, 14, 14)
-            recovery_layout.setSpacing(10)
-            recovery_layout.addWidget(self._caption("Dùng mã khôi phục nếu bạn quên mật khẩu"))
+            # 1: Mã khôi phục
+            rec_page = QtWidgets.QWidget()
+            rec_layout = QtWidgets.QVBoxLayout(rec_page)
+            rec_layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
             self.recovery_edit = QtWidgets.QLineEdit()
-            self.recovery_edit.setPlaceholderText("Mã khôi phục")
+            self.recovery_edit.setPlaceholderText("Nhập mã khôi phục gồm 24 ký tự")
             self.recovery_edit.setObjectName("SoftInput")
-            recovery_layout.addWidget(self.recovery_edit)
-            self.tabs.addTab(recovery_tab, "Mã khôi phục")
+            self.recovery_edit.setMinimumHeight(48)
+            rec_layout.addWidget(self.recovery_edit)
+            
+            rec_btn_row = QtWidgets.QHBoxLayout()
+            rec_btn_row.addStretch()
+            sw_pw2 = QtWidgets.QPushButton("Quay lại Mật khẩu")
+            sw_pw2.setObjectName("GhostButton")
+            sw_pw2.clicked.connect(lambda: self.auth_stack.setCurrentIndex(0))
+            rec_btn_row.addWidget(sw_pw2)
+            rec_btn_row.addStretch()
+            rec_layout.addLayout(rec_btn_row)
+            self.auth_stack.addWidget(rec_page)
 
-            emergency_tab = QtWidgets.QWidget()
-            emergency_layout = QtWidgets.QVBoxLayout(emergency_tab)
-            emergency_layout.setContentsMargins(14, 14, 14, 14)
-            emergency_layout.setSpacing(10)
-            emergency_layout.addWidget(self._caption("Thời gian chờ khôi phục khẩn cấp"))
-            status_label = QtWidgets.QLabel(emergency_status)
-            status_label.setObjectName("MutedLabel")
-            status_label.setWordWrap(True)
-            emergency_layout.addWidget(status_label)
-            note = QtWidgets.QLabel(
-                "Nếu bạn quên cả mật khẩu lẫn mã khôi phục, đây là đường lui an toàn để tránh bị khóa vĩnh viễn. Cơ chế này có độ trễ nên không trở thành đường lách tức thì."
-            )
-            note.setObjectName("MutedLabel")
-            note.setWordWrap(True)
-            emergency_layout.addWidget(note)
-            self.tabs.addTab(emergency_tab, "Khẩn cấp")
+            # 2: Khẩn cấp
+            emg_page = QtWidgets.QWidget()
+            emg_layout = QtWidgets.QVBoxLayout(emg_page)
+            emg_layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            emg_lbl = QtWidgets.QLabel(emergency_status)
+            emg_lbl.setObjectName("MutedLabel")
+            emg_lbl.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            emg_lbl.setWordWrap(True)
+            emg_layout.addWidget(emg_lbl)
+            
+            emg_btn_row = QtWidgets.QHBoxLayout()
+            emg_btn_row.addStretch()
+            
+            self.start_emergency_button = QtWidgets.QPushButton("Bật đếm ngược")
+            self.start_emergency_button.setObjectName("SecondaryButton")
+            self.start_emergency_button.clicked.connect(self._start_emergency)
+            emg_btn_row.addWidget(self.start_emergency_button)
+            
+            sw_pw3 = QtWidgets.QPushButton("Quay lại Mật khẩu")
+            sw_pw3.setObjectName("GhostButton")
+            sw_pw3.clicked.connect(lambda: self.auth_stack.setCurrentIndex(0))
+            emg_btn_row.addWidget(sw_pw3)
+            emg_btn_row.addStretch()
+            emg_layout.addLayout(emg_btn_row)
+            self.auth_stack.addWidget(emg_page)
 
-            layout.addWidget(self.tabs)
+            layout.addWidget(self.auth_stack)
+            self.tabs = self.auth_stack  # Tạm map để không lỗi hàm _approve cũ
         else:
             self.tabs = None
             self.password_edit = None
             self.recovery_edit = None
+            self.auth_stack = None
+
+        layout.addSpacing(40)
 
         actions = QtWidgets.QHBoxLayout()
         actions.addStretch()
 
-        self.start_emergency_button = QtWidgets.QPushButton("Bật khôi phục 7 ngày")
-        self.start_emergency_button.setObjectName("SecondaryButton")
-        self.start_emergency_button.clicked.connect(self._start_emergency)
-        self.start_emergency_button.setVisible(require_auth)
-        actions.addWidget(self.start_emergency_button)
+        self.continue_button = QtWidgets.QPushButton("XÁC NHẬN GỠ")
+        self.continue_button.setObjectName("GiantDangerButton")
+        self.continue_button.setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
+        self.continue_button.clicked.connect(self._approve)
+        actions.addWidget(self.continue_button)
 
         cancel_button = QtWidgets.QPushButton("Hủy")
-        cancel_button.setObjectName("SecondaryButton")
+        cancel_button.setObjectName("GiantButton")
+        cancel_button.setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
         cancel_button.clicked.connect(self.reject)
         actions.addWidget(cancel_button)
-
-        continue_button = QtWidgets.QPushButton("Tiếp tục gỡ cài đặt")
-        continue_button.setObjectName("PrimaryButton")
-        continue_button.clicked.connect(self._approve)
-        actions.addWidget(continue_button)
+        
+        actions.addStretch()
         layout.addLayout(actions)
+        layout.addStretch()
 
     def _caption(self, text: str) -> QtWidgets.QLabel:
         label = QtWidgets.QLabel(text)
@@ -224,8 +263,8 @@ class UninstallApprovalDialog(QtWidgets.QDialog):
             approved=True,
             purge_data=self.purge_checkbox.isChecked(),
         )
-        if self._require_auth and self.tabs is not None:
-            current_index = self.tabs.currentIndex()
+        if self._require_auth and self.auth_stack is not None:
+            current_index = self.auth_stack.currentIndex()
             if current_index == 0:
                 result.password = (self.password_edit.text() if self.password_edit else "").strip()
             elif current_index == 1:

@@ -2,13 +2,13 @@
   "product": "CaiNghien Focus Guard",
   "latest": {
     "version": "0.3.12",
-    "published_at": "2026-04-04",
+    "published_at": "2026-05-23",
     "installer": "../downloads/0.3.12/CaiNghienFocusGuard-Setup-0.3.12.exe",
     "notes": [
       "Khóa cứng việc đổi lịch và lưu cấu hình khi đang ở khung giờ nghiêm khắc để không còn đường vòng.",
       "Lock screen không còn tự reset ô mật khẩu khi enforcement refresh, đồng thời thêm nút Hiện/Ẩn để kiểm tra nội dung đang gõ."
     ],
-    "sha256": "369862cb89f918d43670f2ace2b11160846db2df09721228fd42d46d96d04321",
-    "size_bytes": 33255318
+    "sha256": "9068b1bfead5731c7cd8485488318a0148c35ae708730a246cce110ac731f2be",
+    "size_bytes": 33204325
   }
 }

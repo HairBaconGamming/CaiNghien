@@ -8,12 +8,9 @@ from PySide6 import QtCore
 from ..config import ConfigStore
 from ..models import (
     AppConfig,
-    ManualLockState,
     PasswordRecord,
     RecoveryRequest,
     RuntimeState,
-    StudyProfile,
-    StudySessionState,
     WeeklyStats,
 )
 from ..ui.lock_overlay import StrictLockManager
@@ -21,20 +18,14 @@ from .hosts_blocker import HostsBlocker
 from .process_guard import SystemGuard
 from .runtime_rules import (
     ProtectionWindow,
-    StudyWindow,
     blocked_domains_for_config,
     delay_target_for_change,
     is_service_stale,
     pending_change_due,
-    resolve_active_study_occurrence,
     resolve_active_window,
-    resolve_next_study_occurrence,
     resolve_next_window,
-    resolve_pending_manual_countdown,
     sanitize_runtime_state,
     should_warn_before_lock,
-    should_warn_before_study,
-    study_window_from_session,
 )
 from .security import (
     generate_recovery_code,
@@ -59,20 +50,11 @@ class EnforcementStatus:
     current_window_label: str
     next_window_text: str
     pending_change_text: str
-    manual_countdown_text: str
     safe_mode: bool
     safe_mode_reason: str
     service_alive: bool
     weekly_stats: WeeklyStats
     today_schedule_label: str
-    study_active: bool
-    study_profile_name: str
-    study_label: str
-    study_remaining_text: str
-    next_study_text: str
-    study_summary: str
-    study_resources: list[str]
-    study_allowed_apps: list[str]
 
 
 class EnforcementController(QtCore.QObject):
@@ -131,10 +113,7 @@ class EnforcementController(QtCore.QObject):
         self._state = self._store.load_state()
         return bool(
             self._config.has_password
-            and (
-                self._state.manual_lock is not None
-                or (self._config.mode == "strict" and self._config.protection_enabled)
-            )
+            and (self._config.mode == "strict" and self._config.protection_enabled)
         )
 
     def emergency_recovery_due(self, when: datetime | None = None) -> bool:
@@ -456,84 +435,6 @@ class EnforcementController(QtCore.QObject):
         self._apply_config(updated, now=datetime.now(), log_message="Đã tắt bảo vệ.")
         return True, "Đã tắt bảo vệ."
 
-    def start_manual_lock(self, countdown_minutes: int) -> tuple[bool, str]:
-        if not self._config.has_password:
-            return False, "Cần đặt mật khẩu trước khi bật đếm ngược khóa thủ công."
-        if countdown_minutes < 1:
-            return False, "Đếm ngược phải từ 1 phút trở lên."
-
-        now = datetime.now()
-        activate_at = now + timedelta(minutes=countdown_minutes)
-        end_at = activate_at + timedelta(minutes=self._config.manual_lock_duration_minutes)
-        self._state = self._store.load_state()
-        self._state.manual_lock = ManualLockState(
-            activate_at=activate_at.isoformat(timespec="seconds"),
-            end_at=end_at.isoformat(timespec="seconds"),
-            created_at=now.isoformat(timespec="seconds"),
-        )
-        self._save_state()
-        message = f"Khóa thủ công sẽ bật lúc {activate_at.strftime('%H:%M')} và tự hết lúc {end_at.strftime('%H:%M')}."
-        self._log_event(self._state, "manual_lock_scheduled", message, now=now)
-        self.evaluate(force=True)
-        return True, message
-
-    def cancel_manual_lock(self, password: str | None = None) -> tuple[bool, str]:
-        self._state = self._store.load_state()
-        if self._state.manual_lock is None:
-            return True, "Không có khóa thủ công nào đang chờ."
-        if not self.verify_strict_password(password or ""):
-            self._log_event(
-                self._state,
-                "manual_lock_cancel_failed",
-                "Nhập sai mật khẩu khi cố gắng hủy khóa thủ công.",
-                level="warning",
-                counter_field="failed_unlocks",
-            )
-            return False, "Mật khẩu không đúng."
-        self._state.manual_lock = None
-        self._save_state()
-        self._log_event(self._state, "manual_lock_cancelled", "Đã hủy đếm ngược khóa thủ công.")
-        self.evaluate(force=True)
-        return True, "Đã hủy khóa thủ công."
-
-    def start_study_session(
-        self,
-        profile_id: str,
-        *,
-        duration_minutes: int | None = None,
-    ) -> tuple[bool, str]:
-        now = datetime.now()
-        self._config = self._store.load()
-        self._state = self._store.load_state()
-        active_window = resolve_active_window(self._config, self._state, now)
-        if active_window is not None and active_window.strict:
-            return False, "Không thể bắt đầu phiên học khi strict mode đang hoạt động."
-        if self._state.study_session is not None:
-            return False, "Đang có một phiên học khác hoạt động."
-
-        profile = self._config.study_profile(profile_id)
-        minutes = max(15, int(duration_minutes or profile.default_duration_minutes or 50))
-        session = self._build_study_session(
-            profile=profile,
-            now=now,
-            source="manual",
-            end_at=now + timedelta(minutes=minutes),
-            duration_minutes=minutes,
-        )
-        self._activate_study_session(session, now=now)
-        self.evaluate(force=True)
-        return True, f"Đã bắt đầu phiên học “{profile.name}” trong {minutes} phút."
-
-    def abort_study_session(self, reason: str) -> tuple[bool, str]:
-        now = datetime.now()
-        self._state = self._store.load_state()
-        session = self._state.study_session
-        if session is None:
-            return False, "Không có phiên học nào đang chạy."
-        self._finish_study_session(session, completed=False, now=now, reason=reason.strip() or "Dừng sớm")
-        self.evaluate(force=True)
-        return True, "Đã dừng sớm phiên học và ghi nhận thất bại."
-
     def evaluate(self, *, force: bool = False) -> None:
         now = datetime.now()
         self._config = self._store.load()
@@ -592,28 +493,8 @@ class EnforcementController(QtCore.QObject):
             self.attention_requested.emit("Cảnh báo trước giờ khóa", message)
             state_changed = True
 
-        study_warning = should_warn_before_study(self._config, self._state, now)
-        if study_warning:
-            occurrence, offset = study_warning
-            warning_key = occurrence.warning_key(offset)
-            if self._state.last_study_warning_key != warning_key:
-                self._state.last_study_warning_key = warning_key
-                message = (
-                    f"Cảnh báo học tập: phiên “{occurrence.title}” sẽ bắt đầu lúc "
-                    f"{occurrence.start.strftime('%H:%M')} sau khoảng {offset} phút."
-                )
-                self._log_event(
-                    self._state,
-                    "study_warning",
-                    message,
-                    now=now,
-                    meta={"profile_name": occurrence.title, "offset_minutes": offset},
-                )
-                self.attention_requested.emit("Chuẩn bị vào phiên học", message)
-                state_changed = True
 
         active_window = resolve_active_window(self._config, self._state, now)
-        pending_countdown = resolve_pending_manual_countdown(self._state, now)
         service_alive = self._config.service_enabled and not is_service_stale(self._state, now)
         strict_access_required = bool(
             active_window and active_window.strict and self._config.has_password
@@ -654,25 +535,10 @@ class EnforcementController(QtCore.QObject):
                 )
             self._last_window_key = current_window_key
 
-        study_window, study_profile = self._sync_study_session(now=now, active_window=active_window)
-        if study_window is not None:
-            minute_key = now.strftime("%Y-%m-%dT%H:%M")
-            if self._state.last_study_counted_minute != minute_key:
-                self._state.last_study_counted_minute = minute_key
-                self._state.bump_counter(now.date(), "study_minutes", 1)
-                state_changed = True
-            if study_profile is not None:
-                self._enforce_study_processes(study_profile, now)
-        elif self._state.last_study_counted_minute is not None:
-            self._state.last_study_counted_minute = None
-            self._last_process_log_minute = None
-            self._last_process_log_names.clear()
-            state_changed = True
+
 
         hosts_active, admin, safe_mode_reason = self._evaluate_hosts(
             active_window=active_window,
-            study_profile=study_profile,
-            study_active=study_window is not None,
             service_alive=service_alive,
             force=force,
             now=now,
@@ -716,14 +582,11 @@ class EnforcementController(QtCore.QObject):
         status = self._build_status(
             now=now,
             active_window=active_window,
-            pending_countdown=pending_countdown,
             hosts_active=hosts_active,
             admin=admin,
             lock_active=lock_active,
             safe_mode_reason=safe_mode_reason or "",
             service_alive=service_alive,
-            study_window=study_window,
-            study_profile=study_profile,
         )
         self.status_changed.emit(status)
 
@@ -780,193 +643,17 @@ class EnforcementController(QtCore.QObject):
         self.config_changed.emit(self._config)
         return True
 
-    def _build_study_session(
-        self,
-        *,
-        profile: StudyProfile,
-        now: datetime,
-        source: str,
-        end_at: datetime,
-        duration_minutes: int,
-        schedule_occurrence=None,
-    ) -> StudySessionState:
-        return StudySessionState(
-            session_id=f"{source}:{profile.id}:{now.isoformat(timespec='seconds')}",
-            profile_id=profile.id,
-            profile_name=profile.name,
-            source=source,
-            started_at=now.isoformat(timespec="seconds"),
-            target_end_at=end_at.isoformat(timespec="seconds"),
-            duration_minutes=max(1, duration_minutes),
-            resource_urls=list(profile.resource_urls),
-            allowed_apps=list(profile.allowed_apps),
-            blocked_processes=list(profile.blocked_processes),
-            blocked_domains=blocked_domains_for_config(self._config, profile),
-            schedule_day_key=schedule_occurrence.day_key if schedule_occurrence else None,
-            schedule_start_at=schedule_occurrence.start.isoformat(timespec="seconds") if schedule_occurrence else None,
-            schedule_end_at=schedule_occurrence.end.isoformat(timespec="seconds") if schedule_occurrence else None,
-        )
-
-    def _activate_study_session(self, session: StudySessionState, *, now: datetime) -> None:
-        self._state.study_session = session
-        self._save_state()
-        self._log_event(
-            self._state,
-            "study_session_started",
-            f"Đã bắt đầu phiên học “{session.profile_name}”.",
-            now=now,
-            meta={
-                "profile_id": session.profile_id,
-                "profile_name": session.profile_name,
-                "source": session.source,
-                "duration_minutes": session.duration_minutes,
-            },
-        )
-        for domain in session.blocked_domains:
-            self._log_event(
-                self._state,
-                "study_site_blocked",
-                f"Đang siết web xao nhãng {domain} trong phiên “{session.profile_name}”.",
-                counter_field="study_site_blocks",
-                now=now,
-                meta={"source": domain, "profile_name": session.profile_name},
-            )
-
-    def _finish_study_session(
-        self,
-        session: StudySessionState,
-        *,
-        completed: bool,
-        now: datetime,
-        reason: str | None = None,
-    ) -> None:
-        started_at = session.started_dt or now
-        elapsed_minutes = max(1, int((now - started_at).total_seconds() // 60))
-        if completed:
-            self._state.bump_counter(now.date(), "study_sessions_completed", 1)
-            message = f"Đã hoàn thành phiên học “{session.profile_name}”."
-            kind = "study_session_completed"
-        else:
-            self._state.bump_counter(now.date(), "study_sessions_aborted", 1)
-            message = f"Đã dừng sớm phiên học “{session.profile_name}”."
-            kind = "study_session_aborted"
-        self._state.study_session = None
-        self._save_state()
-        self._log_event(
-            self._state,
-            kind,
-            message,
-            level="warning" if not completed else "info",
-            now=now,
-            meta={
-                "profile_id": session.profile_id,
-                "profile_name": session.profile_name,
-                "source": session.source,
-                "elapsed_minutes": elapsed_minutes,
-                "reason": reason or "",
-            },
-        )
-        self._last_process_log_minute = None
-        self._last_process_log_names.clear()
-
-    def _sync_study_session(
-        self,
-        *,
-        now: datetime,
-        active_window: ProtectionWindow | None,
-    ) -> tuple[StudyWindow | None, StudyProfile | None]:
-        session = self._state.study_session
-        if session is not None:
-            end_at = session.target_end_dt
-            if end_at is None or now >= end_at:
-                self._finish_study_session(session, completed=True, now=now)
-                session = None
-            elif active_window is not None and active_window.strict:
-                self._finish_study_session(
-                    session,
-                    completed=False,
-                    now=now,
-                    reason="Bị ngắt bởi strict mode",
-                )
-                session = None
-
-        scheduled_occurrence = None
-        if self._config.protection_enabled:
-            scheduled_occurrence = resolve_active_study_occurrence(self._config, now)
-
-        if (
-            scheduled_occurrence is not None
-            and active_window is not None
-            and active_window.strict
-        ):
-            conflict_key = f"{scheduled_occurrence.profile_id}:{scheduled_occurrence.start.isoformat()}"
-            if self._state.last_study_conflict_key != conflict_key:
-                self._state.last_study_conflict_key = conflict_key
-                self._log_event(
-                    self._state,
-                    "study_conflict_strict",
-                    f"Phiên học “{scheduled_occurrence.title}” không thể bắt đầu vì strict mode đang hoạt động.",
-                    level="warning",
-                    now=now,
-                    meta={"profile_name": scheduled_occurrence.title},
-                )
-        elif self._state.last_study_conflict_key:
-            self._state.last_study_conflict_key = None
-
-        if self._state.study_session is None and scheduled_occurrence is not None and (
-            active_window is None or not active_window.strict
-        ):
-            profile = self._config.study_profile(scheduled_occurrence.profile_id)
-            session = self._build_study_session(
-                profile=profile,
-                now=now,
-                source="scheduled",
-                end_at=scheduled_occurrence.end,
-                duration_minutes=max(
-                    1,
-                    int((scheduled_occurrence.end - now).total_seconds() // 60),
-                ),
-                schedule_occurrence=scheduled_occurrence,
-            )
-            self._activate_study_session(session, now=now)
-
-        study_window = study_window_from_session(self._state, now)
-        if study_window is None:
-            return None, None
-        return study_window, self._config.study_profile(self._state.study_session.profile_id) if self._state.study_session else None
-
-    def _enforce_study_processes(self, profile: StudyProfile, now: datetime) -> None:
-        minute_key = now.strftime("%Y-%m-%dT%H:%M")
-        if minute_key != self._last_process_log_minute:
-            self._last_process_log_minute = minute_key
-            self._last_process_log_names.clear()
-
-        for process_name in SystemGuard.enforce_process_block(profile.blocked_processes):
-            if process_name in self._last_process_log_names:
-                continue
-            self._last_process_log_names.add(process_name)
-            self._log_event(
-                self._state,
-                "study_app_blocked",
-                f"Đã chặn ứng dụng xao nhãng {process_name} trong phiên “{profile.name}”.",
-                counter_field="study_app_blocks",
-                now=now,
-                meta={"source": process_name, "profile_name": profile.name},
-            )
-
     def _evaluate_hosts(
         self,
         *,
         active_window: ProtectionWindow | None,
-        study_profile: StudyProfile | None,
-        study_active: bool,
         service_alive: bool,
         force: bool,
         now: datetime,
     ) -> tuple[bool, bool, str | None]:
         admin = self._hosts.is_elevated()
         safe_mode_reason: str | None = None
-        if active_window is None and not study_active:
+        if active_window is None:
             if self._hosts_applied and admin:
                 ok, message = self._hosts.remove_block()
                 self._hosts_applied = False
@@ -984,7 +671,7 @@ class EnforcementController(QtCore.QObject):
                     )
             return False, admin, None
 
-        blocked_domains = blocked_domains_for_config(self._config, study_profile if study_active else None)
+        blocked_domains = blocked_domains_for_config(self._config)
         if not blocked_domains:
             return False, admin, "Danh sách chặn rỗng, enforcement hosts không còn tác dụng."
 
@@ -1082,33 +769,20 @@ class EnforcementController(QtCore.QObject):
         *,
         now: datetime,
         active_window: ProtectionWindow | None,
-        pending_countdown: tuple[datetime, datetime] | None,
         hosts_active: bool,
         admin: bool,
         lock_active: bool,
         safe_mode_reason: str,
         service_alive: bool,
-        study_window: StudyWindow | None,
-        study_profile: StudyProfile | None,
     ) -> EnforcementStatus:
         next_window = resolve_next_window(self._config, self._state, now)
-        next_study = resolve_next_study_occurrence(self._config, now)
-
-        pending_text = "Không có thay đổi trì hoãn."
         if self._state.pending_config:
             pending_text = f"Chờ áp dụng lúc {self._state.pending_config.apply_at.replace('T', ' ')}"
-
-        manual_countdown_text = "Không có."
-        if pending_countdown:
-            activate_at, end_at = pending_countdown
-            manual_countdown_text = f"Bật lúc {activate_at.strftime('%H:%M')} - tự hết {end_at.strftime('%H:%M')}"
-        elif active_window is not None and active_window.source == "manual_lock":
-            manual_countdown_text = f"Đang khóa đến {active_window.end.strftime('%H:%M')}"
+        else:
+            pending_text = "Không có thay đổi trì hoãn."
 
         if lock_active:
             summary = "Máy tính đang bị khóa bởi chế độ nghiêm khắc."
-        elif study_window is not None:
-            summary = f"Đang trong phiên học “{study_window.profile_name}”."
         elif active_window is not None:
             summary = "Đang trong khung giờ chặn tập trung."
         elif self._config.protection_enabled:
@@ -1120,31 +794,9 @@ class EnforcementController(QtCore.QObject):
             summary = safe_mode_reason
 
         next_window_text = "Không có lịch tiếp theo."
+        next_window = resolve_next_window(self._config, self._state, now)
         if next_window:
             next_window_text = f"{next_window.start.strftime('%a %d/%m %H:%M')} -> {next_window.end.strftime('%H:%M')}"
-
-        next_study_text = "Không có phiên học theo lịch."
-        if next_study:
-            next_study_text = f"{next_study.title}: {next_study.start.strftime('%a %d/%m %H:%M')} -> {next_study.end.strftime('%H:%M')}"
-
-        study_label = "Chưa có phiên học"
-        study_profile_name = "Chưa chọn"
-        study_remaining_text = "Sẵn sàng bắt đầu thủ công."
-        study_summary = "Chưa có phiên học đang chạy."
-        study_resources: list[str] = []
-        study_allowed_apps: list[str] = []
-        if study_window is not None and study_profile is not None:
-            remaining = max(0, int((study_window.end - now).total_seconds() // 60))
-            study_label = study_window.label
-            study_profile_name = study_profile.name
-            study_remaining_text = f"Còn khoảng {remaining} phút."
-            study_summary = f"Đang siết tài nguyên ngoài học cho profile “{study_profile.name}”."
-            study_resources = list(study_profile.resource_urls)
-            study_allowed_apps = list(study_profile.allowed_apps)
-        elif study_profile is not None:
-            study_profile_name = study_profile.name
-            study_resources = list(study_profile.resource_urls)
-            study_allowed_apps = list(study_profile.allowed_apps)
 
         return EnforcementStatus(
             now_text=now.strftime("%d/%m/%Y %H:%M:%S"),
@@ -1158,20 +810,11 @@ class EnforcementController(QtCore.QObject):
             current_window_label=active_window.label if active_window else self._config.schedule_window(now).label,
             next_window_text=next_window_text,
             pending_change_text=pending_text,
-            manual_countdown_text=manual_countdown_text,
             safe_mode=bool(safe_mode_reason),
             safe_mode_reason=safe_mode_reason,
             service_alive=service_alive,
             weekly_stats=self._store.weekly_stats(self._state, now=now),
             today_schedule_label=self._config.schedule_window(now).label,
-            study_active=study_window is not None,
-            study_profile_name=study_profile_name,
-            study_label=study_label,
-            study_remaining_text=study_remaining_text,
-            next_study_text=next_study_text,
-            study_summary=study_summary,
-            study_resources=study_resources,
-            study_allowed_apps=study_allowed_apps,
         )
 
     def _handle_unlock_attempt(self, password: str) -> None:

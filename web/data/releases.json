@@ -1,7 +1,7 @@
 {
   "latest": {
     "version": "0.3.12",
-    "published_at": "2026-04-04",
+    "published_at": "2026-05-23",
     "notes": [
       "Khóa cứng việc đổi lịch và lưu cấu hình khi đang ở khung giờ nghiêm khắc để không còn đường vòng.",
       "Lock screen không còn tự reset ô mật khẩu khi enforcement refresh, đồng thời thêm nút Hiện/Ẩn để kiểm tra nội dung đang gõ."
@@ -9,20 +9,20 @@
     "files": {
       "installer": {
         "url": "../downloads/0.3.12/CaiNghienFocusGuard-Setup-0.3.12.exe",
-        "size_bytes": 33255318,
-        "sha256": "369862cb89f918d43670f2ace2b11160846db2df09721228fd42d46d96d04321"
+        "size_bytes": 33204325,
+        "sha256": "9068b1bfead5731c7cd8485488318a0148c35ae708730a246cce110ac731f2be"
       },
       "portable": {
         "url": "../downloads/0.3.12/CaiNghienFocusGuard-0.3.12.exe",
-        "size_bytes": 47185839,
-        "sha256": "8c44b657c2e520c3a2f453ebae18a5fae82b08e4562d69759041c6e27768ebe9"
+        "size_bytes": 47140169,
+        "sha256": "bf46cc460f5892eebf0e20b0dbeac9a9577b153b08fd007ea26b3568125f4b6b"
       }
     }
   },
   "releases": [
     {
       "version": "0.3.12",
-      "published_at": "2026-04-04",
+      "published_at": "2026-05-23",
       "notes": [
         "Khóa cứng việc đổi lịch và lưu cấu hình khi đang ở khung giờ nghiêm khắc để không còn đường vòng.",
         "Lock screen không còn tự reset ô mật khẩu khi enforcement refresh, đồng thời thêm nút Hiện/Ẩn để kiểm tra nội dung đang gõ."
@@ -30,13 +30,13 @@
       "files": {
         "installer": {
           "url": "../downloads/0.3.12/CaiNghienFocusGuard-Setup-0.3.12.exe",
-          "size_bytes": 33255318,
-          "sha256": "369862cb89f918d43670f2ace2b11160846db2df09721228fd42d46d96d04321"
+          "size_bytes": 33204325,
+          "sha256": "9068b1bfead5731c7cd8485488318a0148c35ae708730a246cce110ac731f2be"
         },
         "portable": {
           "url": "../downloads/0.3.12/CaiNghienFocusGuard-0.3.12.exe",
-          "size_bytes": 47185839,
-          "sha256": "8c44b657c2e520c3a2f453ebae18a5fae82b08e4562d69759041c6e27768ebe9"
+          "size_bytes": 47140169,
+          "sha256": "bf46cc460f5892eebf0e20b0dbeac9a9577b153b08fd007ea26b3568125f4b6b"
         }
       }
     },

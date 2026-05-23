@@ -11,12 +11,9 @@ from .. import __version__
 from ..models import (
     AppConfig,
     DaySchedule,
-    StudyDaySchedule,
-    StudyProfile,
     WEEKDAY_KEYS,
     WEEKDAY_LABELS,
     dedupe_domains,
-    dedupe_processes,
     dedupe_text_values,
 )
 from ..services.enforcement import EnforcementController, EnforcementStatus
@@ -27,7 +24,6 @@ from ..services.security import (
     validate_password,
 )
 from ..services.uninstall_flow import find_uninstaller, launch_uninstaller, write_uninstall_approval
-from ..services.updater import UpdateInfo, UpdateManager
 from ..services.windows_guard import (
     WindowsServiceManager,
     WindowsSessionController,
@@ -54,11 +50,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.controller = controller
         self.startup_manager = WindowsStartupManager()
         self.service_manager = WindowsServiceManager()
-        self.update_manager = UpdateManager(controller.store)
         self._ignore_close_to_tray = False
         self._last_status: EnforcementStatus | None = None
         self._day_editors: dict[str, tuple[QtWidgets.QCheckBox, QtWidgets.QTimeEdit, QtWidgets.QTimeEdit]] = {}
-        self._study_day_editors: dict[str, tuple[QtWidgets.QCheckBox, QtWidgets.QTimeEdit, QtWidgets.QTimeEdit, QtWidgets.QComboBox]] = {}
         self._stats_labels: dict[str, QtWidgets.QLabel] = {}
         self._side_panel: QtWidgets.QFrame | None = None
         self._side_panel_scroll: QtWidgets.QScrollArea | None = None
@@ -66,30 +60,96 @@ class MainWindow(QtWidgets.QMainWindow):
         self._metrics_grid: QtWidgets.QGridLayout | None = None
         self._metric_cards: list[QtWidgets.QFrame] = []
         self._sidebar_compact = False
-        self._study_profiles_cache: list[StudyProfile] = []
-        self._study_profile_loading = False
-        self._study_profile_editing_id: str | None = None
-        self._hold_abort_timer: QtCore.QTimer | None = None
-        self._hold_abort_remaining = 0
         self._build_ui()
         self._build_tray()
         self._connect_signals()
         self._load_config(controller.config)
-        QtCore.QTimer.singleShot(3500, self.check_for_updates_silent)
 
     def _build_ui(self) -> None:
         self.setWindowTitle("CaiNghiện Focus Guard")
-        self.resize(1500, 1040)
-        self.setMinimumSize(1240, 820)
+        self.resize(1100, 760)
+        self.setMinimumSize(960, 680)
         central = QtWidgets.QWidget()
         central.setObjectName("AppShell")
         self.setCentralWidget(central)
+
+        self.stacked_widget = QtWidgets.QStackedWidget(central)
         shell = QtWidgets.QHBoxLayout(central)
-        shell.setContentsMargins(22, 22, 22, 22)
-        shell.setSpacing(18)
+        shell.setContentsMargins(0, 0, 0, 0)
+        shell.addWidget(self.stacked_widget)
+
+        self._build_focus_view()
+        self._build_settings_view()
+        
+        self.stacked_widget.setCurrentIndex(0)
+
+    def _build_focus_view(self) -> None:
+        page = QtWidgets.QWidget()
+        page.setObjectName("FocusPage")
+        layout = QtWidgets.QVBoxLayout(page)
+        layout.setContentsMargins(32, 32, 32, 32)
+        
+        top_bar = QtWidgets.QHBoxLayout()
+        top_bar.addStretch()
+        self.open_settings_button = QtWidgets.QToolButton()
+        self.open_settings_button.setText("⚙️ Cài Đặt")
+        self.open_settings_button.setObjectName("GhostButton")
+        self.open_settings_button.setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
+        top_bar.addWidget(self.open_settings_button)
+        layout.addLayout(top_bar)
+        
+        layout.addStretch()
+        
+        center_layout = QtWidgets.QVBoxLayout()
+        center_layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        
+        self.focus_status_label = QtWidgets.QLabel("ĐANG BẢO VỆ")
+        self.focus_status_label.setObjectName("GiantStatus")
+        self.focus_status_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        center_layout.addWidget(self.focus_status_label)
+        
+        self.focus_substatus_label = QtWidgets.QLabel("Bảo vệ toàn diện")
+        self.focus_substatus_label.setObjectName("GiantSubstatus")
+        self.focus_substatus_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        center_layout.addWidget(self.focus_substatus_label)
+        
+        layout.addLayout(center_layout)
+        layout.addSpacing(60)
+        
+        self.main_focus_toggle_button = QtWidgets.QPushButton("Tắt bảo vệ")
+        self.main_focus_toggle_button.setObjectName("GiantButton")
+        self.main_focus_toggle_button.setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
+        
+        btn_layout = QtWidgets.QHBoxLayout()
+        btn_layout.addStretch()
+        btn_layout.addWidget(self.main_focus_toggle_button)
+        btn_layout.addStretch()
+        layout.addLayout(btn_layout)
+        
+        layout.addStretch()
+        self.stacked_widget.addWidget(page)
+
+    def _build_settings_view(self) -> None:
+        page = QtWidgets.QWidget()
+        page.setObjectName("SettingsPage")
+        
+        layout = QtWidgets.QVBoxLayout(page)
+        layout.setContentsMargins(22, 12, 22, 22)
+        layout.setSpacing(12)
+        
+        back_row = QtWidgets.QHBoxLayout()
+        self.close_settings_button = QtWidgets.QToolButton()
+        self.close_settings_button.setText("← Quay lại")
+        self.close_settings_button.setObjectName("GhostButton")
+        self.close_settings_button.setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
+        back_row.addWidget(self.close_settings_button)
+        back_row.addStretch()
+        layout.addLayout(back_row)
+        
         self._side_panel = self._create_side_panel()
         self._side_panel_scroll = self._wrap_side_panel(self._side_panel)
         self._workspace_scroll = self._create_workspace()
+        
         splitter = QtWidgets.QSplitter(QtCore.Qt.Orientation.Horizontal)
         splitter.setChildrenCollapsible(False)
         splitter.setHandleWidth(10)
@@ -97,8 +157,10 @@ class MainWindow(QtWidgets.QMainWindow):
         splitter.addWidget(self._workspace_scroll)
         splitter.setStretchFactor(0, 0)
         splitter.setStretchFactor(1, 1)
-        splitter.setSizes([348, 1100])
-        shell.addWidget(splitter, 1)
+        splitter.setSizes([320, 780])
+        
+        layout.addWidget(splitter, 1)
+        self.stacked_widget.addWidget(page)
 
     def _wrap_side_panel(self, panel: QtWidgets.QFrame) -> QtWidgets.QScrollArea:
         scroll = QtWidgets.QScrollArea()
@@ -236,7 +298,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def _create_workspace(self) -> QtWidgets.QWidget:
         content = QtWidgets.QWidget()
         content.setObjectName("Workspace")
-        content.setMinimumWidth(900)
+        content.setMinimumWidth(600)
         content.setSizePolicy(
             QtWidgets.QSizePolicy.Policy.Expanding,
             QtWidgets.QSizePolicy.Policy.Expanding,
@@ -259,13 +321,10 @@ class MainWindow(QtWidgets.QMainWindow):
         tabs.tabBar().setObjectName("WorkspaceTabBar")
 
         tabs.addTab(self._wrap_tab_page(self._create_overview_tab()), "Tổng quan")
-        tabs.addTab(self._wrap_tab_page(self._create_study_tab()), "Học tập")
         tabs.addTab(self._wrap_tab_page(self._create_schedule_tab()), "Lịch")
         tabs.addTab(self._wrap_tab_page(self._create_sites_tab()), "Trang web")
         tabs.addTab(self._wrap_tab_page(self._create_strict_tab()), "Nghiêm khắc")
-        tabs.addTab(self._wrap_tab_page(self._create_system_tab()), "Hệ thống")
-        tabs.addTab(self._wrap_tab_page(self._create_help_tab()), "Trợ giúp")
-        tabs.addTab(self._wrap_tab_page(self._create_log_tab()), "Nhật ký")
+        tabs.addTab(self._wrap_tab_page(self._create_settings_help_tab()), "Cài đặt & Trợ giúp")
 
         layout.addWidget(tabs, 1)
         return content
@@ -295,37 +354,15 @@ class MainWindow(QtWidgets.QMainWindow):
         row.setVerticalSpacing(18)
         row.addWidget(self._create_guardrail_card(), 0, 0)
         row.addWidget(self._create_stats_card(), 0, 1)
-        row.addWidget(self._create_study_overview_card(), 1, 0)
-        row.addWidget(self._create_study_report_card(), 1, 1)
         row.setColumnStretch(0, 1)
         row.setColumnStretch(1, 1)
         layout.addLayout(row)
-        layout.addStretch()
-        return page
-
-    def _create_study_tab(self) -> QtWidgets.QWidget:
-        page, layout = self._create_tab_page()
-        grid = QtWidgets.QGridLayout()
-        grid.setHorizontalSpacing(18)
-        grid.setVerticalSpacing(18)
-        grid.addWidget(self._create_study_session_card(), 0, 0)
-        grid.addWidget(self._create_study_profile_card(), 0, 1)
-        grid.setColumnStretch(0, 1)
-        grid.setColumnStretch(1, 1)
-        layout.addLayout(grid)
         layout.addStretch()
         return page
 
     def _create_schedule_tab(self) -> QtWidgets.QWidget:
         page, layout = self._create_tab_page()
-        row = QtWidgets.QGridLayout()
-        row.setHorizontalSpacing(18)
-        row.setVerticalSpacing(18)
-        row.addWidget(self._create_schedule_card(), 0, 0)
-        row.addWidget(self._create_study_schedule_card(), 0, 1)
-        row.setColumnStretch(0, 1)
-        row.setColumnStretch(1, 1)
-        layout.addLayout(row)
+        layout.addWidget(self._create_schedule_card())
         layout.addStretch()
         return page
 
@@ -340,28 +377,11 @@ class MainWindow(QtWidgets.QMainWindow):
         layout.addStretch()
         return page
 
-    def _create_system_tab(self) -> QtWidgets.QWidget:
+    def _create_settings_help_tab(self) -> QtWidgets.QWidget:
         page, layout = self._create_tab_page()
         layout.addWidget(self._create_system_card())
+        layout.addWidget(self._create_docs_card())
         layout.addStretch()
-        return page
-
-    def _create_help_tab(self) -> QtWidgets.QWidget:
-        page, layout = self._create_tab_page()
-        grid = QtWidgets.QGridLayout()
-        grid.setHorizontalSpacing(18)
-        grid.setVerticalSpacing(18)
-        grid.addWidget(self._create_helper_card(), 0, 0)
-        grid.addWidget(self._create_docs_card(), 0, 1)
-        grid.setColumnStretch(0, 1)
-        grid.setColumnStretch(1, 1)
-        layout.addLayout(grid)
-        layout.addStretch()
-        return page
-
-    def _create_log_tab(self) -> QtWidgets.QWidget:
-        page, layout = self._create_tab_page()
-        layout.addWidget(self._create_log_card(), 1)
         return page
 
     def _create_focus_banner(self) -> QtWidgets.QFrame:
@@ -629,45 +649,6 @@ class MainWindow(QtWidgets.QMainWindow):
         layout.addWidget(self.uninstall_button)
         return frame
 
-    def _create_helper_card(self) -> QtWidgets.QFrame:
-        frame, layout = self._card(
-            "Helper và chẩn đoán",
-            "Kiểm tra nhanh quyền Admin, dịch vụ, file dữ liệu và các đường cứu hộ an toàn nếu hệ thống mật khẩu hoặc runtime bị lỗi.",
-        )
-        self.helper_summary_label = QtWidgets.QLabel("Đang tải chẩn đoán hệ thống.")
-        self.helper_summary_label.setObjectName("MutedLabel")
-        self.helper_summary_label.setWordWrap(True)
-        layout.addWidget(self._labeled_value("Kết luận nhanh", self.helper_summary_label))
-
-        self.helper_paths_label = QtWidgets.QLabel("Đang tải đường dẫn dữ liệu.")
-        self.helper_paths_label.setObjectName("MutedLabel")
-        self.helper_paths_label.setWordWrap(True)
-        layout.addWidget(self._labeled_value("Đường dẫn quan trọng", self.helper_paths_label))
-
-        action_row = QtWidgets.QGridLayout()
-        action_row.setHorizontalSpacing(12)
-        action_row.setVerticalSpacing(12)
-        self.refresh_helper_button = QtWidgets.QPushButton("Làm mới helper")
-        self.refresh_helper_button.setObjectName("SecondaryButton")
-        action_row.addWidget(self.refresh_helper_button, 0, 0)
-        self.open_data_folder_button = QtWidgets.QPushButton("Mở thư mục dữ liệu")
-        self.open_data_folder_button.setObjectName("SecondaryButton")
-        action_row.addWidget(self.open_data_folder_button, 0, 1)
-        self.open_readme_button = QtWidgets.QPushButton("Mở README")
-        self.open_readme_button.setObjectName("SecondaryButton")
-        action_row.addWidget(self.open_readme_button, 1, 0)
-        self.emergency_cleanup_button = QtWidgets.QPushButton("Dọn dẹp khẩn cấp")
-        self.emergency_cleanup_button.setObjectName("DangerButton")
-        action_row.addWidget(self.emergency_cleanup_button, 1, 1)
-        layout.addLayout(action_row)
-
-        self.helper_report_output = QtWidgets.QPlainTextEdit()
-        self.helper_report_output.setReadOnly(True)
-        self.helper_report_output.setObjectName("LogOutput")
-        self.helper_report_output.setMinimumHeight(300)
-        layout.addWidget(self.helper_report_output)
-        return frame
-
     def _create_docs_card(self) -> QtWidgets.QFrame:
         frame, layout = self._card(
             "Tài liệu ngay trong app",
@@ -702,205 +683,6 @@ class MainWindow(QtWidgets.QMainWindow):
         layout.addWidget(self._labeled_value("Chế độ an toàn", self.safe_mode_label))
         return frame
 
-    def _create_study_overview_card(self) -> QtWidgets.QFrame:
-        frame, layout = self._card(
-            "Tổng quan học tập",
-            "Theo dõi phiên học hiện tại, profile đang dùng và phiên kế tiếp mà không phải chuyển tab.",
-        )
-        self.study_overview_status = QtWidgets.QLabel("Chưa có phiên học đang chạy.")
-        self.study_overview_status.setObjectName("MutedLabel")
-        self.study_overview_status.setWordWrap(True)
-        layout.addWidget(self._labeled_value("Trạng thái phiên học", self.study_overview_status))
-
-        self.study_overview_profile = QtWidgets.QLabel("Phiên học sâu")
-        self.study_overview_profile.setObjectName("MutedLabel")
-        self.study_overview_profile.setWordWrap(True)
-        layout.addWidget(self._labeled_value("Profile hiện tại", self.study_overview_profile))
-
-        self.study_overview_next = QtWidgets.QLabel("Không có phiên học theo lịch.")
-        self.study_overview_next.setObjectName("MutedLabel")
-        self.study_overview_next.setWordWrap(True)
-        layout.addWidget(self._labeled_value("Phiên học tiếp theo", self.study_overview_next))
-
-        self.study_overview_warning = QtWidgets.QLabel("Chưa có cảnh báo gần đây.")
-        self.study_overview_warning.setObjectName("MutedLabel")
-        self.study_overview_warning.setWordWrap(True)
-        layout.addWidget(self._labeled_value("Cảnh báo gần nhất", self.study_overview_warning))
-        return frame
-
-    def _create_study_report_card(self) -> QtWidgets.QFrame:
-        frame, layout = self._card(
-            "Báo cáo học tập",
-            "Báo cáo 7 ngày gom streak, thời lượng học sâu và các nguồn xao nhãng bị siết mạnh nhất.",
-        )
-        grid = QtWidgets.QGridLayout()
-        grid.setHorizontalSpacing(12)
-        grid.setVerticalSpacing(12)
-        items = [
-            ("study_sessions_completed", "Phiên hoàn thành"),
-            ("study_sessions_aborted", "Phiên dừng sớm"),
-            ("study_minutes", "Phút học sâu"),
-            ("average_study_minutes", "TB mỗi phiên"),
-            ("study_site_blocks", "Web bị siết"),
-            ("study_app_blocks", "App bị chặn"),
-            ("current_streak", "Streak hiện tại"),
-            ("best_streak", "Streak tốt nhất"),
-        ]
-        for index, (key, label) in enumerate(items):
-            card, value = self._mini_card(label)
-            self._stats_labels[key] = value
-            grid.addWidget(card, index // 2, index % 2)
-        layout.addLayout(grid)
-
-        self.study_profile_distribution_label = QtWidgets.QLabel("Chưa có phân bổ theo profile.")
-        self.study_profile_distribution_label.setObjectName("MutedLabel")
-        self.study_profile_distribution_label.setWordWrap(True)
-        layout.addWidget(self._labeled_value("Phân bổ theo profile", self.study_profile_distribution_label))
-
-        self.study_distraction_label = QtWidgets.QLabel("Chưa ghi nhận nguồn xao nhãng nào.")
-        self.study_distraction_label.setObjectName("MutedLabel")
-        self.study_distraction_label.setWordWrap(True)
-        layout.addWidget(self._labeled_value("Nguồn xao nhãng nổi bật", self.study_distraction_label))
-        return frame
-
-    def _create_study_session_card(self) -> QtWidgets.QFrame:
-        frame, layout = self._card(
-            "Phiên học sâu",
-            "Bắt đầu thủ công bất cứ lúc nào, theo dõi đồng hồ đếm ngược và chỉ cho phép tài nguyên học tập đã cấu hình.",
-        )
-        selector_row = QtWidgets.QGridLayout()
-        selector_row.setHorizontalSpacing(12)
-        selector_row.setVerticalSpacing(12)
-        self.study_manual_profile_combo = QtWidgets.QComboBox()
-        self.study_manual_profile_combo.setObjectName("SoftInput")
-        self.study_duration_spin = self._spin_box(15, 240, " phút")
-        self.study_duration_spin.setValue(50)
-        selector_row.addWidget(self._labeled_widget("Profile học", self.study_manual_profile_combo), 0, 0)
-        selector_row.addWidget(self._labeled_widget("Thời lượng", self.study_duration_spin), 0, 1)
-        layout.addLayout(selector_row)
-
-        actions = QtWidgets.QHBoxLayout()
-        self.start_study_button = QtWidgets.QPushButton("Bắt đầu phiên học")
-        self.start_study_button.setObjectName("PrimaryButton")
-        actions.addWidget(self.start_study_button)
-        self.abort_study_button = QtWidgets.QPushButton("Giữ 3 giây để dừng sớm")
-        self.abort_study_button.setObjectName("SecondaryButton")
-        actions.addWidget(self.abort_study_button)
-        layout.addLayout(actions)
-
-        self.study_active_label = QtWidgets.QLabel("Chưa có phiên học đang chạy.")
-        self.study_active_label.setObjectName("MutedLabel")
-        self.study_active_label.setWordWrap(True)
-        layout.addWidget(self._labeled_value("Phiên hiện tại", self.study_active_label))
-
-        self.study_countdown_label = QtWidgets.QLabel("Sẵn sàng bắt đầu thủ công.")
-        self.study_countdown_label.setObjectName("MutedLabel")
-        self.study_countdown_label.setWordWrap(True)
-        layout.addWidget(self._labeled_value("Đồng hồ đếm ngược", self.study_countdown_label))
-
-        resources_box = QtWidgets.QFrame()
-        resources_box.setObjectName("InsetCard")
-        resources_layout = QtWidgets.QVBoxLayout(resources_box)
-        resources_layout.setContentsMargins(16, 16, 16, 16)
-        resources_layout.setSpacing(10)
-        resources_layout.addWidget(self._section_label("Tài nguyên học nhanh"))
-        self.study_resources_flow = QtWidgets.QVBoxLayout()
-        self.study_resources_flow.setSpacing(8)
-        resources_layout.addLayout(self.study_resources_flow)
-        layout.addWidget(resources_box)
-        return frame
-
-    def _create_study_profile_card(self) -> QtWidgets.QFrame:
-        frame, layout = self._card(
-            "Cấu hình profile học",
-            "Mỗi profile có tài nguyên học, app được dùng và danh sách web hoặc app xao nhãng cần siết trong phiên học.",
-        )
-        header = QtWidgets.QHBoxLayout()
-        self.study_profile_combo = QtWidgets.QComboBox()
-        self.study_profile_combo.setObjectName("SoftInput")
-        header.addWidget(self.study_profile_combo, 1)
-        self.add_study_profile_button = QtWidgets.QPushButton("Thêm profile")
-        self.add_study_profile_button.setObjectName("SecondaryButton")
-        header.addWidget(self.add_study_profile_button)
-        self.remove_study_profile_button = QtWidgets.QPushButton("Xóa profile")
-        self.remove_study_profile_button.setObjectName("SecondaryButton")
-        header.addWidget(self.remove_study_profile_button)
-        layout.addLayout(header)
-
-        self.study_profile_name_edit = QtWidgets.QLineEdit()
-        self.study_profile_name_edit.setPlaceholderText("Tên profile học")
-        self.study_profile_name_edit.setObjectName("SoftInput")
-        layout.addWidget(self.study_profile_name_edit)
-
-        self.study_profile_duration_spin = self._spin_box(15, 240, " phút")
-        layout.addWidget(self._labeled_widget("Thời lượng mặc định", self.study_profile_duration_spin))
-
-        editors = QtWidgets.QGridLayout()
-        editors.setHorizontalSpacing(12)
-        editors.setVerticalSpacing(12)
-        self.study_domains_edit = QtWidgets.QPlainTextEdit()
-        self.study_domains_edit.setObjectName("CodeLikeEdit")
-        self.study_domains_edit.setMinimumHeight(120)
-        editors.addWidget(self._labeled_widget("Website học được giữ lại", self.study_domains_edit), 0, 0)
-        self.study_urls_edit = QtWidgets.QPlainTextEdit()
-        self.study_urls_edit.setObjectName("CodeLikeEdit")
-        self.study_urls_edit.setMinimumHeight(120)
-        editors.addWidget(self._labeled_widget("Link học mở nhanh", self.study_urls_edit), 0, 1)
-        self.study_allowed_apps_edit = QtWidgets.QPlainTextEdit()
-        self.study_allowed_apps_edit.setObjectName("CodeLikeEdit")
-        self.study_allowed_apps_edit.setMinimumHeight(120)
-        editors.addWidget(self._labeled_widget("App học được mở nhanh", self.study_allowed_apps_edit), 1, 0)
-        self.study_blocked_apps_edit = QtWidgets.QPlainTextEdit()
-        self.study_blocked_apps_edit.setObjectName("CodeLikeEdit")
-        self.study_blocked_apps_edit.setMinimumHeight(120)
-        editors.addWidget(self._labeled_widget("Process xao nhãng cần chặn", self.study_blocked_apps_edit), 1, 1)
-        self.study_extra_domains_edit = QtWidgets.QPlainTextEdit()
-        self.study_extra_domains_edit.setObjectName("CodeLikeEdit")
-        self.study_extra_domains_edit.setMinimumHeight(120)
-        editors.addWidget(self._labeled_widget("Domain xao nhãng bổ sung", self.study_extra_domains_edit), 2, 0, 1, 2)
-        layout.addLayout(editors)
-        return frame
-
-    def _create_study_schedule_card(self) -> QtWidgets.QFrame:
-        frame, layout = self._card(
-            "Lịch học theo từng ngày",
-            "Mỗi ngày có thể bật hoặc tắt riêng và gắn với một profile học. Lịch này tách khỏi lịch bảo vệ để bạn không bị trộn khái niệm.",
-        )
-        header = QtWidgets.QGridLayout()
-        header.setHorizontalSpacing(10)
-        header.addWidget(self._section_label("Ngày"), 0, 0)
-        header.addWidget(self._section_label("Bật/Tắt"), 0, 1)
-        header.addWidget(self._section_label("Bắt đầu"), 0, 2)
-        header.addWidget(self._section_label("Kết thúc"), 0, 3)
-        header.addWidget(self._section_label("Profile"), 0, 4)
-        layout.addLayout(header)
-
-        grid = QtWidgets.QGridLayout()
-        grid.setHorizontalSpacing(10)
-        grid.setVerticalSpacing(10)
-        for row, key in enumerate(WEEKDAY_KEYS):
-            day_label = QtWidgets.QLabel(WEEKDAY_LABELS[key])
-            day_label.setObjectName("InsetTitle")
-            checkbox = QtWidgets.QCheckBox("Bật")
-            checkbox.setObjectName("SoftCheck")
-            start_edit = self._create_time_edit()
-            end_edit = self._create_time_edit()
-            profile_combo = QtWidgets.QComboBox()
-            profile_combo.setObjectName("SoftInput")
-            self._study_day_editors[key] = (checkbox, start_edit, end_edit, profile_combo)
-            grid.addWidget(day_label, row, 0)
-            grid.addWidget(checkbox, row, 1)
-            grid.addWidget(start_edit, row, 2)
-            grid.addWidget(end_edit, row, 3)
-            grid.addWidget(profile_combo, row, 4)
-        layout.addLayout(grid)
-
-        self.study_next_label = QtWidgets.QLabel("Không có phiên học theo lịch.")
-        self.study_next_label.setObjectName("MutedLabel")
-        self.study_next_label.setWordWrap(True)
-        layout.addWidget(self._labeled_value("Phiên học kế tiếp", self.study_next_label))
-        return frame
-
     def _create_stats_card(self) -> QtWidgets.QFrame:
         frame, layout = self._card(
             "Thống kê 7 ngày",
@@ -925,22 +707,6 @@ class MainWindow(QtWidgets.QMainWindow):
         layout.addLayout(grid)
         return frame
 
-    def _create_log_card(self) -> QtWidgets.QFrame:
-        frame, layout = self._card(
-            "Nhật ký chống phá",
-            "Mọi cảnh báo, cấu hình chờ áp dụng, mở dịch vụ hay nhập sai mật khẩu đều được ghi vào đây.",
-        )
-        self.log_filter_combo = QtWidgets.QComboBox()
-        self.log_filter_combo.setObjectName("SoftInput")
-        self.log_filter_combo.addItems(["Tất cả", "Học tập", "Cảnh báo", "Chống phá", "Nghiêm khắc"])
-        layout.addWidget(self._labeled_widget("Bộ lọc nhật ký", self.log_filter_combo))
-        self.log_output = QtWidgets.QPlainTextEdit()
-        self.log_output.setReadOnly(True)
-        self.log_output.setObjectName("LogOutput")
-        self.log_output.setMinimumHeight(500)
-        layout.addWidget(self.log_output)
-        return frame
-
     def _build_tray(self) -> None:
         icon = self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_ComputerIcon)
         self.tray_icon = QtWidgets.QSystemTrayIcon(icon, self)
@@ -963,46 +729,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.toggle_button.clicked.connect(self.toggle_protection)
         self.admin_button.clicked.connect(self.relaunch_as_admin)
         self.service_button.clicked.connect(self.ensure_service_running)
-        self.manual_lock_button.clicked.connect(self.start_manual_lock)
-        self.cancel_manual_lock_button.clicked.connect(self.cancel_manual_lock)
         self.recovery_key_button.clicked.connect(self.rotate_recovery_key)
         self.forgot_password_button.clicked.connect(self.start_password_recovery)
-        self.start_study_button.clicked.connect(self.start_study_session)
-        self.abort_study_button.pressed.connect(self._begin_abort_hold)
-        self.abort_study_button.released.connect(self._cancel_abort_hold)
-        self.add_study_profile_button.clicked.connect(self.add_study_profile)
-        self.remove_study_profile_button.clicked.connect(self.remove_study_profile)
-        self.study_profile_combo.currentIndexChanged.connect(self._on_study_profile_selection_changed)
-        self.study_manual_profile_combo.currentIndexChanged.connect(self._sync_manual_duration_from_profile)
-        self.study_manual_profile_combo.currentIndexChanged.connect(
-            self._refresh_study_manual_profile_preview
-        )
-        self.log_filter_combo.currentIndexChanged.connect(self._refresh_log_view)
-        self.check_update_button.clicked.connect(self.check_for_updates_manual)
-        self.cleanup_versions_button.clicked.connect(self.cleanup_cached_updates)
         self.uninstall_button.clicked.connect(self.start_professional_uninstall)
-        self.refresh_helper_button.clicked.connect(self.refresh_helper_panel)
-        self.open_data_folder_button.clicked.connect(self.open_data_folder)
-        self.open_readme_button.clicked.connect(self.open_readme_file)
-        self.emergency_cleanup_button.clicked.connect(self.start_emergency_cleanup)
-
-        self.update_manager.check_completed.connect(self._on_update_check_completed)
-        self.update_manager.download_completed.connect(self._on_update_download_completed)
-        self.update_manager.cleanup_completed.connect(self._on_update_cleanup_completed)
 
         for checkbox, start_edit, end_edit in self._day_editors.values():
             checkbox.toggled.connect(self._refresh_schedule_preview)
             start_edit.timeChanged.connect(self._refresh_schedule_preview)
             end_edit.timeChanged.connect(self._refresh_schedule_preview)
 
-        for checkbox, start_edit, end_edit, _profile_combo in self._study_day_editors.values():
-            checkbox.toggled.connect(self._refresh_schedule_preview)
-            start_edit.timeChanged.connect(self._refresh_schedule_preview)
-            end_edit.timeChanged.connect(self._refresh_schedule_preview)
-
-        self._hold_abort_timer = QtCore.QTimer(self)
-        self._hold_abort_timer.setInterval(1000)
-        self._hold_abort_timer.timeout.connect(self._tick_abort_hold)
 
     def _load_config(self, config: AppConfig) -> None:
         self.normal_mode_button.setChecked(config.mode == "normal")
@@ -1024,39 +759,40 @@ class MainWindow(QtWidgets.QMainWindow):
         self.warning_minutes_spin.setValue(config.warning_minutes)
         self.last_minute_guard_spin.setValue(config.last_minute_guard_minutes)
         self.change_delay_checkbox.setChecked(config.change_delay_enabled)
-        self.manual_duration_spin.setValue(config.manual_lock_duration_minutes)
-        self.auto_check_updates_checkbox.setChecked(config.auto_check_updates)
-        self._study_profiles_cache = [
-            StudyProfile.from_dict(profile.to_dict(), fallback_id=profile.id)
-            for profile in config.study_profiles
-        ] or [StudyProfile(id="study-default", name="Phiên học sâu")]
-        self._refresh_study_profile_selectors()
-        for key, schedule in config.study_schedule.items():
-            checkbox, start_edit, end_edit, profile_combo = self._study_day_editors[key]
-            checkbox.setChecked(schedule.enabled)
-            start_edit.setTime(QtCore.QTime.fromString(schedule.start, "HH:mm"))
-            end_edit.setTime(QtCore.QTime.fromString(schedule.end, "HH:mm"))
-            self._set_combo_to_profile(profile_combo, schedule.profile_id)
-        self._load_selected_study_profile()
-        self._refresh_study_manual_profile_preview()
         self.strict_note_label.setText(
             "Mật khẩu đã được thiết lập."
             if config.has_password
-            else "Cần đặt mật khẩu trước khi dùng chế độ nghiêm khắc hoặc khóa thủ công."
+            else "Cần đặt mật khẩu trước khi dùng chế độ nghiêm khắc."
         )
         recovery_state = "Đã tạo mã khôi phục." if config.has_recovery_key else "Chưa tạo mã khôi phục."
         if self.controller.state.recovery_request is not None:
             recovery_state += " " + self.controller.emergency_recovery_status_text()
         self.recovery_status_label.setText(recovery_state)
         self._refresh_schedule_preview()
-        self._refresh_log_view()
-        self.refresh_helper_panel()
         self._apply_strict_config_lock(self.controller.strict_configuration_locked())
 
     def _apply_status(self, status: EnforcementStatus) -> None:
         self._last_status = status
         self._apply_strict_config_lock(self.controller.strict_configuration_locked())
         self.toggle_button.setText("Tắt bảo vệ" if status.protection_enabled else "Bật bảo vệ")
+
+        if status.protection_enabled:
+            if status.schedule_active:
+                self.focus_status_label.setText("ĐANG TRONG GIỜ CẤM")
+                self.focus_status_label.setStyleSheet("color: #991B1B;")
+                self.focus_substatus_label.setText(status.today_schedule_label)
+                self.main_focus_toggle_button.setText("Đang bảo vệ (Không thể tắt)")
+            else:
+                self.focus_status_label.setText("ĐANG BẢO VỆ")
+                self.focus_status_label.setStyleSheet("color: #111827;")
+                self.focus_substatus_label.setText(f"Tiếp theo: {status.next_window_text}")
+                self.main_focus_toggle_button.setText("Tắt bảo vệ")
+        else:
+            self.focus_status_label.setText("BẢO VỆ ĐANG TẮT")
+            self.focus_status_label.setStyleSheet("color: #4B5563;")
+            self.focus_substatus_label.setText("Tự do lướt web. Nhấn để bật bảo vệ.")
+            self.main_focus_toggle_button.setText("Bật bảo vệ")
+
         self.overview_badge.setText(
             "Chế độ an toàn"
             if status.safe_mode
@@ -1093,22 +829,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.schedule_big_label.setText(status.today_schedule_label)
         self.schedule_preview_label.setText(f"Tiếp theo: {status.next_window_text}")
-        self.manual_lock_label.setText(status.manual_countdown_text)
         self.pending_change_label.setText(status.pending_change_text)
         self.next_window_label.setText(status.next_window_text)
         self.safe_mode_label.setText(status.safe_mode_reason or "Không có cảnh báo an toàn.")
-        self.study_active_label.setText(status.study_summary)
-        self.study_countdown_label.setText(status.study_remaining_text)
-        self.study_overview_status.setText(status.study_summary)
-        manual_profile = self._current_manual_study_profile()
-        self.study_overview_profile.setText(
-            status.study_profile_name
-            if status.study_active
-            else manual_profile.name if manual_profile is not None else status.study_profile_name
-        )
-        self.study_overview_next.setText(status.next_study_text)
-        self.study_overview_warning.setText(self._latest_warning_text())
-        self.study_next_label.setText(status.next_study_text)
         recovery_status = (
             "Đã tạo mã khôi phục." if self.controller.config.has_recovery_key else "Chưa tạo mã khôi phục."
         )
@@ -1136,30 +859,16 @@ class MainWindow(QtWidgets.QMainWindow):
             "failed_unlocks": str(stats.failed_unlocks),
             "tamper_events": str(stats.tamper_events),
             "pending_changes": str(stats.pending_changes),
-            "study_sessions_completed": str(stats.study_sessions_completed),
-            "study_sessions_aborted": str(stats.study_sessions_aborted),
-            "study_minutes": str(stats.study_minutes),
-            "average_study_minutes": str(stats.average_study_minutes),
-            "study_site_blocks": str(stats.study_site_blocks),
-            "study_app_blocks": str(stats.study_app_blocks),
-            "current_streak": str(stats.current_streak),
-            "best_streak": str(stats.best_streak),
         }
         for key, value in mapping.items():
             label = self._stats_labels.get(key)
             if label is not None:
                 label.setText(value)
-        self.study_profile_distribution_label.setText(self._format_distribution(stats.profile_distribution))
-        self.study_distraction_label.setText(self._format_distractions(stats.top_blocked_domains, stats.top_blocked_apps))
-        if status.study_active:
-            self._refresh_study_resource_buttons(status.study_resources, status.study_allowed_apps)
-        else:
-            self._refresh_study_manual_profile_preview()
-        self.refresh_helper_panel()
+
 
     def _append_log(self, message: str) -> None:
         self._refresh_log_view()
-        self.refresh_helper_panel()
+
 
     def _show_attention(self, title: str, message: str) -> None:
         self.tray_icon.showMessage(title, message, self.windowIcon(), 6000)
@@ -1178,198 +887,8 @@ class MainWindow(QtWidgets.QMainWindow):
         if self._last_status:
             self.window_value.setText(label)
 
-        study_checkbox, study_start, study_end, _ = self._study_day_editors[today_key]
-        study_label = (
-            f"{study_start.time().toString('HH:mm')} -> {study_end.time().toString('HH:mm')}"
-            if study_checkbox.isChecked()
-            else "Tắt"
-        )
-        if hasattr(self, "study_next_label") and not self._last_status:
-            self.study_next_label.setText(f"Hôm nay: {study_label}")
-
-    def _current_study_profile_id(self) -> str:
-        data = self.study_profile_combo.currentData()
-        if isinstance(data, str) and data:
-            return data
-        if self._study_profiles_cache:
-            return self._study_profiles_cache[0].id
-        return "study-default"
-
-    def _current_manual_study_profile(self) -> StudyProfile | None:
-        if not self._study_profiles_cache:
-            return None
-        profile_id = self.study_manual_profile_combo.currentData()
-        if isinstance(profile_id, str) and profile_id:
-            return next(
-                (item for item in self._study_profiles_cache if item.id == profile_id),
-                self._study_profiles_cache[0],
-            )
-        return self._study_profiles_cache[0]
-
     def _collect_text_lines(self, edit: QtWidgets.QPlainTextEdit) -> list[str]:
         return [line.strip() for line in edit.toPlainText().splitlines() if line.strip()]
-
-    def _populate_profile_combo(self, combo: QtWidgets.QComboBox, selected_id: str | None = None) -> None:
-        current = selected_id or combo.currentData()
-        combo.blockSignals(True)
-        combo.clear()
-        for profile in self._study_profiles_cache:
-            combo.addItem(profile.name, profile.id)
-        if current:
-            index = combo.findData(current)
-            if index >= 0:
-                combo.setCurrentIndex(index)
-        combo.blockSignals(False)
-
-    def _set_combo_to_profile(self, combo: QtWidgets.QComboBox, profile_id: str) -> None:
-        index = combo.findData(profile_id)
-        if index >= 0:
-            combo.setCurrentIndex(index)
-
-    def _refresh_study_profile_selectors(self) -> None:
-        current_editor_id = (
-            self._study_profile_editing_id
-            or self._current_study_profile_id()
-            or self._study_profiles_cache[0].id
-        )
-        manual_id = self.study_manual_profile_combo.currentData()
-        if not isinstance(manual_id, str) or not manual_id:
-            manual_id = current_editor_id
-        self._populate_profile_combo(self.study_profile_combo, current_editor_id)
-        self._populate_profile_combo(self.study_manual_profile_combo, manual_id)
-        for _, _, _, profile_combo in self._study_day_editors.values():
-            previous = profile_combo.currentData()
-            self._populate_profile_combo(profile_combo, previous or current_editor_id)
-        self._sync_manual_duration_from_profile()
-
-    def _save_selected_study_profile_into_cache(self, profile_id: str | None = None) -> None:
-        if self._study_profile_loading or not self._study_profiles_cache:
-            return
-        current_id = profile_id or self._study_profile_editing_id or self._current_study_profile_id()
-        for index, profile in enumerate(self._study_profiles_cache):
-            if profile.id != current_id:
-                continue
-            self._study_profiles_cache[index] = StudyProfile(
-                id=profile.id,
-                name=self.study_profile_name_edit.text().strip() or profile.name,
-                default_duration_minutes=self.study_profile_duration_spin.value(),
-                study_domains=dedupe_domains(self._collect_text_lines(self.study_domains_edit)),
-                resource_urls=dedupe_text_values(self._collect_text_lines(self.study_urls_edit)),
-                allowed_apps=dedupe_text_values(self._collect_text_lines(self.study_allowed_apps_edit)),
-                blocked_processes=dedupe_processes(self._collect_text_lines(self.study_blocked_apps_edit)),
-                extra_blocked_domains=dedupe_domains(self._collect_text_lines(self.study_extra_domains_edit)),
-            )
-            break
-        self._refresh_study_profile_selectors()
-
-    def _load_selected_study_profile(self, profile_id: str | None = None) -> None:
-        if not self._study_profiles_cache:
-            self._study_profiles_cache = [StudyProfile(id="study-default", name="Phiên học sâu")]
-        current_id = profile_id or self._current_study_profile_id()
-        profile = next(
-            (item for item in self._study_profiles_cache if item.id == current_id),
-            self._study_profiles_cache[0],
-        )
-        self._study_profile_loading = True
-        self._set_combo_to_profile(self.study_profile_combo, profile.id)
-        self.study_profile_name_edit.setText(profile.name)
-        self.study_profile_duration_spin.setValue(profile.default_duration_minutes)
-        self.study_domains_edit.setPlainText("\n".join(profile.study_domains))
-        self.study_urls_edit.setPlainText("\n".join(profile.resource_urls))
-        self.study_allowed_apps_edit.setPlainText("\n".join(profile.allowed_apps))
-        self.study_blocked_apps_edit.setPlainText("\n".join(profile.blocked_processes))
-        self.study_extra_domains_edit.setPlainText("\n".join(profile.extra_blocked_domains))
-        self._study_profile_loading = False
-        self._study_profile_editing_id = profile.id
-        self._sync_manual_duration_from_profile()
-
-    def _on_study_profile_selection_changed(self) -> None:
-        if self._study_profile_loading:
-            return
-        previous_id = self._study_profile_editing_id
-        new_id = self._current_study_profile_id()
-        if previous_id:
-            self._save_selected_study_profile_into_cache(previous_id)
-        self._load_selected_study_profile(new_id)
-
-    def _sync_manual_duration_from_profile(self) -> None:
-        profile = self._current_manual_study_profile()
-        if profile is None:
-            return
-        self.study_duration_spin.setValue(profile.default_duration_minutes)
-
-    def _refresh_study_manual_profile_preview(self) -> None:
-        profile = self._current_manual_study_profile()
-        if profile is None:
-            self._refresh_study_resource_buttons([], [])
-            return
-        self._refresh_study_resource_buttons(profile.resource_urls, profile.allowed_apps)
-
-    def _next_study_profile_id(self) -> str:
-        existing = {profile.id for profile in self._study_profiles_cache}
-        index = 1
-        while True:
-            candidate = f"study-{index}"
-            if candidate not in existing:
-                return candidate
-            index += 1
-
-    def add_study_profile(self) -> None:
-        self._save_selected_study_profile_into_cache()
-        profile_id = self._next_study_profile_id()
-        profile = StudyProfile(id=profile_id, name=f"Phiên học {len(self._study_profiles_cache) + 1}")
-        self._study_profiles_cache.append(profile)
-        self._study_profile_editing_id = profile_id
-        self._refresh_study_profile_selectors()
-        self._set_combo_to_profile(self.study_profile_combo, profile_id)
-        self._set_combo_to_profile(self.study_manual_profile_combo, profile_id)
-        self._load_selected_study_profile(profile_id)
-        self._refresh_study_manual_profile_preview()
-
-    def remove_study_profile(self) -> None:
-        if len(self._study_profiles_cache) <= 1:
-            self._show_warning("Không thể xóa", "App cần giữ ít nhất một profile học.")
-            return
-        current_id = self._study_profile_editing_id or self._current_study_profile_id()
-        self._study_profiles_cache = [item for item in self._study_profiles_cache if item.id != current_id]
-        fallback_id = self._study_profiles_cache[0].id
-        self._study_profile_editing_id = fallback_id
-        self._refresh_study_profile_selectors()
-        for _, _, _, profile_combo in self._study_day_editors.values():
-            if profile_combo.currentData() == current_id or profile_combo.currentIndex() < 0:
-                self._set_combo_to_profile(profile_combo, fallback_id)
-        self._set_combo_to_profile(self.study_profile_combo, fallback_id)
-        self._set_combo_to_profile(self.study_manual_profile_combo, fallback_id)
-        self._load_selected_study_profile(fallback_id)
-        self._refresh_study_manual_profile_preview()
-
-    def _build_study_profiles_from_ui(self) -> list[StudyProfile]:
-        self._save_selected_study_profile_into_cache()
-        return [
-            StudyProfile.from_dict(profile.to_dict(), fallback_id=profile.id)
-            for profile in self._study_profiles_cache
-        ]
-
-    def _refresh_study_resource_buttons(self, resources: list[str], allowed_apps: list[str]) -> None:
-        self._clear_layout(self.study_resources_flow)
-        if not resources and not allowed_apps:
-            placeholder = QtWidgets.QLabel("Chưa cấu hình tài nguyên học nhanh cho profile này.")
-            placeholder.setObjectName("MutedLabel")
-            placeholder.setWordWrap(True)
-            self.study_resources_flow.addWidget(placeholder)
-            return
-
-        for url in resources[:4]:
-            button = QtWidgets.QPushButton(url)
-            button.setObjectName("SecondaryButton")
-            button.clicked.connect(lambda _checked=False, target=url: self._launch_study_resource(target))
-            self.study_resources_flow.addWidget(button)
-
-        for app_path in allowed_apps[:3]:
-            button = QtWidgets.QPushButton(Path(app_path).name or app_path)
-            button.setObjectName("SecondaryButton")
-            button.clicked.connect(lambda _checked=False, target=app_path: self._launch_study_app(target))
-            self.study_resources_flow.addWidget(button)
 
     def _clear_layout(self, layout: QtWidgets.QLayout) -> None:
         while layout.count():
@@ -1380,96 +899,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 widget.deleteLater()
             elif child_layout is not None:
                 self._clear_layout(child_layout)
-
-    def _launch_study_resource(self, target: str) -> None:
-        QtGui.QDesktopServices.openUrl(QtCore.QUrl(target))
-
-    def _launch_study_app(self, target: str) -> None:
-        try:
-            subprocess.Popen([target])
-        except OSError as exc:
-            self._show_warning("Không mở được app học", str(exc))
-
-    def start_study_session(self) -> None:
-        profile_id = self.study_manual_profile_combo.currentData()
-        if not isinstance(profile_id, str):
-            self._show_warning("Chưa có profile", "Hãy tạo hoặc chọn một profile học trước.")
-            return
-        success, message = self.controller.start_study_session(
-            profile_id,
-            duration_minutes=self.study_duration_spin.value(),
-        )
-        if not success:
-            self._show_warning("Không bắt đầu được phiên học", message)
-
-    def _begin_abort_hold(self) -> None:
-        if self.controller.state.study_session is None:
-            return
-        self._hold_abort_remaining = 3
-        self.abort_study_button.setText("Giữ thêm 3 giây...")
-        if self._hold_abort_timer is not None:
-            self._hold_abort_timer.start()
-
-    def _tick_abort_hold(self) -> None:
-        self._hold_abort_remaining -= 1
-        if self._hold_abort_remaining <= 0:
-            if self._hold_abort_timer is not None:
-                self._hold_abort_timer.stop()
-            self.abort_study_button.setText("Giữ 3 giây để dừng sớm")
-            self._confirm_abort_study_session()
-            return
-        self.abort_study_button.setText(f"Giữ thêm {self._hold_abort_remaining} giây...")
-
-    def _cancel_abort_hold(self) -> None:
-        if self._hold_abort_timer is not None:
-            self._hold_abort_timer.stop()
-        self.abort_study_button.setText("Giữ 3 giây để dừng sớm")
-
-    def _confirm_abort_study_session(self) -> None:
-        reason, ok = QtWidgets.QInputDialog.getText(
-            self,
-            "Dừng sớm phiên học",
-            "Lý do dừng sớm:",
-        )
-        if not ok:
-            return
-        success, message = self.controller.abort_study_session(reason)
-        if not success:
-            self._show_warning("Không dừng được phiên học", message)
-
-    def _refresh_log_view(self) -> None:
-        if not hasattr(self, "log_output"):
-            return
-        selected = self.log_filter_combo.currentText() if hasattr(self, "log_filter_combo") else "Tất cả"
-        lines: list[str] = []
-        for record in self.controller.store.recent_events(limit=250):
-            if not self._event_matches_filter(record, selected):
-                continue
-            stamp = str(record.get("at", "")).replace("T", " ")
-            message = str(record.get("message", "")).strip()
-            level = str(record.get("level", "info")).upper()
-            lines.append(f"[{stamp}] [{level}] {message}")
-        self.log_output.setPlainText("\n".join(lines) if lines else "Chưa có sự kiện phù hợp.")
-        self.log_output.verticalScrollBar().setValue(self.log_output.verticalScrollBar().maximum())
-
-    def _event_matches_filter(self, record: dict, selected: str) -> bool:
-        if selected == "Tất cả":
-            return True
-        kind = str(record.get("kind", ""))
-        if selected == "Học tập":
-            return kind.startswith("study_")
-        if selected == "Nghiêm khắc":
-            return "strict" in kind or "lock" in kind or "unlock" in kind
-        if selected == "Cảnh báo":
-            return str(record.get("level", "")) == "warning" or "warning" in kind
-        if selected == "Chống phá":
-            return any(token in kind for token in ("tamper", "safe_mode", "integrity", "heartbeat"))
-        return True
-
-    def _format_distribution(self, distribution: dict[str, int]) -> str:
-        if not distribution:
-            return "Chưa có phân bổ theo profile."
-        return " • ".join(f"{name}: {count}" for name, count in distribution.items())
 
     def _format_distractions(self, domains: list[str], apps: list[str]) -> str:
         parts: list[str] = []
@@ -1509,20 +938,6 @@ class MainWindow(QtWidgets.QMainWindow):
         config.warning_minutes = self.warning_minutes_spin.value()
         config.last_minute_guard_minutes = self.last_minute_guard_spin.value()
         config.change_delay_enabled = self.change_delay_checkbox.isChecked()
-        config.manual_lock_duration_minutes = self.manual_duration_spin.value()
-        config.auto_check_updates = self.auto_check_updates_checkbox.isChecked()
-        config.study_profiles = self._build_study_profiles_from_ui()
-        config.study_schedule = {}
-        for key, (checkbox, start_edit, end_edit, profile_combo) in self._study_day_editors.items():
-            profile_id = profile_combo.currentData()
-            if not isinstance(profile_id, str) or not profile_id:
-                profile_id = config.study_profiles[0].id
-            config.study_schedule[key] = StudyDaySchedule(
-                enabled=checkbox.isChecked(),
-                start=start_edit.time().toString("HH:mm"),
-                end=end_edit.time().toString("HH:mm"),
-                profile_id=profile_id,
-            )
         return config
 
     def _apply_password_inputs(
@@ -1653,7 +1068,6 @@ class MainWindow(QtWidgets.QMainWindow):
         ok, message = self.service_manager.sync_service_store(self.controller.store)
         if ok:
             self._append_log(f"ÄÃ£ Ä‘á»“ng bá»™ service-data: {message}")
-        else:
             self._show_warning("KhÃ´ng Ä‘á»“ng bá»™ Ä‘Æ°á»£c service-data", message)
 
     def toggle_protection(self) -> None:
@@ -1703,19 +1117,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.password_confirm_edit.clear()
         if recovery_code:
             self._show_recovery_code(recovery_code, reason="Bạn vừa đặt mật khẩu nghiêm khắc mới.")
-
-    def start_manual_lock(self) -> None:
-        success, message = self.controller.start_manual_lock(self.manual_countdown_spin.value())
-        if not success:
-            self._show_warning("Không bật được khóa thủ công", message)
-
-    def cancel_manual_lock(self) -> None:
-        password = self._prompt_password("Nhập mật khẩu để hủy khóa thủ công.")
-        if password is None:
-            return
-        success, message = self.controller.cancel_manual_lock(password)
-        if not success:
-            self._show_warning("Không hủy được", message)
 
     def rotate_recovery_key(self) -> None:
         current = self.controller.config
@@ -1834,8 +1235,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 if not self.controller.emergency_recovery_due():
                     self._show_warning("Không thể gỡ cài đặt", self.controller.emergency_recovery_status_text())
                     return
-            else:
-                self._show_warning("Chưa xác thực", "Cần xác thực trước khi gỡ cài đặt.")
+                    self._show_warning("Chưa xác thực", "Cần xác thực trước khi gỡ cài đặt.")
                 return
 
         write_uninstall_approval(self.controller.store, purge_data=result.purge_data)
@@ -1885,75 +1285,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self._append_log("Dịch vụ đã được cài hoặc khởi động.")
         self.controller.evaluate(force=True)
         self.refresh_helper_panel()
-
-    def check_for_updates_silent(self) -> None:
-        if not self.auto_check_updates_checkbox.isChecked():
-            return
-        self.update_manager.check_for_updates(
-            __version__,
-            self.controller.config.update_manifest_url,
-            silent=True,
-        )
-
-    def check_for_updates_manual(self) -> None:
-        self.update_manager.check_for_updates(
-            __version__,
-            self.controller.config.update_manifest_url,
-            silent=False,
-        )
-
-    def cleanup_cached_updates(self) -> None:
-        message = self.update_manager.cleanup_cached_versions()
-        self._append_log(message)
-
-    def refresh_helper_panel(self) -> None:
-        if not hasattr(self, "helper_report_output"):
-            return
-        snapshot = self.controller.store.integrity_snapshot()
-        service = self.service_manager.diagnostics()
-        paths = self.controller.store.path_summary()
-        critical = self._critical_integrity_issue(snapshot)
-        summary = critical or "Hệ thống đang ở trạng thái ổn định, có thể tiếp tục dùng bình thường."
-        self.helper_summary_label.setText(summary)
-        self.helper_paths_label.setText(
-            "\n".join(
-                [
-                    f"Data: {paths['root']}",
-                    f"Config: {paths['config']}",
-                    f"State: {paths['state']}",
-                    f"Updates: {paths['updates']}",
-                ]
-            )
-        )
-
-        report_lines = [
-            "TÓM TẮT HELPER",
-            f"- Quyền Admin: {'Có' if WindowsSessionController.is_admin() else 'Không'}",
-            f"- Service khả dụng: {service['available']}",
-            f"- Service đã cài: {service['installed']}",
-            f"- Service đang chạy: {service['running']}",
-            f"- Dịch vụ báo: {service['message']}",
-            f"- Service trỏ đúng file hiện tại: {service.get('path_ok', 'Không rõ')}",
-            f"- Đường dẫn service: {service.get('image_path') or 'Không rõ'}",
-            f"- Startup type: {service.get('start_type') or 'Không rõ'}",
-            f"- Chẩn đoán service: {service.get('path_message') or 'Không có'}",
-            f"- Startup cùng Windows: {'Bật' if self.startup_manager.is_enabled() else 'Tắt'}",
-            f"- Safe mode: {self.controller.state.safe_mode_reason or 'Không có'}",
-            f"- Recovery: {self.controller.emergency_recovery_status_text()}",
-            "",
-            "TÌNH TRẠNG FILE",
-        ]
-        for key, label in (
-            ("config", "config.json"),
-            ("state", "state.json"),
-            ("config_backup", "config.backup.json"),
-            ("state_backup", "state.backup.json"),
-            ("events", "events.jsonl"),
-        ):
-            item = snapshot[key]
-            report_lines.append(f"- {label}: {item['status']} - {item['detail']}")
-
-        self.helper_report_output.setPlainText("\n".join(report_lines))
 
     def open_data_folder(self) -> None:
         target = self.controller.store.root_dir
@@ -2007,134 +1338,6 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.controller.state.last_integrity_issue:
             return f"Hệ thống đang báo lỗi an toàn: {self.controller.state.last_integrity_issue}."
         return None
-
-    def start_emergency_cleanup(self) -> None:
-        snapshot = self.controller.store.integrity_snapshot()
-        critical = self._critical_integrity_issue(snapshot)
-        service = self.service_manager.diagnostics()
-        if service["installed"] == "Có" and not WindowsSessionController.is_admin():
-            self._show_warning(
-                "Cần quyền Admin",
-                "Máy đang còn dịch vụ nền. Hãy mở lại app với quyền Admin rồi mới dọn dẹp khẩn cấp để tránh sót service.",
-            )
-            return
-        requires_password = bool(
-            self.controller.config.has_password
-            and not critical
-            and self.controller.requires_exit_password()
-        )
-
-        if requires_password:
-            password = self._prompt_password(
-                "Nhập mật khẩu để xác nhận dọn dẹp khẩn cấp khi strict mode hoặc khóa thủ công đang bật."
-            )
-            if password is None or not self.controller.verify_strict_password(password):
-                self._show_warning("Không thể dọn dẹp", "Mật khẩu không đúng.")
-                return
-
-        phrase, ok = QtWidgets.QInputDialog.getText(
-            self,
-            "Dọn dẹp khẩn cấp",
-            (
-                "Tính năng này sẽ dừng enforcement, gỡ startup/service theo khả năng hiện có, sao lưu dữ liệu rồi tạo lại cấu hình mặc định.\n"
-                "Gõ DONDEP để xác nhận."
-            ),
-        )
-        if not ok:
-            return
-        if phrase.strip().upper() != "DONDEP":
-            self._show_warning("Chưa xác nhận", "Cần gõ đúng DONDEP để tránh thao tác nhầm.")
-            return
-
-        try:
-            self.startup_manager.set_enabled(False)
-        except OSError:
-            pass
-        self.service_manager.stop()
-        self.service_manager.remove()
-        self.controller.shutdown()
-        backup_dir = self.controller.store.emergency_reset()
-        QtWidgets.QMessageBox.information(
-            self,
-            "Đã dọn dẹp khẩn cấp",
-            (
-                "Hệ thống đã được đưa về cấu hình mặc định.\n"
-                f"Bản sao lưu nằm tại:\n{backup_dir}\n\n"
-                "Ứng dụng sẽ thoát để bạn mở lại với trạng thái sạch."
-            ),
-        )
-        self._ignore_close_to_tray = True
-        QtWidgets.QApplication.quit()
-
-    def _on_update_check_completed(self, update: object, error: str, silent: bool) -> None:
-        if error:
-            self.update_hint_label.setText(f"Cập nhật: lỗi kiểm tra ({error})")
-            if not silent:
-                self._show_warning("Không kiểm tra được cập nhật", error)
-            return
-        if update is None:
-            self.update_hint_label.setText(f"Phiên bản hiện tại: {__version__} - đã mới nhất")
-            if not silent:
-                QtWidgets.QMessageBox.information(
-                    self,
-                    "Cập nhật",
-                    "Bạn đang dùng phiên bản mới nhất.",
-                )
-            return
-
-        update_info = update if isinstance(update, UpdateInfo) else None
-        if update_info is None:
-            return
-        self.update_hint_label.setText(
-            f"Có bản mới {update_info.version} ({update_info.published_at})"
-        )
-        notes = "\n".join(f"- {item}" for item in update_info.notes) or "- Bản cập nhật mới."
-        answer = QtWidgets.QMessageBox.question(
-            self,
-            "Có bản cập nhật mới",
-            (
-                f"Phát hiện phiên bản {update_info.version}.\n\n"
-                f"Thay đổi:\n{notes}\n\n"
-                "Bạn có muốn tải installer và cập nhật không?"
-            ),
-            QtWidgets.QMessageBox.StandardButton.Yes | QtWidgets.QMessageBox.StandardButton.No,
-            QtWidgets.QMessageBox.StandardButton.Yes,
-        )
-        if answer == QtWidgets.QMessageBox.StandardButton.Yes:
-            self.update_hint_label.setText(f"Đang tải bản {update_info.version}...")
-            self.update_manager.download_update(update_info)
-
-    def _on_update_download_completed(self, installer_path: str, update: object, error: str) -> None:
-        update_info = update if isinstance(update, UpdateInfo) else None
-        if error:
-            self.update_hint_label.setText(f"Cập nhật thất bại: {error}")
-            self._show_warning("Tải cập nhật thất bại", error)
-            return
-        if not installer_path or update_info is None:
-            return
-        self.update_hint_label.setText(f"Đã tải xong bản {update_info.version}")
-        launch = QtWidgets.QMessageBox.question(
-            self,
-            "Sẵn sàng cập nhật",
-            (
-                f"Đã tải xong installer {update_info.version}.\n"
-                "Bạn có muốn mở installer ngay bây giờ không?"
-            ),
-            QtWidgets.QMessageBox.StandardButton.Yes | QtWidgets.QMessageBox.StandardButton.No,
-            QtWidgets.QMessageBox.StandardButton.Yes,
-        )
-        if launch != QtWidgets.QMessageBox.StandardButton.Yes:
-            return
-        try:
-            subprocess.Popen([installer_path])
-        except OSError as exc:
-            self._show_warning("Không mở được installer", str(exc))
-            return
-        self.controller.shutdown()
-        QtWidgets.QApplication.quit()
-
-    def _on_update_cleanup_completed(self, message: str) -> None:
-        self.update_hint_label.setText(message)
 
     def relaunch_as_admin(self) -> None:
         if WindowsSessionController.relaunch_as_admin():

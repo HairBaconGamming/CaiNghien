@@ -22,12 +22,17 @@ DefaultDirName={localappdata}\Programs\{#MyAppName}
 DefaultGroupName={#MyAppName}
 UsePreviousAppDir=yes
 DisableProgramGroupPage=yes
+DisableDirPage=yes
+DisableReadyPage=yes
+DisableFinishedPage=no
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
 ArchitecturesInstallIn64BitMode=x64compatible
 OutputDir=..\dist\installer
 OutputBaseFilename={#OutputFileName}
 SetupIconFile=..\assets\CaiNghienFocusGuard.ico
+WizardImageFile=..\assets\installer_large.bmp
+WizardSmallImageFile=..\assets\installer_small.bmp
 UninstallDisplayIcon={app}\{#MyAppExeName}
 WizardStyle=modern
 Compression=lzma2/ultra64
@@ -41,8 +46,7 @@ UsedUserAreasWarning=no
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
-[Tasks]
-Name: "desktopicon"; Description: "Tạo shortcut ngoài Desktop"; GroupDescription: "Tùy chọn bổ sung:"
+
 
 [Files]
 Source: "{#SourceAppDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
@@ -51,7 +55,7 @@ Source: "..\README.md"; DestDir: "{app}"; DestName: "README.txt"; Flags: ignorev
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
-Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 
 [Run]
 Filename: "{cmd}"; Parameters: "/C ping 127.0.0.1 -n 2 >nul && start """" /D ""{app}"" ""{app}\{#MyAppExeName}"""; Description: "Mở {#MyAppName}"; Flags: nowait postinstall runhidden skipifsilent
