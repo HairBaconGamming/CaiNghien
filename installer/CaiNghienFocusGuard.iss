@@ -292,14 +292,25 @@ begin
   end;
 end;
 
+function IsSafeToWipeDir(const TargetDir: string): Boolean;
+begin
+  Result := FileExists(TargetDir + '\unins000.exe') or
+            FileExists(TargetDir + '\unins000.dat') or
+            FileExists(TargetDir + '\{#MyAppExeName}');
+end;
+
 procedure CleanupInstalledBundleFiles(FullRepair: Boolean);
 begin
   if DirExists(AppInstallDir()) then
   begin
-    if FullRepair then
-      CleanupDirectoryContents(AppInstallDir(), True)
+    if IsSafeToWipeDir(AppInstallDir()) then
+    begin
+      // Always cleanup everything (except uninstaller) for a fresh installation
+      CleanupDirectoryContents(AppInstallDir(), True);
+    end
     else
     begin
+      // Fallback if the directory is unsafe (e.g. user installed to C:\)
       DelTree(AppInstallDir() + '\_internal', True, True, True);
       DeleteFile(MainAppExePath());
       DeleteFile(ServiceExePath());
