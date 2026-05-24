@@ -18,11 +18,8 @@ class SystemGuard:
         try:
             registry_path = r"Software\Microsoft\Windows\CurrentVersion\Policies\System"
             with winreg.CreateKey(winreg.HKEY_CURRENT_USER, registry_path) as key:
-                if enabled:
-                    with contextlib.suppress(FileNotFoundError):
-                        winreg.DeleteValue(key, "DisableTaskMgr")
-                else:
-                    winreg.SetValueEx(key, "DisableTaskMgr", 0, winreg.REG_DWORD, 1)
+                with contextlib.suppress(FileNotFoundError):
+                    winreg.DeleteValue(key, "DisableTaskMgr")
         except Exception:
             pass
 

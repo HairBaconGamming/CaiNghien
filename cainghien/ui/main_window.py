@@ -782,7 +782,7 @@ class MainWindow(QtWidgets.QMainWindow):
         text = self.instant_lock_combo.currentText()
         minutes = int(text.split(" ")[0])
         self.controller.trigger_instant_lock(minutes)
-        self.show_toast(f"Đã khóa tức thì trong {minutes} phút", "info")
+        QtWidgets.QMessageBox.information(self, "Thông báo", f"Đã khóa tức thì trong {minutes} phút")
 
 
     def _load_config(self, config: AppConfig) -> None:
@@ -831,17 +831,17 @@ class MainWindow(QtWidgets.QMainWindow):
         if status.protection_enabled:
             if status.schedule_active:
                 self.focus_status_label.setText("ĐANG TRONG GIỜ CẤM")
-                self.focus_status_label.setStyleSheet("color: #991B1B;")
+                self.focus_status_label.setStyleSheet("color: #FCA5A5;")
                 self.focus_substatus_label.setText(status.today_schedule_label)
                 self.main_focus_toggle_button.setText("Đang bảo vệ (Không thể tắt)")
             else:
                 self.focus_status_label.setText("ĐANG BẢO VỆ")
-                self.focus_status_label.setStyleSheet("color: #111827;")
+                self.focus_status_label.setStyleSheet("color: #F8FAFC;")
                 self.focus_substatus_label.setText(f"Tiếp theo: {status.next_window_text}")
                 self.main_focus_toggle_button.setText("Tắt bảo vệ")
         else:
             self.focus_status_label.setText("BẢO VỆ ĐANG TẮT")
-            self.focus_status_label.setStyleSheet("color: #4B5563;")
+            self.focus_status_label.setStyleSheet("color: #64748B;")
             self.focus_substatus_label.setText("Tự do lướt web. Nhấn để bật bảo vệ.")
             self.main_focus_toggle_button.setText("Bật bảo vệ")
 
@@ -919,7 +919,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
     def _append_log(self, message: str) -> None:
-        self._refresh_log_view()
+        pass
 
 
     def _show_attention(self, title: str, message: str) -> None:
@@ -1128,10 +1128,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def toggle_protection(self) -> None:
         current = self.controller.config
-        if current.protection_enabled or self.controller.state.manual_lock is not None:
+        if current.protection_enabled or self.controller.state.manual_lock_until is not None:
             password = None
             if current.has_password and (
-                current.mode == "strict" or self.controller.state.manual_lock is not None
+                current.mode == "strict" or self.controller.state.manual_lock_until is not None
             ):
                 password = self._prompt_password("Nhập mật khẩu để tắt bảo vệ.")
                 if password is None:
@@ -1555,10 +1555,27 @@ class MainWindow(QtWidgets.QMainWindow):
     def _show_warning(self, title: str, message: str) -> None:
         QtWidgets.QMessageBox.warning(self, title, message)
 
+    def _apply_shadow(self, widget: QtWidgets.QWidget) -> None:
+        shadow = QtWidgets.QGraphicsDropShadowEffect(widget)
+        shadow.setBlurRadius(24)
+        shadow.setXOffset(0)
+        shadow.setYOffset(8)
+        shadow.setColor(QtGui.QColor(0, 0, 0, 80))
+        widget.setGraphicsEffect(shadow)
+
+    def _apply_mini_shadow(self, widget: QtWidgets.QWidget) -> None:
+        shadow = QtWidgets.QGraphicsDropShadowEffect(widget)
+        shadow.setBlurRadius(12)
+        shadow.setXOffset(0)
+        shadow.setYOffset(4)
+        shadow.setColor(QtGui.QColor(0, 0, 0, 60))
+        widget.setGraphicsEffect(shadow)
+
     def _card(self, title: str, subtitle: str) -> tuple[QtWidgets.QFrame, QtWidgets.QVBoxLayout]:
         frame = QtWidgets.QFrame()
         frame.setObjectName("Card")
         frame.setMinimumWidth(340)
+        self._apply_shadow(frame)
         layout = QtWidgets.QVBoxLayout(frame)
         layout.setContentsMargins(28, 28, 28, 28)
         layout.setSpacing(12)
@@ -1584,6 +1601,7 @@ class MainWindow(QtWidgets.QMainWindow):
         frame = QtWidgets.QFrame()
         frame.setObjectName("MiniCard")
         frame.setMinimumHeight(96)
+        self._apply_mini_shadow(frame)
         frame.setMinimumWidth(0)
         frame.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Fixed)
         layout = QtWidgets.QVBoxLayout(frame)

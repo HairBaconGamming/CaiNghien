@@ -854,9 +854,7 @@ class EnforcementController(QtCore.QObject):
         self._lock_manager.show_feedback(message, error=not success)
 
     def _should_lock_workstation(self, now: datetime) -> bool:
-        if self._last_lock_moment is None:
-            return True
-        return now - self._last_lock_moment >= timedelta(seconds=45)
+        return False
 
     def _save_state(self) -> None:
         self._store.save_state(self._state)

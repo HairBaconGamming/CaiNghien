@@ -51,17 +51,24 @@ class FocusGuardService(win32serviceutil.ServiceFramework):
         self.main()
 
     def main(self) -> None:
-        self._run_once_safely()
-        while True:
-            wait_result = win32event.WaitForSingleObject(self._stop_event, 10_000)
-            if wait_result == win32event.WAIT_OBJECT_0:
-                break
+        try:
             self._run_once_safely()
+            while True:
+                wait_result = win32event.WaitForSingleObject(self._stop_event, 10_000)
+                if wait_result == win32event.WAIT_OBJECT_0:
+                    break
+                self._run_once_safely()
+        finally:
+            self._hosts.remove_block()
 
     def _run_once_safely(self) -> None:
         try:
             self.run_once()
         except Exception as exc:  # pragma: no cover - defensive runtime guard
+            try:
+                self._hosts.remove_block()
+            except Exception:
+                pass
             detail = traceback.format_exc(limit=8)
             now = datetime.now()
             error_key = f"{type(exc).__name__}:{exc}"

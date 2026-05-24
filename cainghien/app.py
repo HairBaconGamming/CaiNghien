@@ -132,13 +132,16 @@ def main(argv: list[str] | None = None) -> int:
             reevaluate=False,
         )
 
-    if not background:
-        controller.start()
-    close_watcher = install_external_close_watcher(app, controller, window)
-    app.setProperty("installer_close_watcher", close_watcher)
-    if show_window:
-        window.show()
-    return app.exec()
+    try:
+        if not background:
+            controller.start()
+        close_watcher = install_external_close_watcher(app, controller, window)
+        app.setProperty("installer_close_watcher", close_watcher)
+        if show_window:
+            window.show()
+        return app.exec()
+    finally:
+        controller.shutdown()
 
 if __name__ == "__main__":
     sys.exit(main())
