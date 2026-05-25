@@ -77,7 +77,8 @@ pub fn run() {
                     "quit" => {
                         let is_protected = {
                             let state = app.state::<config::ConfigState>();
-                            state.0.lock().unwrap().protection_enabled
+                            let enabled = state.0.lock().unwrap().protection_enabled;
+                            enabled
                         };
                         
                         if is_protected {
