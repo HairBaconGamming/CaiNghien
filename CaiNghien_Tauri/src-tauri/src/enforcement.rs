@@ -83,11 +83,12 @@ pub fn spawn_enforcement_loop(app: tauri::AppHandle) {
             // Lấy config hiện tại
             let config = {
                 let state = app.state::<ConfigState>();
-                if let Ok(guard) = state.0.lock() {
+                let config_opt = if let Ok(guard) = state.0.lock() {
                     Some(guard.clone())
                 } else {
                     None
-                }
+                };
+                config_opt
             };
 
             if let Some(config) = config {

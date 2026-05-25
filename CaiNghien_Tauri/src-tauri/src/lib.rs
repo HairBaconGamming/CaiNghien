@@ -8,7 +8,7 @@ use sha2::{Sha256, Digest};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 #[tauri::command]
-pub fn set_password(app: tauri::AppHandle, state: tauri::State<'_, config::ConfigState>, password: Option<String>) -> Result<(), String> {
+fn set_password(app: tauri::AppHandle, state: tauri::State<'_, config::ConfigState>, password: Option<String>) -> Result<(), String> {
     let mut config_data = state.0.lock().unwrap().clone();
     
     if let Some(pwd) = password {
@@ -28,7 +28,7 @@ pub fn set_password(app: tauri::AppHandle, state: tauri::State<'_, config::Confi
 }
 
 #[tauri::command]
-pub fn verify_password(state: tauri::State<'_, config::ConfigState>, password: String) -> Result<bool, String> {
+fn verify_password(state: tauri::State<'_, config::ConfigState>, password: String) -> Result<bool, String> {
     let config_data = state.0.lock().unwrap();
     if let Some(ref hash) = config_data.password_hash {
         let mut hasher = Sha256::new();
@@ -41,7 +41,7 @@ pub fn verify_password(state: tauri::State<'_, config::ConfigState>, password: S
 }
 
 #[tauri::command]
-pub fn request_unlock(app: tauri::AppHandle, state: tauri::State<'_, config::ConfigState>) -> Result<u64, String> {
+fn request_unlock(app: tauri::AppHandle, state: tauri::State<'_, config::ConfigState>) -> Result<u64, String> {
     let mut config_data = state.0.lock().unwrap().clone();
     
     let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
