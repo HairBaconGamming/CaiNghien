@@ -1,12 +1,19 @@
 {
-  "name": "cainghien-focus-guard-site",
+  "name": "cainghien-web",
   "private": true,
-  "version": "0.3.1",
-  "description": "Static release site for CaiNghien Focus Guard",
-  "engines": {
-    "node": "20.x"
-  },
+  "version": "1.0.0",
+  "type": "module",
   "scripts": {
-    "build": "node ./scripts/build.mjs"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^6.2.0"
   }
 }
