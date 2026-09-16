@@ -1,8 +1,13 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "cainghien_tauri",
+<<<<<<< HEAD
   "version": "1.0.0",
   "identifier": "com.cainghien.desktop",
+=======
+  "version": "0.1.0",
+  "identifier": "com.cainghien.app",
+>>>>>>> a698a5e52a114d4a1f1ff5b4fb121c030ed783b6
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -12,6 +17,7 @@
   "app": {
     "windows": [
       {
+<<<<<<< HEAD
         "label": "main",
         "title": "cainghien_tauri",
         "width": 800,
@@ -19,6 +25,11 @@
         "visible": true,
         "center": true,
         "decorations": false
+=======
+        "title": "cainghien_tauri",
+        "width": 800,
+        "height": 600
+>>>>>>> a698a5e52a114d4a1f1ff5b4fb121c030ed783b6
       }
     ],
     "security": {

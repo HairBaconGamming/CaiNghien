@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Logs
 logs
 *.log
@@ -57,3 +58,15 @@ TEST_READY.md
 
 # Temp locked file
 test2.txt
+=======
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+dist/
+build/
+web/dist/
+.release_dist/
+.release_work/
+.qodo/
+>>>>>>> a698a5e52a114d4a1f1ff5b4fb121c030ed783b6

@@ -5,6 +5,7 @@
   "windows": ["main"],
   "permissions": [
     "core:default",
+<<<<<<< HEAD
     "core:window:default",
     "core:window:allow-start-dragging",
     "core:window:allow-close",
@@ -14,5 +15,8 @@
     "opener:default",
     "autostart:default",
     "default"
+=======
+    "opener:default"
+>>>>>>> a698a5e52a114d4a1f1ff5b4fb121c030ed783b6
   ]
 }

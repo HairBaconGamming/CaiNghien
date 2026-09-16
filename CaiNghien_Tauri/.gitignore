@@ -7,7 +7,10 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+<<<<<<< HEAD
 # Node
+=======
+>>>>>>> a698a5e52a114d4a1f1ff5b4fb121c030ed783b6
 node_modules
 dist
 dist-ssr
@@ -23,6 +26,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+<<<<<<< HEAD
 
 # Rust / Tauri
 src-tauri/target/
@@ -50,3 +54,5 @@ node_modules_old/
 tmp/
 output/
 *.pdb
+=======
+>>>>>>> a698a5e52a114d4a1f1ff5b4fb121c030ed783b6

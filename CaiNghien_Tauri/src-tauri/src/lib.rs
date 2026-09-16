@@ -1,6 +1,7 @@
 pub mod models;
 pub mod config;
 pub mod enforcement;
+<<<<<<< HEAD
 pub mod hooks;
 
 use tauri::{Emitter, Manager, menu::{Menu, MenuItem}, tray::TrayIconBuilder};
@@ -19,6 +20,17 @@ fn set_password(app: tauri::AppHandle, state: tauri::State<'_, config::ConfigSta
             return Err("Hardcore mode is active.".to_string());
         }
     }
+=======
+
+use tauri::{Manager, menu::{Menu, MenuItem}, tray::TrayIconBuilder};
+use tauri_plugin_autostart::MacosLauncher;
+use sha2::{Sha256, Digest};
+use std::time::{SystemTime, UNIX_EPOCH};
+
+#[tauri::command]
+fn set_password(app: tauri::AppHandle, state: tauri::State<'_, config::ConfigState>, password: Option<String>) -> Result<(), String> {
+    let mut config_data = state.0.lock().unwrap().clone();
+>>>>>>> a698a5e52a114d4a1f1ff5b4fb121c030ed783b6
     
     if let Some(pwd) = password {
         let mut hasher = Sha256::new();
@@ -32,6 +44,7 @@ fn set_password(app: tauri::AppHandle, state: tauri::State<'_, config::ConfigSta
     }
     
     let _ = config::save_config(&app, &config_data);
+<<<<<<< HEAD
     Ok(())
 }
 
@@ -49,11 +62,15 @@ fn set_hardcore_mode(app: tauri::AppHandle, state: tauri::State<'_, config::Conf
     
     config_data.hardcore_until = Some(until);
     let _ = config::save_config(&app, &config_data);
+=======
+    *state.0.lock().unwrap() = config_data;
+>>>>>>> a698a5e52a114d4a1f1ff5b4fb121c030ed783b6
     Ok(())
 }
 
 #[tauri::command]
 fn verify_password(state: tauri::State<'_, config::ConfigState>, password: String) -> Result<bool, String> {
+<<<<<<< HEAD
     let mut config_data = state.0.lock().map_err(|_| "Mutex poisoned".to_string())?;
     
     if let Some(hardcore_until) = config_data.hardcore_until {
@@ -63,15 +80,22 @@ fn verify_password(state: tauri::State<'_, config::ConfigState>, password: Strin
         }
     }
 
+=======
+    let config_data = state.0.lock().unwrap();
+>>>>>>> a698a5e52a114d4a1f1ff5b4fb121c030ed783b6
     if let Some(ref hash) = config_data.password_hash {
         let mut hasher = Sha256::new();
         hasher.update(password.as_bytes());
         let result = hex::encode(hasher.finalize());
+<<<<<<< HEAD
         let ok = &result == hash;
         if ok {
             config_data.temporary_unlock_until = Some(SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() + 60);
         }
         Ok(ok)
+=======
+        Ok(&result == hash)
+>>>>>>> a698a5e52a114d4a1f1ff5b4fb121c030ed783b6
     } else {
         Ok(true) // No password set
     }
@@ -79,6 +103,7 @@ fn verify_password(state: tauri::State<'_, config::ConfigState>, password: Strin
 
 #[tauri::command]
 fn request_unlock(app: tauri::AppHandle, state: tauri::State<'_, config::ConfigState>) -> Result<u64, String> {
+<<<<<<< HEAD
     let mut config_data = state.0.lock().map_err(|_| "Mutex poisoned".to_string())?;
     
     if let Some(hardcore_until) = config_data.hardcore_until {
@@ -88,14 +113,23 @@ fn request_unlock(app: tauri::AppHandle, state: tauri::State<'_, config::ConfigS
         }
     }
 
+=======
+    let mut config_data = state.0.lock().unwrap().clone();
+    
+>>>>>>> a698a5e52a114d4a1f1ff5b4fb121c030ed783b6
     let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
     config_data.unlock_requested_at = Some(now);
     
     let _ = config::save_config(&app, &config_data);
+<<<<<<< HEAD
+=======
+    *state.0.lock().unwrap() = config_data.clone();
+>>>>>>> a698a5e52a114d4a1f1ff5b4fb121c030ed783b6
     
     Ok(now)
 }
 
+<<<<<<< HEAD
 #[tauri::command]
 fn start_quota(state: tauri::State<'_, config::ConfigState>) -> Result<(), String> {
     let config_data = state.0.lock().map_err(|_| "Mutex poisoned".to_string())?;
@@ -215,6 +249,13 @@ pub fn run() {
             }
             _ => {}
         })
+=======
+#[cfg_attr(mobile, tauri::mobile_entry_point)]
+pub fn run() {
+    tauri::Builder::default()
+        .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, Some(vec!["--minimized"])))
+        .plugin(tauri_plugin_opener::init())
+>>>>>>> a698a5e52a114d4a1f1ff5b4fb121c030ed783b6
         .setup(|app| {
             let config_data = config::load_config(app.handle());
             app.manage(config::ConfigState(std::sync::Mutex::new(config_data)));
@@ -227,12 +268,19 @@ pub fn run() {
             let show_i = MenuItem::with_id(app, "show", "Mở ứng dụng", true, None::<&str>)?;
             let menu = Menu::with_items(app, &[&show_i, &quit_i])?;
 
+<<<<<<< HEAD
             let mut tray_builder = TrayIconBuilder::new().menu(&menu);
             if let Some(icon) = app.default_window_icon() {
                 tray_builder = tray_builder.icon(icon.clone());
             }
 
             let tray = tray_builder.on_menu_event(|app, event| match event.id.as_ref() {
+=======
+            let _tray = TrayIconBuilder::new()
+                .icon(app.default_window_icon().unwrap().clone())
+                .menu(&menu)
+                .on_menu_event(|app, event| match event.id.as_ref() {
+>>>>>>> a698a5e52a114d4a1f1ff5b4fb121c030ed783b6
                     "quit" => {
                         let is_protected = {
                             let state = app.state::<config::ConfigState>();
@@ -244,6 +292,7 @@ pub fn run() {
                             // Prevent quit, show window instead
                             if let Some(window) = app.get_webview_window("main") {
                                 let _ = window.show();
+<<<<<<< HEAD
                                 let _ = window.unminimize();
                                 let _ = window.set_focus();
                             }
@@ -259,18 +308,27 @@ pub fn run() {
                                     .output();
                             }
                             
+=======
+                                let _ = window.set_focus();
+                            }
+                        } else {
+>>>>>>> a698a5e52a114d4a1f1ff5b4fb121c030ed783b6
                             std::process::exit(0);
                         }
                     }
                     "show" => {
                         if let Some(window) = app.get_webview_window("main") {
                             let _ = window.show();
+<<<<<<< HEAD
                             let _ = window.unminimize();
+=======
+>>>>>>> a698a5e52a114d4a1f1ff5b4fb121c030ed783b6
                             let _ = window.set_focus();
                         }
                     }
                     _ => {}
                 })
+<<<<<<< HEAD
                 .on_tray_icon_event(|tray, event| {
                     if let tauri::tray::TrayIconEvent::Click {
                         button: tauri::tray::MouseButton::Left,
@@ -300,6 +358,10 @@ pub fn run() {
                 }
             }
 
+=======
+                .build(app)?;
+            
+>>>>>>> a698a5e52a114d4a1f1ff5b4fb121c030ed783b6
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -307,6 +369,7 @@ pub fn run() {
             config::save_app_config,
             set_password,
             verify_password,
+<<<<<<< HEAD
             request_unlock,
             start_quota,
             pause_quota,
@@ -317,6 +380,9 @@ pub fn run() {
             apply_penalty,
             enter_focus_room,
             exit_focus_room
+=======
+            request_unlock
+>>>>>>> a698a5e52a114d4a1f1ff5b4fb121c030ed783b6
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+<<<<<<< HEAD
 use std::collections::HashMap;
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
@@ -32,6 +33,10 @@ impl Default for ScheduleConfig {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(default)]
+=======
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+>>>>>>> a698a5e52a114d4a1f1ff5b4fb121c030ed783b6
 pub struct AppConfig {
     pub protection_enabled: bool,
     pub blocked_domains: Vec<String>,
@@ -40,6 +45,7 @@ pub struct AppConfig {
     pub start_with_windows: bool,
     pub change_delay_enabled: bool,
     pub block_nsfw: bool,
+<<<<<<< HEAD
     pub protection_started_at: Option<u64>,
     pub violations_count: u32,
     pub daily_quota_minutes: u32,
@@ -67,6 +73,8 @@ pub struct AppConfig {
 
     #[serde(skip)]
     pub temporary_unlock_until: Option<u64>,
+=======
+>>>>>>> a698a5e52a114d4a1f1ff5b4fb121c030ed783b6
 }
 
 impl Default for AppConfig {
@@ -87,6 +95,7 @@ impl Default for AppConfig {
             start_with_windows: false,
             change_delay_enabled: true,
             block_nsfw: false,
+<<<<<<< HEAD
             protection_started_at: None,
             violations_count: 0,
             daily_quota_minutes: 60,
@@ -166,3 +175,8 @@ mod tests {
         assert_eq!(rec.violations, 0);
     }
 }
+=======
+        }
+    }
+}
+>>>>>>> a698a5e52a114d4a1f1ff5b4fb121c030ed783b6

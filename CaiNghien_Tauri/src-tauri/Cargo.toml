@@ -1,6 +1,10 @@
 [package]
 name = "cainghien_tauri"
+<<<<<<< HEAD
 version = "1.0.0"
+=======
+version = "0.1.0"
+>>>>>>> a698a5e52a114d4a1f1ff5b4fb121c030ed783b6
 description = "A Tauri App"
 authors = ["you"]
 edition = "2021"
@@ -29,6 +33,9 @@ tokio = { version = "1.52.3", features = ["rt-multi-thread", "macros", "time"] }
 tauri-plugin-autostart = "2.5.1"
 sha2 = "0.11.0"
 hex = "0.4.3"
+<<<<<<< HEAD
 sysinfo = "0.39.6"
 windows = { version = "0.62.2", features = ["Win32_UI_WindowsAndMessaging", "Win32_Foundation", "Win32_System_LibraryLoader", "Win32_System_Threading"] }
+=======
+>>>>>>> a698a5e52a114d4a1f1ff5b4fb121c030ed783b6
 
