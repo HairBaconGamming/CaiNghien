@@ -1,0 +1,59 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Node
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Rust / Tauri
+CaiNghien_Tauri/src-tauri/target/
+# Uncomment if you want to ignore cargo lock
+# CaiNghien_Tauri/src-tauri/Cargo.lock
+
+# Environment
+.env
+.env.local
+
+# Build artifacts
+release/
+build/
+*.exe
+*.msi
+
+# OS files
+Thumbs.db
+
+# Orchestrator & Agents Temp Directories
+.agents/
+
+# Legacy / Temp
+node_modules_old/
+tmp/
+output/
+*.pdb
+
+# Teamwork generated artifacts (Optional)
+ORIGINAL_REQUEST.md
+PROJECT.md
+TEST_INFRA.md
+TEST_READY.md
+
+# Temp locked file
+test2.txt

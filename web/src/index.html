@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CaiNghiện Focus Guard | Kỷ luật tuyệt đối</title>
+    <meta name="description" content="CaiNghiện Focus Guard là ứng dụng Windows giúp chặn xao nhãng số, khóa máy 1 chạm và giữ kỷ luật thép với giao diện tối giản." />
+    <meta property="og:title" content="CaiNghiện Focus Guard" />
+    <meta property="og:description" content="Kỷ luật tuyệt đối, giao diện tối giản, 1 nút bấm khóa mọi xao nhãng trên Windows." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="./assets/CaiNghienFocusGuard-preview.png" />
+    <link rel="icon" type="image/png" href="./assets/CaiNghienFocusGuard-preview.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <!-- Ambient glowing backgrounds for glassmorphism -->
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+    <div class="ambient-glow glow-3"></div>
+
+    <div class="page-shell">
+      <header class="hero fade-in-up">
+        <section class="hero-panel hero-copy glass-panel">
+          <div class="hero-copy-top">
+            <p class="eyebrow text-glow">Kỷ luật tuyệt đối cho Windows</p>
+            <h1>CAINGHIỆN<br><span class="text-gradient">FOCUS GUARD</span></h1>
+            <p class="lead">
+              Một desktop app dành cho người muốn chặn xao nhãng số bằng kỷ luật thép: giao diện tối giản, 
+              một nút bấm duy nhất để bật bảo vệ, và không có đường lùi khi bạn đã quyết tâm.
+            </p>
+          </div>
+
+          <div class="hero-proof">
+            <article class="proof-card glass-panel-inner">
+              <span class="proof-kicker">Chặn tuyệt đối</span>
+              <strong>Không còn lối thoát</strong>
+              <p>Khóa cứng thiết lập bằng Windows Service. Không thể tắt ngang bằng Task Manager.</p>
+            </article>
+            <article class="proof-card glass-panel-inner">
+              <span class="proof-kicker">Tối giản</span>
+              <strong>1-Click Bật/Tắt</strong>
+              <p>Trải nghiệm Focus-Centric. Giao diện siêu to, phẳng lì, phục vụ đúng một mục đích.</p>
+            </article>
+          </div>
+
+          <div class="hero-actions">
+            <a class="button primary glow-pulse" href="#downloads">
+              <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.3" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+              Tải bản mới nhất
+            </a>
+          </div>
+
+          <div class="trust-row">
+            <span>Luôn hỏi trước khi cập nhật</span>
+            <span>Uninstaller an toàn</span>
+            <span>Tự cứu khẩn cấp 7 ngày</span>
+          </div>
+        </section>
+
+        <aside class="hero-panel hero-preview glass-panel">
+          <div class="preview-frame">
+            <img
+              class="preview-image"
+              src="./assets/CaiNghienFocusGuard-preview.png"
+              alt="Ảnh xem trước giao diện CaiNghiện Focus Guard"
+            />
+          </div>
+
+          <div class="preview-meta">
+            <div class="preview-meta-head">
+              <p class="eyebrow">Tập trung vào điều quan trọng nhất</p>
+              <h2>Không màu mè, chỉ có kỷ luật</h2>
+            </div>
+            <ul class="preview-list">
+              <li>Màn hình chính khổng lồ, gạt bỏ mọi chi tiết thừa</li>
+              <li>Chế độ nghiêm khắc yêu cầu mật khẩu để gỡ bỏ</li>
+              <li>Sẵn sàng đưa bạn vào vùng làm việc sâu</li>
+            </ul>
+          </div>
+        </aside>
+      </header>
+
+      <main class="fade-in-up" style="animation-delay: 0.15s">
+        <!-- TỔNG QUAN -->
+        <section class="feature-grid mt-8" id="features">
+          <article class="feature-card glass-panel interactive-card">
+            <div class="card-icon">BLOCK</div>
+            <h3>Chặn Không Lối Thoát</h3>
+            <p>Khóa bằng cơ chế Hosts và Service Watchdog độc lập. Các tiểu xảo đổi giờ hay tắt tiến trình đều vô hiệu.</p>
+          </article>
+          <article class="feature-card glass-panel interactive-card">
+            <div class="card-icon">FOCUS</div>
+            <h3>Giao Diện Tối Giản</h3>
+            <p>Focus-Centric UI bọc trong một khối. Nút bật/tắt khổng lồ, mọi cài đặt phức tạp được ẩn đi cẩn thận.</p>
+          </article>
+          <article class="feature-card glass-panel interactive-card">
+            <div class="card-icon">SAFE</div>
+            <h3>An Toàn Cốt Lõi</h3>
+            <p>Mã khôi phục dùng 1 lần, cơ chế Emergency Recovery đợi 7 ngày. Bạn sẽ không bao giờ bị khóa vĩnh viễn.</p>
+          </article>
+          <article class="feature-card glass-panel interactive-card">
+            <div class="card-icon">UPDATE</div>
+            <h3>Cập nhật có kiểm soát</h3>
+            <p>Mỗi bản vá được công bố minh bạch. Bạn có toàn quyền quyết định khi nào cần áp dụng bản cập nhật.</p>
+          </article>
+        </section>
+
+        <!-- TẢI VỀ -->
+        <section class="download-section mt-12" id="downloads">
+          <div class="section-head text-center">
+            <p class="eyebrow text-glow">Bản ổn định</p>
+            <h2 class="section-title text-gradient-light">Sẵn sàng để tập trung?</h2>
+          </div>
+          <div class="latest-release glass-panel" id="latest-release">
+            <p class="loading-text">Đang tải thông tin phát hành...</p>
+          </div>
+        </section>
+
+        <section class="versions-section mt-8" id="versions">
+          <div class="section-head section-head-inline">
+            <div>
+              <p class="eyebrow">Lịch sử phát hành</p>
+              <h2 class="section-title">Các bản cũ hơn</h2>
+            </div>
+            <p class="section-caption">Danh sách gọn nhẹ, minh bạch.</p>
+          </div>
+          <div class="version-list scrollable-box glass-panel p-4" id="version-list"></div>
+        </section>
+      </main>
+
+      <footer class="site-footer glass-panel mt-12">
+        <div class="footer-info">
+          <p><strong>CaiNghiện Focus Guard</strong> for Windows</p>
+          <p class="mt-2 text-sm">Phiên bản cực đoan. Thiết kế dành cho những bộ óc cần tập trung sâu nhất.</p>
+        </div>
+        <div class="footer-links manifest-actions">
+          <p class="eyebrow" style="margin-bottom: 8px;">Dành cho Nhà phát triển</p>
+          <a class="button secondary btn-sm" href="./data/update-manifest.json" target="_blank" rel="noreferrer">
+            update-manifest.json
+          </a>
+          <a class="button secondary btn-sm" href="./data/releases.json" target="_blank" rel="noreferrer">
+            releases.json
+          </a>
+        </div>
+      </footer>
+    </div>
+
+    <script src="./app.js" type="module"></script>
+  </body>
+</html>

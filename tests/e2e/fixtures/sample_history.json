@@ -1,0 +1,28 @@
+{
+  "continuous_7_day_streak": {
+    "2026-09-01": { "focus_minutes": 180, "violations": 0, "is_clean": true },
+    "2026-09-02": { "focus_minutes": 240, "violations": 0, "is_clean": true },
+    "2026-09-03": { "focus_minutes": 300, "violations": 0, "is_clean": true },
+    "2026-09-04": { "focus_minutes": 210, "violations": 0, "is_clean": true },
+    "2026-09-05": { "focus_minutes": 360, "violations": 0, "is_clean": true },
+    "2026-09-06": { "focus_minutes": 150, "violations": 0, "is_clean": true },
+    "2026-09-07": { "focus_minutes": 420, "violations": 0, "is_clean": true }
+  },
+  "broken_streak_with_violation": {
+    "2026-09-08": { "focus_minutes": 240, "violations": 0, "is_clean": true },
+    "2026-09-09": { "focus_minutes": 180, "violations": 0, "is_clean": true },
+    "2026-09-10": { "focus_minutes": 60, "violations": 1, "is_clean": false },
+    "2026-09-11": { "focus_minutes": 200, "violations": 0, "is_clean": true }
+  },
+  "leap_year_transition": {
+    "2024-02-28": { "focus_minutes": 120, "violations": 0, "is_clean": true },
+    "2024-02-29": { "focus_minutes": 180, "violations": 0, "is_clean": true },
+    "2024-03-01": { "focus_minutes": 240, "violations": 0, "is_clean": true }
+  },
+  "year_rollover_transition": {
+    "2025-12-30": { "focus_minutes": 300, "violations": 0, "is_clean": true },
+    "2025-12-31": { "focus_minutes": 240, "violations": 0, "is_clean": true },
+    "2026-01-01": { "focus_minutes": 180, "violations": 0, "is_clean": true },
+    "2026-01-02": { "focus_minutes": 360, "violations": 0, "is_clean": true }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "schema": 2,
+  "saved_at": "2026-09-16T10:00:00.000Z",
+  "data": {
+    "protection_enabled": false,
+    "blocked_domains": [
+      "facebook.com",
+      "instagram.com",
+      "tiktok.com",
+      "x.com",
+      "youtube.com",
+      "reddit.com",
+      "discord.com"
+    ],
+    "password_hash": null,
+    "level": 1,
+    "xp": 0,
+    "streak": 0,
+    "daily_stats": {},
+    "daily_history": {},
+    "total_focus_hours": 0,
+    "violations_count": 0,
+    "schedule": {
+      "enabled": false,
+      "start_time": "08:00",
+      "end_time": "17:00",
+      "days_of_week": [1, 2, 3, 4, 5]
+    },
+    "block_nsfw": true,
+    "start_with_windows": false,
+    "change_delay_enabled": true
+  }
+}

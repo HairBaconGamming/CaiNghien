@@ -1,0 +1,38 @@
+{
+  "standard_workday": {
+    "enabled": true,
+    "start_time": "08:00",
+    "end_time": "17:00",
+    "days_of_week": [1, 2, 3, 4, 5]
+  },
+  "disabled_workday": {
+    "enabled": false,
+    "start_time": "08:00",
+    "end_time": "17:00",
+    "days_of_week": [1, 2, 3, 4, 5]
+  },
+  "overnight_shift": {
+    "enabled": true,
+    "start_time": "22:00",
+    "end_time": "06:00",
+    "days_of_week": [1, 2, 3, 4, 5]
+  },
+  "weekend_only": {
+    "enabled": true,
+    "start_time": "09:00",
+    "end_time": "21:00",
+    "days_of_week": [0, 6]
+  },
+  "empty_days": {
+    "enabled": true,
+    "start_time": "08:00",
+    "end_time": "17:00",
+    "days_of_week": []
+  },
+  "malformed_times": {
+    "enabled": true,
+    "start_time": "25:61",
+    "end_time": "invalid",
+    "days_of_week": [1]
+  }
+}

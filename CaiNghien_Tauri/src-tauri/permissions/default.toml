@@ -1,0 +1,88 @@
+[[permission]]
+identifier = "allow-get-app-config"
+description = "Allows the get_app_config command"
+commands.allow = ["get_app_config"]
+
+[[permission]]
+identifier = "allow-save-app-config"
+description = "Allows the save_app_config command"
+commands.allow = ["save_app_config"]
+
+[[permission]]
+identifier = "allow-set-password"
+description = "Allows the set_password command"
+commands.allow = ["set_password"]
+
+[[permission]]
+identifier = "allow-verify-password"
+description = "Allows the verify_password command"
+commands.allow = ["verify_password"]
+
+[[permission]]
+identifier = "allow-request-unlock"
+description = "Allows the request_unlock command"
+commands.allow = ["request_unlock"]
+
+[[permission]]
+identifier = "allow-start-quota"
+description = "Allows the start_quota command"
+commands.allow = ["start_quota"]
+
+[[permission]]
+identifier = "allow-pause-quota"
+description = "Allows the pause_quota command"
+commands.allow = ["pause_quota"]
+
+[[permission]]
+identifier = "allow-get-quota-status"
+description = "Allows the get_quota_status command"
+commands.allow = ["get_quota_status"]
+
+[[permission]]
+identifier = "allow-lock-hardware"
+description = "Allows the lock_hardware_input command"
+commands.allow = ["lock_hardware_input"]
+
+[[permission]]
+identifier = "allow-unlock-hardware"
+description = "Allows the unlock_hardware_input command"
+commands.allow = ["unlock_hardware_input"]
+
+[[permission]]
+identifier = "allow-set-hardcore-mode"
+description = "Allows the set_hardcore_mode command"
+commands.allow = ["set_hardcore_mode"]
+
+[[permission]]
+identifier = "allow-apply-penalty"
+description = "Allows the apply_penalty command"
+commands.allow = ["apply_penalty"]
+
+[[permission]]
+identifier = "allow-enter-focus-room"
+description = "Allows the enter_focus_room command"
+commands.allow = ["enter_focus_room"]
+
+[[permission]]
+identifier = "allow-exit-focus-room"
+description = "Allows the exit_focus_room command"
+commands.allow = ["exit_focus_room"]
+
+[default]
+description = "Default permissions for the app's custom commands"
+permissions = [
+  "allow-get-app-config",
+  "allow-save-app-config",
+  "allow-set-password",
+  "allow-verify-password",
+  "allow-request-unlock",
+  "allow-start-quota",
+  "allow-pause-quota",
+  "allow-set-hardcore-mode",
+  "allow-get-quota-status",
+  "allow-lock-hardware",
+  "allow-unlock-hardware",
+  "allow-apply-penalty",
+  "allow-enter-focus-room",
+  "allow-exit-focus-room",
+]
