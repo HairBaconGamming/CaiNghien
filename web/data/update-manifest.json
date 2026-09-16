@@ -1,14 +1,16 @@
 {
   "product": "CaiNghien Focus Guard",
   "latest": {
-    "version": "0.3.12",
-    "published_at": "2026-05-23",
-    "installer": "../downloads/0.3.12/CaiNghienFocusGuard-Setup-0.3.12.exe",
+    "version": "1.0.0",
+    "published_at": "2026-09-16",
+    "installer": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.0.0/cainghien_tauri_0.1.0_x64-setup.exe",
     "notes": [
-      "Khóa cứng việc đổi lịch và lưu cấu hình khi đang ở khung giờ nghiêm khắc để không còn đường vòng.",
-      "Lock screen không còn tự reset ô mật khẩu khi enforcement refresh, đồng thời thêm nút Hiện/Ẩn để kiểm tra nội dung đang gõ."
+      "Phi�n b?n v1.0.0 Ch�nh Th?c",
+      "Ch? d? kh�a c?ng ?ng d?ng (Kiosk Mode).",
+      "Giao di?n Glassmorphism ho�n to�n m?i.",
+      "H? th?ng Heatmap v� Th? th�ch g� ph�m."
     ],
-    "sha256": "f13514921128f209b82d951189b796aa82bdce12b5a8c7b15a3fd020b72a3522",
-    "size_bytes": 33216089
+    "sha256": "placeholder_sha256_or_can_be_skipped_since_we_didnt_compute_it",
+    "size_bytes": 4590767
   }
 }
