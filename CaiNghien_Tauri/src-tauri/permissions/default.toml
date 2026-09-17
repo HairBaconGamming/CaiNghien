@@ -68,6 +68,41 @@ identifier = "allow-exit-focus-room"
 description = "Allows the exit_focus_room command"
 commands.allow = ["exit_focus_room"]
 
+[[permission]]
+identifier = "allow-get-heatmap-data"
+description = "Allows the get_heatmap_data command"
+commands.allow = ["get_heatmap_data"]
+
+[[permission]]
+identifier = "allow-get-user-profile"
+description = "Allows the get_user_profile command"
+commands.allow = ["get_user_profile"]
+
+[[permission]]
+identifier = "allow-update-user-profile"
+description = "Allows the update_user_profile command"
+commands.allow = ["update_user_profile"]
+
+[[permission]]
+identifier = "allow-record-focus-session"
+description = "Allows the record_focus_session command"
+commands.allow = ["record_focus_session"]
+
+[[permission]]
+identifier = "allow-get-typing-challenge-text"
+description = "Allows the get_typing_challenge_text command"
+commands.allow = ["get_typing_challenge_text"]
+
+[[permission]]
+identifier = "allow-save-typing-score"
+description = "Allows the save_typing_score command"
+commands.allow = ["save_typing_score"]
+
+[[permission]]
+identifier = "allow-get-typing-scores"
+description = "Allows the get_typing_scores command"
+commands.allow = ["get_typing_scores"]
+
 [default]
 description = "Default permissions for the app's custom commands"
 permissions = [
@@ -85,4 +120,11 @@ permissions = [
   "allow-apply-penalty",
   "allow-enter-focus-room",
   "allow-exit-focus-room",
+  "allow-get-heatmap-data",
+  "allow-get-user-profile",
+  "allow-update-user-profile",
+  "allow-record-focus-session",
+  "allow-get-typing-challenge-text",
+  "allow-save-typing-score",
+  "allow-get-typing-scores",
 ]

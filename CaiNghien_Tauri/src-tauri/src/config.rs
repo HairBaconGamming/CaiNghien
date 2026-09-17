@@ -6,8 +6,8 @@ use std::sync::Mutex;
 use crate::models::AppConfig;
 
 pub struct ConfigState(pub Mutex<AppConfig>);
+pub type AppConfigState = ConfigState;
 
-<<<<<<< HEAD
 pub fn get_default_config_path() -> PathBuf {
     if let Ok(appdata) = std::env::var("APPDATA") {
         let mut path = PathBuf::from(appdata);
@@ -28,10 +28,6 @@ pub fn get_config_path(app: &AppHandle) -> PathBuf {
             PathBuf::from("data")
         }
     });
-=======
-fn get_config_path(app: &AppHandle) -> PathBuf {
-    let mut path = app.path().app_data_dir().unwrap_or_else(|_| PathBuf::from("data"));
->>>>>>> a698a5e52a114d4a1f1ff5b4fb121c030ed783b6
     if !path.exists() {
         let _ = fs::create_dir_all(&path);
     }
@@ -39,7 +35,6 @@ fn get_config_path(app: &AppHandle) -> PathBuf {
     path
 }
 
-<<<<<<< HEAD
 pub fn load_config_from_path(path: &std::path::Path) -> AppConfig {
     let mut config = AppConfig::default();
     if path.exists() {
@@ -76,38 +71,12 @@ pub fn atomic_save_to_path(path: &std::path::Path, config: &AppConfig) -> Result
     if let Some(parent) = path.parent() {
         let _ = fs::create_dir_all(parent);
     }
-=======
-pub fn load_config(app: &AppHandle) -> AppConfig {
-    let path = get_config_path(app);
-    if path.exists() {
-        if let Ok(content) = fs::read_to_string(&path) {
-            // we skip the "schema" wrapper for simplicity if we want, or parse it.
-            // For now, let's assume we read/write the config directly, or extract "data".
-            if let Ok(parsed) = serde_json::from_str::<serde_json::Value>(&content) {
-                if let Some(data) = parsed.get("data") {
-                    if let Ok(config) = serde_json::from_value(data.clone()) {
-                        return config;
-                    }
-                }
-            }
-            if let Ok(config) = serde_json::from_str::<AppConfig>(&content) {
-                return config;
-            }
-        }
-    }
-    AppConfig::default()
-}
-
-pub fn save_config(app: &AppHandle, config: &AppConfig) -> Result<(), String> {
-    let path = get_config_path(app);
->>>>>>> a698a5e52a114d4a1f1ff5b4fb121c030ed783b6
     let wrapper = serde_json::json!({
         "schema": 2,
         "saved_at": chrono::Utc::now().to_rfc3339(),
         "data": config,
     });
     let content = serde_json::to_string_pretty(&wrapper).map_err(|e| e.to_string())?;
-<<<<<<< HEAD
 
     let tmp_path = path.with_extension(format!("tmp.{}", std::process::id()));
     fs::write(&tmp_path, &content).map_err(|e| e.to_string())?;
@@ -142,13 +111,6 @@ pub fn apply_penalty_core(config: &mut AppConfig) {
     entry.violations += 1;
     entry.is_clean = false;
 }
-
-=======
-    fs::write(&path, content).map_err(|e| e.to_string())?;
-    Ok(())
-}
-
->>>>>>> a698a5e52a114d4a1f1ff5b4fb121c030ed783b6
 #[tauri::command]
 pub fn get_app_config(state: tauri::State<'_, ConfigState>) -> Result<AppConfig, String> {
     let config = state.0.lock().map_err(|_| "Mutex poisoned".to_string())?;
@@ -159,7 +121,6 @@ pub fn get_app_config(state: tauri::State<'_, ConfigState>) -> Result<AppConfig,
 pub fn save_app_config(
     app: AppHandle,
     state: tauri::State<'_, ConfigState>,
-<<<<<<< HEAD
     mut new_config: AppConfig,
 ) -> Result<(), String> {
     let mut config = state.0.lock().map_err(|_| "Mutex poisoned".to_string())?;
@@ -211,16 +172,19 @@ pub fn save_app_config(
     if new_config.daily_history.is_empty() && !config.daily_history.is_empty() {
         new_config.daily_history = config.daily_history.clone();
     }
-=======
-    new_config: AppConfig,
-) -> Result<(), String> {
-    let mut config = state.0.lock().map_err(|_| "Mutex poisoned".to_string())?;
->>>>>>> a698a5e52a114d4a1f1ff5b4fb121c030ed783b6
+    if new_config.focus_sessions.is_empty() && !config.focus_sessions.is_empty() {
+        new_config.focus_sessions = config.focus_sessions.clone();
+    }
+    if new_config.typing_scores.is_empty() && !config.typing_scores.is_empty() {
+        new_config.typing_scores = config.typing_scores.clone();
+    }
+    if new_config.heatmap_days.is_empty() && !config.heatmap_days.is_empty() {
+        new_config.heatmap_days = config.heatmap_days.clone();
+    }
     *config = new_config.clone();
     save_config(&app, &config)?;
     Ok(())
 }
-<<<<<<< HEAD
 
 #[cfg(test)]
 mod tests {
@@ -275,5 +239,3 @@ mod tests {
         let _ = fs::remove_dir_all(&tmp_dir);
     }
 }
-=======
->>>>>>> a698a5e52a114d4a1f1ff5b4fb121c030ed783b6

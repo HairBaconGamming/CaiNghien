@@ -1,5 +1,4 @@
 use serde::{Deserialize, Serialize};
-<<<<<<< HEAD
 use std::collections::HashMap;
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
@@ -33,10 +32,141 @@ impl Default for ScheduleConfig {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(default)]
-=======
+pub struct UserProfile {
+    pub username: String,
+    pub title: String,
+    pub level: u32,
+    #[serde(alias = "xp")]
+    pub current_xp: u32,
+    pub next_level_xp: u32,
+    pub rank: String,
+    #[serde(default)]
+    pub handle: String,
+    #[serde(default)]
+    pub avatar_type: String,
+    #[serde(default)]
+    pub level_title: String,
+    #[serde(default)]
+    pub next_level_title: String,
+    #[serde(default)]
+    pub streak: u32,
+}
+
+impl Default for UserProfile {
+    fn default() -> Self {
+        Self {
+            username: "Alex Chen".to_string(),
+            handle: "@astro_alex".to_string(),
+            title: "Stargazer".to_string(),
+            avatar_type: "cosmic_singularity".to_string(),
+            level: 28,
+            level_title: "Stargazer".to_string(),
+            next_level_title: "Nova Voyager (LVL 29)".to_string(),
+            current_xp: 14350,
+            next_level_xp: 15000,
+            streak: 128,
+            rank: "Stargazer".to_string(),
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+pub struct HeatmapDay {
+    pub date: String,
+    pub count: u32,
+    pub level: u8,
+}
+
+pub type DayCell = HeatmapDay;
+
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+pub struct HeatmapData {
+    pub total_contributions: u32,
+    pub current_streak: u32,
+    pub longest_streak: u32,
+    pub activity_rate: f64,
+    #[serde(default)]
+    pub activity_percentage: f64,
+    pub days: Vec<HeatmapDay>,
+}
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
->>>>>>> a698a5e52a114d4a1f1ff5b4fb121c030ed783b6
+#[serde(default)]
+pub struct FocusSession {
+    pub id: String,
+    pub timestamp: u64,
+    pub duration_minutes: u32,
+    pub quote: Option<String>,
+    pub session_type: String,
+    pub completed: bool,
+    pub xp_earned: u32,
+}
+
+impl Default for FocusSession {
+    fn default() -> Self {
+        Self {
+            id: String::new(),
+            timestamp: 0,
+            duration_minutes: 25,
+            quote: None,
+            session_type: "pomodoro".to_string(),
+            completed: true,
+            xp_earned: 100,
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+pub struct FocusSessionResult {
+    pub success: bool,
+    pub xp_earned: u32,
+    pub new_streak: u32,
+    pub today_count: u32,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct TypingChallenge {
+    pub id: String,
+    pub text: String,
+    pub title: String,
+    pub author: String,
+    pub difficulty: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+pub struct TypingScore {
+    pub id: String,
+    pub timestamp: u64,
+    pub wpm: u32,
+    pub accuracy: f64,
+    pub time_seconds: u32,
+    pub words_count: u32,
+    pub xp_earned: u32,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+pub struct TypingScoreInput {
+    pub wpm: u32,
+    pub accuracy: f64,
+    pub time_seconds: u32,
+    pub words_count: u32,
+    #[serde(default)]
+    pub difficulty: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+pub struct TypingScoreResult {
+    pub saved: bool,
+    pub rank: String,
+    pub xp_earned: u32,
+    #[serde(default)]
+    pub success: bool,
+    #[serde(default)]
+    pub new_streak: u32,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(default)]
 pub struct AppConfig {
     pub protection_enabled: bool,
     pub blocked_domains: Vec<String>,
@@ -45,7 +175,6 @@ pub struct AppConfig {
     pub start_with_windows: bool,
     pub change_delay_enabled: bool,
     pub block_nsfw: bool,
-<<<<<<< HEAD
     pub protection_started_at: Option<u64>,
     pub violations_count: u32,
     pub daily_quota_minutes: u32,
@@ -73,8 +202,16 @@ pub struct AppConfig {
 
     #[serde(skip)]
     pub temporary_unlock_until: Option<u64>,
-=======
->>>>>>> a698a5e52a114d4a1f1ff5b4fb121c030ed783b6
+
+    // M2: Cosmos gamification & screens persistence
+    #[serde(default)]
+    pub user_profile: UserProfile,
+    #[serde(default)]
+    pub focus_sessions: Vec<FocusSession>,
+    #[serde(default)]
+    pub typing_scores: Vec<TypingScore>,
+    #[serde(default)]
+    pub heatmap_days: HashMap<String, u32>,
 }
 
 impl Default for AppConfig {
@@ -95,7 +232,6 @@ impl Default for AppConfig {
             start_with_windows: false,
             change_delay_enabled: true,
             block_nsfw: false,
-<<<<<<< HEAD
             protection_started_at: None,
             violations_count: 0,
             daily_quota_minutes: 60,
@@ -111,6 +247,10 @@ impl Default for AppConfig {
             schedule: ScheduleConfig::default(),
             daily_history: HashMap::new(),
             temporary_unlock_until: None,
+            user_profile: UserProfile::default(),
+            focus_sessions: Vec::new(),
+            typing_scores: Vec::new(),
+            heatmap_days: HashMap::new(),
         }
     }
 }
@@ -130,6 +270,10 @@ mod tests {
         assert_eq!(config.schedule.end_time, "17:00");
         assert_eq!(config.schedule.days_of_week, vec![1, 2, 3, 4, 5]);
         assert!(config.daily_history.is_empty());
+        assert_eq!(config.user_profile.level, 28);
+        assert_eq!(config.user_profile.title, "Stargazer");
+        assert!(config.focus_sessions.is_empty());
+        assert!(config.typing_scores.is_empty());
     }
 
     #[test]
@@ -147,6 +291,7 @@ mod tests {
         assert!(config.daily_history.is_empty());
         assert_eq!(config.violations_count, 3);
         assert!(config.protection_enabled);
+        assert_eq!(config.user_profile.title, "Stargazer");
     }
 
     #[test]
@@ -174,9 +319,38 @@ mod tests {
         assert!(rec.is_clean);
         assert_eq!(rec.violations, 0);
     }
-}
-=======
-        }
+
+    #[test]
+    fn test_cosmos_models_roundtrip() {
+        let mut config = AppConfig::default();
+        config.user_profile.username = "Cosmic Traveler".to_string();
+        config.user_profile.level = 29;
+        config.focus_sessions.push(FocusSession {
+            id: "session-1".to_string(),
+            timestamp: 1700000000,
+            duration_minutes: 25,
+            quote: Some("Silence is strength".to_string()),
+            session_type: "pomodoro".to_string(),
+            completed: true,
+            xp_earned: 100,
+        });
+        config.typing_scores.push(TypingScore {
+            id: "score-1".to_string(),
+            timestamp: 1700000000,
+            wpm: 85,
+            accuracy: 99.5,
+            time_seconds: 40,
+            words_count: 55,
+            xp_earned: 50,
+        });
+        config.heatmap_days.insert("2026-09-17".to_string(), 4);
+
+        let json = serde_json::to_string(&config).expect("Must serialize");
+        let deserialized: AppConfig = serde_json::from_str(&json).expect("Must deserialize");
+        assert_eq!(deserialized.user_profile.username, "Cosmic Traveler");
+        assert_eq!(deserialized.user_profile.level, 29);
+        assert_eq!(deserialized.focus_sessions.len(), 1);
+        assert_eq!(deserialized.typing_scores.len(), 1);
+        assert_eq!(deserialized.heatmap_days.get("2026-09-17"), Some(&4));
     }
 }
->>>>>>> a698a5e52a114d4a1f1ff5b4fb121c030ed783b6
