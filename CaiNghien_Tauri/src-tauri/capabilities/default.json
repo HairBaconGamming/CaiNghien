@@ -12,6 +12,8 @@
     "core:window:allow-maximize",
     "core:window:allow-toggle-maximize",
     "opener:default",
+    "updater:default",
+    "process:default",
     "autostart:default",
     "default"
   ]

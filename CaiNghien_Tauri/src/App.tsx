@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Navbar, NavTabId } from './components/layout/Navbar';
 import { DashboardScreen } from './components/dashboard/DashboardScreen';
 import { FocusRoomScreen } from './components/focus/FocusRoomScreen';
@@ -10,8 +10,11 @@ import {
   Shield,
   Cpu,
   Sparkles,
-  ExternalLink
+  ExternalLink,
+  RefreshCw
 } from 'lucide-react';
+import { check } from '@tauri-apps/plugin-updater';
+import { relaunch } from '@tauri-apps/plugin-process';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<NavTabId>('dashboard');
@@ -27,6 +30,34 @@ export default function App() {
     totalContributions: 4185,
     activityRate: 85,
   });
+
+  const [updateObj, setUpdateObj] = useState<any>(null);
+  const [isCheckingUpdate, setIsCheckingUpdate] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  useEffect(() => {
+    check().then((update) => {
+      if (update) {
+        setUpdateObj(update);
+      }
+    }).catch(console.error);
+  }, []);
+
+  const handleManualCheck = async () => {
+    setIsCheckingUpdate(true);
+    try {
+      const update = await check();
+      if (update) {
+        setUpdateObj(update);
+      } else {
+        alert("System is up to date.");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Failed to check for updates.");
+    }
+    setIsCheckingUpdate(false);
+  };
 
   // Generate fixed random starfield coordinates
   const stars = useMemo(() => {
@@ -238,6 +269,26 @@ export default function App() {
                       </div>
                     </div>
                   </div>
+
+                  <div className="glass-panel rounded-2xl p-6 border border-white/10 md:col-span-2">
+                    <div className="flex items-center gap-2 mb-4">
+                      <RefreshCw className="w-5 h-5 text-emerald-400" />
+                      <h3 className="text-base font-bold text-white">System Updates</h3>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-semibold text-slate-200">Cosmic Core Engine</p>
+                        <p className="text-xs text-slate-400">Check for the latest features and security enhancements</p>
+                      </div>
+                      <button
+                        onClick={handleManualCheck}
+                        disabled={isCheckingUpdate}
+                        className="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider text-white bg-emerald-600/80 hover:bg-emerald-500 transition-colors flex items-center gap-2 disabled:opacity-50"
+                      >
+                        {isCheckingUpdate ? 'Checking...' : 'Check for Updates'}
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -254,6 +305,52 @@ export default function App() {
               onClose={() => setShowTypingModal(false)}
               onComplete={() => setShowTypingModal(false)}
             />
+          </div>
+        </div>
+      )}
+
+      {/* Update Modal */}
+      {updateObj && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+          <div className="glass-panel w-full max-w-md p-6 rounded-2xl border border-cyan-500/30 shadow-[0_0_40px_rgba(6,182,212,0.2)]">
+            <h2 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-cyan-400" />
+              Cosmic Update Available
+            </h2>
+            <p className="text-sm text-slate-300 mb-4">
+              Version {updateObj.version} is ready for deployment.
+            </p>
+            {updateObj.body && (
+              <div className="bg-slate-900/50 rounded-lg p-3 mb-6 border border-white/5 max-h-32 overflow-y-auto text-xs text-slate-400 whitespace-pre-wrap">
+                {updateObj.body}
+              </div>
+            )}
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setUpdateObj(null)}
+                className="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-300 bg-white/5 hover:bg-white/10 transition-colors cursor-pointer"
+                disabled={isUpdating}
+              >
+                Later
+              </button>
+              <button
+                onClick={async () => {
+                  setIsUpdating(true);
+                  try {
+                    await updateObj.downloadAndInstall();
+                    await relaunch();
+                  } catch (e) {
+                    console.error(e);
+                    alert("Failed to install update.");
+                  }
+                  setIsUpdating(false);
+                }}
+                className="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider text-white bg-cyan-600 hover:bg-cyan-500 transition-colors flex items-center gap-2 cursor-pointer"
+                disabled={isUpdating}
+              >
+                {isUpdating ? 'Deploying...' : 'Install & Restart'}
+              </button>
+            </div>
           </div>
         </div>
       )}
