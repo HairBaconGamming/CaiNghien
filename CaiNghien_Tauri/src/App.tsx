@@ -11,7 +11,8 @@ import {
   Cpu,
   Sparkles,
   ExternalLink,
-  RefreshCw
+  RefreshCw,
+  Lock
 } from 'lucide-react';
 import { check } from '@tauri-apps/plugin-updater';
 import { relaunch } from '@tauri-apps/plugin-process';
@@ -34,6 +35,17 @@ export default function App() {
   const [updateObj, setUpdateObj] = useState<any>(null);
   const [isCheckingUpdate, setIsCheckingUpdate] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  
+  // Settings Protection
+  const [settingsLocked, setSettingsLocked] = useState(true);
+  const [showUnlockModal, setShowUnlockModal] = useState(false);
+
+  useEffect(() => {
+    if (activeTab !== 'settings') {
+      setSettingsLocked(true);
+      setShowUnlockModal(false);
+    }
+  }, [activeTab]);
 
   useEffect(() => {
     check().then((update) => {
@@ -223,7 +235,49 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="relative grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {settingsLocked && (
+                    <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[#030712]/80 backdrop-blur-sm rounded-2xl border border-white/10">
+                      <Shield className="w-12 h-12 text-cyan-400 mb-4 animate-pulse" />
+                      <h3 className="text-white font-bold text-xl mb-2">Active Protection Engaged</h3>
+                      <p className="text-slate-300 text-sm mb-6 text-center max-w-sm">
+                        Focus Guard is active. Settings and password modifications are strictly locked. Complete a challenge to unlock.
+                      </p>
+                      <button
+                        onClick={() => setShowUnlockModal(true)}
+                        className="px-6 py-2.5 rounded-xl font-bold text-sm tracking-wider uppercase text-white flex items-center gap-2 bg-gradient-to-r from-cyan-500/40 to-sky-500/30 border border-cyan-400 shadow-[0_0_18px_rgba(0,240,255,0.45)] hover:shadow-[0_0_25px_rgba(0,240,255,0.7)] transition-all cursor-pointer"
+                      >
+                        <Shield className="w-4 h-4 text-cyan-300" />
+                        <span>Type to Unlock</span>
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Password Protection Box */}
+                  <div className="glass-panel rounded-2xl p-6 border border-white/10">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Lock className="w-5 h-5 text-fuchsia-400" />
+                      <h3 className="text-base font-bold text-white">Password & Security</h3>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-semibold text-slate-200">Require Password to Exit</p>
+                          <p className="text-xs text-slate-400">Enforce strict exit barriers</p>
+                        </div>
+                        <input type="checkbox" defaultChecked className="toggle-checkbox accent-fuchsia-400 w-5 h-5 cursor-pointer" disabled={settingsLocked} />
+                      </div>
+                      <div className="pt-2 border-t border-white/10">
+                        <button
+                          disabled={settingsLocked}
+                          className="w-full py-2 rounded-lg border border-fuchsia-500/30 text-xs font-bold uppercase tracking-wider text-fuchsia-300 hover:bg-fuchsia-500/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                          Change Password
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="glass-panel rounded-2xl p-6 border border-white/10">
                     <div className="flex items-center gap-2 mb-4">
                       <Shield className="w-5 h-5 text-cyan-400" />
@@ -304,6 +358,22 @@ export default function App() {
               asModal
               onClose={() => setShowTypingModal(false)}
               onComplete={() => setShowTypingModal(false)}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Unlock Settings Modal */}
+      {showUnlockModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+          <div className="relative w-full max-w-2xl">
+            <TypingChallengeScreen
+              asModal
+              onClose={() => setShowUnlockModal(false)}
+              onComplete={() => {
+                setSettingsLocked(false);
+                setShowUnlockModal(false);
+              }}
             />
           </div>
         </div>

@@ -86,7 +86,7 @@ export const TypingChallengeScreen: React.FC<TypingChallengeScreenProps> = ({
 
   // Recalculate metrics whenever typed text or elapsed time updates
   useEffect(() => {
-    const target = challenge.text;
+    const target = challenge.text.normalize('NFC');
     let correctCount = 0;
     const minLen = Math.min(typedText.length, target.length);
 
