@@ -1,5 +1,5 @@
-import React from 'react';
-import { Play, Pause, RotateCcw } from 'lucide-react';
+import React, { useState } from 'react';
+import { Play, Pause, RotateCcw, Check, X } from 'lucide-react';
 
 export interface TimerRingProps {
   secondsRemaining: number;
@@ -24,6 +24,9 @@ export const TimerRing: React.FC<TimerRingProps> = ({
   availableDurations = [15, 25, 45, 60, 90],
   disabled = false,
 }) => {
+  const [isCustomizing, setIsCustomizing] = useState(false);
+  const [customValue, setCustomValue] = useState('');
+
   // Format MM:SS or HH:MM:SS
   const formatTime = (secs: number) => {
     const hours = Math.floor(secs / 3600);
@@ -244,14 +247,17 @@ export const TimerRing: React.FC<TimerRingProps> = ({
 
       {/* Duration Selector Pills (Visible when not actively running or on subtle hover) */}
       {!isRunning && onSelectDuration && (
-        <div className="flex items-center gap-2 mt-5 animate-fade-in">
+        <div className="flex items-center gap-2 mt-5 animate-fade-in flex-wrap justify-center">
           {availableDurations.map((mins) => {
-            const isSelected = selectedMinutes === mins;
+            const isSelected = selectedMinutes === mins && !isCustomizing;
             return (
               <button
                 key={mins}
                 type="button"
-                onClick={() => onSelectDuration(mins)}
+                onClick={() => {
+                  setIsCustomizing(false);
+                  onSelectDuration(mins);
+                }}
                 disabled={disabled}
                 className={`
                   px-3 py-1 rounded-full text-xs font-semibold tracking-wider transition-all duration-200 cursor-pointer
@@ -265,6 +271,74 @@ export const TimerRing: React.FC<TimerRingProps> = ({
               </button>
             );
           })}
+
+          {isCustomizing ? (
+            <div className="flex items-center gap-1 animate-fade-in">
+              <input
+                type="number"
+                min="1"
+                max="999"
+                value={customValue}
+                onChange={(e) => setCustomValue(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    let val = parseInt(customValue, 10);
+                    if (!isNaN(val) && val > 0) {
+                      if (val > 999) val = 999;
+                      onSelectDuration(val);
+                      setIsCustomizing(false);
+                    }
+                  } else if (e.key === 'Escape') {
+                    setIsCustomizing(false);
+                  }
+                }}
+                placeholder="Phút"
+                className="w-16 px-2 py-1 bg-white/5 border border-cyan-400/50 text-cyan-300 text-xs rounded-full focus:outline-none focus:border-cyan-300 text-center"
+                autoFocus
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  let val = parseInt(customValue, 10);
+                  if (!isNaN(val) && val > 0) {
+                    if (val > 999) val = 999;
+                    onSelectDuration(val);
+                    setIsCustomizing(false);
+                  }
+                }}
+                className="p-1 rounded-full text-cyan-300 hover:bg-cyan-500/20 transition-colors"
+                title="Xác nhận"
+              >
+                <Check size={14} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsCustomizing(false)}
+                className="p-1 rounded-full text-slate-400 hover:text-rose-400 hover:bg-rose-500/20 transition-colors"
+                title="Hủy"
+              >
+                <X size={14} />
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                setCustomValue(!availableDurations.includes(selectedMinutes) ? String(selectedMinutes) : '');
+                setIsCustomizing(true);
+              }}
+              disabled={disabled}
+              className={`
+                px-3 py-1 rounded-full text-xs font-semibold tracking-wider transition-all duration-200 cursor-pointer
+                ${!availableDurations.includes(selectedMinutes)
+                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400/50 shadow-[0_0_12px_rgba(0,240,255,0.35)] scale-105'
+                  : 'bg-white/5 hover:bg-white/10 text-slate-400 hover:text-slate-200 border border-white/10 hover:border-white/20'
+                }
+              `}
+            >
+              {!availableDurations.includes(selectedMinutes) ? `${selectedMinutes}m` : 'Tùy chỉnh'}
+            </button>
+          )}
         </div>
       )}
     </div>

@@ -67,7 +67,8 @@ export const FocusRoomScreen: React.FC<FocusRoomScreenProps> = ({
       setTotalSeconds(initialMinutes * 60);
       setSecondsRemaining(initialMinutes * 60);
     }
-  }, [initialMinutes, isRunning, isCompleted]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialMinutes]);
 
   // Handle Fullscreen & Kiosk Lock Hooks with Tauri Backend
   useEffect(() => {
@@ -529,10 +530,7 @@ export const FocusRoomScreen: React.FC<FocusRoomScreenProps> = ({
             <div className="flex items-center gap-3">
               <button
                 type="button"
-                onClick={() => {
-                  setIsCompleted(false);
-                  handleTogglePlayPause();
-                }}
+                onClick={handleReset}
                 className="flex-1 py-3 px-4 rounded-xl font-bold text-sm tracking-wider uppercase text-white bg-gradient-to-r from-cyan-500 to-sky-500 hover:from-cyan-400 hover:to-sky-400 border border-cyan-300 shadow-[0_0_20px_rgba(0,240,255,0.4)] hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2"
               >
                 <Play size={16} className="fill-white" />
