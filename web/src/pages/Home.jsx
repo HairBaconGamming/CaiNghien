@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import {
   ShieldCheckIcon,
   DownloadIcon,
@@ -15,16 +16,67 @@ import {
   TerminalIcon
 } from '../components/Icons.jsx';
 
+const DEFAULT_LATEST = {
+  version: "v1.2.0",
+  versionRaw: "1.2.0",
+  publishedAt: "18/09/2026",
+  installerUrl: "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.2.0/cainghien_tauri_1.2.0_x64-setup.exe",
+  localInstallerUrl: "/downloads/1.2.0/CaiNghien_Tauri_Setup.exe",
+  msiInstallerUrl: "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.1.0/cainghien_tauri_1.1.0_x64_en-US.msi",
+  sha256Checksum: "481c8bb0700499c520b32f41f4be6b46d45c570dccb6db9242a66fc65a791b05",
+  sizeFormatted: "6.1 MB",
+  notes: [
+    "Ra mắt tính năng Tự động cập nhật (Auto Updater).",
+    "Sửa lỗi gõ tiếng Việt (VNI/Telex) khi gõ phím.",
+    "Thêm nút tùy chỉnh số phút tập trung.",
+    "Thay đổi Logo ứng dụng phong cách vũ trụ.",
+    "Vá lỗi kẹt tiến trình khi gỡ cài đặt (Uninstall)."
+  ]
+};
+
 export default function Home() {
   const [copiedSha, setCopiedSha] = useState(false);
   const copyTimeoutRef = useRef(null);
-  
-  const releaseVersion = "v1.0.0";
-  const releaseDate = "16/09/2026";
-  const installerUrl = "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.0.0/cainghien_tauri_0.1.0_x64-setup.exe";
-  const localInstallerUrl = "/downloads/1.0.0/CaiNghien_Tauri_Setup.exe";
-  const msiInstallerUrl = "/downloads/1.0.0/CaiNghien_Tauri_Installer.msi";
-  const sha256Checksum = "bbc19c7902c51681c815374037c2a793a461f3019a6b1629700b5f388bbb08b7";
+  const [releaseInfo, setReleaseInfo] = useState(DEFAULT_LATEST);
+
+  useEffect(() => {
+    fetch('/data/releases.json')
+      .then(res => (res.ok ? res.json() : null))
+      .then(data => {
+        if (!data) return;
+        const rel = data.releases?.find(r => r.is_latest) || data.releases?.find(r => r.version === data.latest?.version) || data.releases?.[0] || data.latest;
+        if (!rel) return;
+
+        const verStr = rel.version
+          ? (rel.version.startsWith('v') ? rel.version : `v${rel.version}`)
+          : DEFAULT_LATEST.version;
+        const pubDateStr = rel.published_at
+          ? rel.published_at.split('T')[0].split('-').reverse().join('/')
+          : DEFAULT_LATEST.publishedAt;
+        const fileObj = rel.files?.installer;
+        const msiObj = rel.files?.msi;
+
+        setReleaseInfo({
+          version: verStr,
+          versionRaw: rel.version || DEFAULT_LATEST.versionRaw,
+          publishedAt: pubDateStr,
+          installerUrl: fileObj?.url || DEFAULT_LATEST.installerUrl,
+          localInstallerUrl: fileObj?.direct_url || `/downloads/${rel.version}/CaiNghien_Tauri_Setup.exe`,
+          msiInstallerUrl: msiObj?.url || DEFAULT_LATEST.msiInstallerUrl,
+          msiAvailable: !!msiObj,
+          sha256Checksum: fileObj?.sha256 || DEFAULT_LATEST.sha256Checksum,
+          sizeFormatted:
+            fileObj?.size_formatted ||
+            (fileObj?.size_bytes
+              ? `${(fileObj.size_bytes / 1024 / 1024).toFixed(1)} MB`
+              : DEFAULT_LATEST.sizeFormatted),
+          notes: rel.notes || DEFAULT_LATEST.notes
+        });
+      })
+      .catch(err => {
+        console.warn('Failed to fetch releases.json in Home.jsx, using defaults', err);
+      });
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -35,10 +87,11 @@ export default function Home() {
   }, []);
 
   const handleCopyChecksum = async () => {
+    const checksum = releaseInfo.sha256Checksum;
     let success = false;
     try {
       if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(sha256Checksum);
+        await navigator.clipboard.writeText(checksum);
         success = true;
       }
     } catch (e) {
@@ -48,7 +101,7 @@ export default function Home() {
     if (!success) {
       try {
         const textArea = document.createElement('textarea');
-        textArea.value = sha256Checksum;
+        textArea.value = checksum;
         textArea.setAttribute('readonly', '');
         textArea.style.position = 'fixed';
         textArea.style.opacity = '0';
@@ -84,7 +137,7 @@ export default function Home() {
             <span className="status-indicator-dot">
               <span className="status-indicator-pulse" />
             </span>
-            <span>Phiên bản {releaseVersion} Chính Thức Phát Hành</span>
+            <span>Phiên bản {releaseInfo.version} Chính Thức Phát Hành</span>
           </div>
 
           <h1 className="hero-main-heading">
@@ -99,7 +152,7 @@ export default function Home() {
           </p>
 
           <div className="hero-action-buttons-group">
-            <a href={installerUrl} download className="button-primary-download">
+            <a href={releaseInfo.installerUrl} download className="button-primary-download">
               <DownloadIcon className="svg-icon-standard" />
               <span>Tải Miễn Phí (Windows x64)</span>
             </a>
@@ -315,16 +368,21 @@ export default function Home() {
           <div className="release-main-glass-panel">
             <div className="release-header-row">
               <div className="release-title-block">
-                <span className="release-version-pill">{releaseVersion}</span>
-                <span className="release-timestamp-text">Phát hành ngày {releaseDate}</span>
+                <span className="release-version-pill">{releaseInfo.version}</span>
+                <span className="release-timestamp-text">Phát hành ngày {releaseInfo.publishedAt}</span>
               </div>
-              <span className="trust-badge-item">Kiến trúc x64</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                <span className="trust-badge-item">Kiến trúc x64</span>
+                <Link to="/releases" className="download-secondary-button" style={{ padding: '6px 14px', fontSize: '0.82rem' }}>
+                  <span>Xem tất cả bản phát hành →</span>
+                </Link>
+              </div>
             </div>
 
             <div className="release-glance-metrics-row">
               <div className="glance-metric-card">
                 <span className="glance-metric-title">Kích thước file</span>
-                <div className="glance-metric-value">4.4 MB</div>
+                <div className="glance-metric-value">{releaseInfo.sizeFormatted}</div>
               </div>
               <div className="glance-metric-card">
                 <span className="glance-metric-title">Nền tảng</span>
@@ -339,15 +397,15 @@ export default function Home() {
             <div className="release-actions-row">
               <div className="download-action-card">
                 <div>
-                  <div className="file-info-primary">CaiNghien Setup Installer (.exe)</div>
-                  <div className="file-info-description">Khuyến dùng: Bản cài đặt tiêu chuẩn tự động cấu hình service nền.</div>
+                  <div className="file-info-primary">CaiNghien Setup Installer ({releaseInfo.version} .exe)</div>
+                  <div className="file-info-description">Khuyến dùng: Bản cài đặt tiêu chuẩn tự động cấu hình service nền và Auto Updater.</div>
                 </div>
                 <div className="download-buttons-cluster">
-                  <a href={installerUrl} download className="download-primary-button">
+                  <a href={releaseInfo.installerUrl} download className="download-primary-button">
                     <DownloadIcon className="svg-icon-standard" />
                     <span>Tải từ GitHub</span>
                   </a>
-                  <a href={localInstallerUrl} download className="download-secondary-button" title="Tải trực tiếp từ máy chủ web nếu mạng chặn GitHub">
+                  <a href={releaseInfo.localInstallerUrl} download className="download-secondary-button" title="Tải trực tiếp từ máy chủ web nếu mạng chặn GitHub">
                     <DownloadIcon className="svg-icon-standard" />
                     <span>Tải trực tiếp (.exe)</span>
                   </a>
@@ -356,19 +414,23 @@ export default function Home() {
 
               <div className="download-action-card">
                 <div>
-                  <div className="file-info-primary">CaiNghien MSI Package (.msi)</div>
-                  <div className="file-info-description">Gói cài đặt Windows Installer dành cho quản trị viên hệ thống.</div>
+                  <div className="file-info-primary">CaiNghien MSI Package ({releaseInfo.msiAvailable ? releaseInfo.version : 'v1.1.0 LTS'} .msi)</div>
+                  <div className="file-info-description">
+                    {releaseInfo.msiAvailable
+                      ? "Gói cài đặt Windows Installer dành cho quản trị viên hệ thống."
+                      : "Gói cài đặt Windows Installer dành cho quản trị viên hệ thống (Bản ổn định v1.1.0)."}
+                  </div>
                 </div>
-                <a href={msiInstallerUrl} download className="button-secondary-outline">
+                <a href={releaseInfo.msiInstallerUrl} download className="button-secondary-outline">
                   <DownloadIcon className="svg-icon-standard" />
-                  <span>Tải MSI</span>
+                  <span>Tải MSI {releaseInfo.msiAvailable ? `(${releaseInfo.version})` : '(v1.1.0)'}</span>
                 </a>
               </div>
             </div>
 
             <div className="checksum-copy-box" aria-live="polite">
-              <span className="checksum-hash-code" title={sha256Checksum}>
-                SHA-256: {sha256Checksum}
+              <span className="checksum-hash-code" title={releaseInfo.sha256Checksum}>
+                SHA-256: {releaseInfo.sha256Checksum}
               </span>
               <button 
                 type="button" 
@@ -391,13 +453,17 @@ export default function Home() {
             </div>
 
             <div className="release-notes-container">
-              <h4 className="release-notes-title">Điểm nổi bật trong bản phát hành v1.0.0:</h4>
+              <h4 className="release-notes-title">Điểm nổi bật trong bản phát hành {releaseInfo.version}:</h4>
               <ul className="release-notes-list">
-                <li className="release-note-item">Phiên bản v1.0.0 Chính Thức với kiến trúc Rust & Tauri tối ưu hóa bộ nhớ RAM.</li>
-                <li className="release-note-item">Chế độ khóa cứng ứng dụng (Kiosk Mode) vô hiệu hóa Alt+Tab và Windows Key.</li>
-                <li className="release-note-item">Giao diện Glassmorphism hoàn toàn mới bằng Vanilla CSS siêu mượt mà.</li>
-                <li className="release-note-item">Hệ thống Heatmap theo dõi chuỗi ngày kỷ luật và Thử thách gõ phím chánh niệm.</li>
+                {releaseInfo.notes.map((note, index) => (
+                  <li key={index} className="release-note-item">{note}</li>
+                ))}
               </ul>
+              <div style={{ marginTop: '16px' }}>
+                <Link to="/releases" className="manifest-link-pill" style={{ display: 'inline-flex' }}>
+                  <span>Xem toàn bộ lịch sử phát hành &amp; kiểm tra mã băm SHA-256 →</span>
+                </Link>
+              </div>
             </div>
           </div>
         </section>
@@ -410,7 +476,7 @@ export default function Home() {
               Cài đặt CaiNghiện ngay hôm nay để bảo vệ sự tập trung của bạn khỏi thế giới đầy xao nhãng.
             </p>
             <div className="cta-button-wrapper">
-              <a href={installerUrl} download className="button-primary-download">
+              <a href={releaseInfo.installerUrl} download className="button-primary-download">
                 <DownloadIcon className="svg-icon-standard" />
                 <span>Tải Miễn Phí (Windows x64)</span>
               </a>

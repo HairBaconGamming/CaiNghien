@@ -1,11 +1,25 @@
-import { Routes, Route, Link } from 'react-router-dom';
+import { Routes, Route, Link, NavLink } from 'react-router-dom';
 import Home from './pages/Home.jsx';
 import Releases from './pages/Releases.jsx';
 import React from 'react';
 import { DownloadIcon } from './components/Icons.jsx';
 
 export default function App() {
-  const installerUrl = "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.0.0/cainghien_tauri_0.1.0_x64-setup.exe";
+  const defaultInstallerUrl = "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.2.0/cainghien_tauri_1.2.0_x64-setup.exe";
+  const [installerUrl, setInstallerUrl] = React.useState(defaultInstallerUrl);
+
+  React.useEffect(() => {
+    fetch('/data/releases.json')
+      .then(res => (res.ok ? res.json() : null))
+      .then(data => {
+        const latestRel = data?.releases?.find(r => r.is_latest) || data?.releases?.find(r => r.version === data?.latest?.version) || data?.releases?.[0];
+        const latestUrl = latestRel?.files?.installer?.url || data?.latest?.installer || data?.latest?.url;
+        if (latestUrl) {
+          setInstallerUrl(latestUrl);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <div className="landing-root-container">
@@ -20,21 +34,26 @@ export default function App() {
       {/* Top Glassmorphic Navigation */}
       <header className="glass-nav-header">
         <div className="glass-nav-inner">
-          <a href="#" className="brand-container">
+          <Link to="/" className="brand-container">
             <div className="brand-icon-wrapper">
               <img src="/logo.png" alt="Logo" className="svg-icon-standard" style={{ width: '24px', height: '24px', objectFit: 'contain' }} />
             </div>
             <span className="brand-title-text">
               CaiNghiện <span className="brand-title-highlight">Focus</span>
             </span>
-          </a>
+          </Link>
 
           <nav className="navigation-menu">
             <a href="/#features" className="navigation-link-item">Tính Năng</a>
             <a href="/#mindfulness" className="navigation-link-item">Chánh Niệm</a>
             <a href="/#kiosk" className="navigation-link-item">Tĩnh Tâm</a>
             <a href="/#downloads" className="navigation-link-item">Tải Xuống</a>
-            <Link to="/releases" className="navigation-link-item">Lịch sử cập nhật</Link>
+            <NavLink 
+              to="/releases" 
+              className={({ isActive }) => `navigation-link-item ${isActive ? 'active' : ''}`}
+            >
+              Lịch sử cập nhật
+            </NavLink>
           </nav>
 
           <div className="nav-actions-wrapper">

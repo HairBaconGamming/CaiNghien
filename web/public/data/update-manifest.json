@@ -1,17 +1,17 @@
-﻿{
+{
   "product": "CaiNghien Focus Guard",
   "latest": {
-    "version": "1.1.0",
-    "published_at": "2026-09-17",
-    "installer": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.1.0/cainghien_tauri_1.1.0_x64-setup.exe",
+    "version": "1.2.0",
+    "published_at": "2026-09-18",
+    "installer": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.2.0/cainghien_tauri_1.2.0_x64-setup.exe",
     "notes": [
-      "Đại tu giao diện toàn diện với thiết kế Cosmos Glassmorphism.",
-      "Tích hợp màn hình Dashboard Heatmap 365 ngày.",
-      "Tích hợp màn hình Focus Room với nhạc Lofi.",
-      "Tích hợp màn hình Typing Challenge chấm điểm theo thời gian thực.",
-      "Lưu trữ dữ liệu API thực tế vào ổ đĩa."
+      "Ra mắt tính năng Tự động cập nhật (Auto Updater).",
+      "Sửa lỗi gõ tiếng Việt (VNI/Telex) khi gõ phím.",
+      "Thêm nút tùy chỉnh số phút tập trung.",
+      "Thay đổi Logo ứng dụng phong cách vũ trụ.",
+      "Vá lỗi kẹt tiến trình khi gỡ cài đặt (Uninstall)."
     ],
-    "sha256": "8d7d9c165e0b5f6e078b6aebb5b94300521272216270d2dc6fcbadea2d856e8a",
-    "size_bytes": 4753402
+    "sha256": "481c8bb0700499c520b32f41f4be6b46d45c570dccb6db9242a66fc65a791b05",
+    "size_bytes": 6426534
   }
 }

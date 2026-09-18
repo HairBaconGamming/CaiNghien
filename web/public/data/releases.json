@@ -13,7 +13,11 @@
   "releases": [
     {
       "version": "1.2.0",
+      "tag": "v1.2.0",
       "published_at": "2026-09-18",
+      "is_latest": true,
+      "title": "Bản Phát Hành Ổn Định v1.2.0",
+      "summary": "Tích hợp tính năng Tự động Cập nhật (Auto Updater), hoàn thiện bộ gõ tiếng Việt trong Thử thách Gõ phím và nâng cấp giao diện Cosmos phong cách vũ trụ.",
       "notes": [
         "Ra mắt tính năng Tự động cập nhật (Auto Updater).",
         "Sửa lỗi gõ tiếng Việt (VNI/Telex) khi gõ phím.",
@@ -21,17 +25,39 @@
         "Thay đổi Logo ứng dụng phong cách vũ trụ.",
         "Vá lỗi kẹt tiến trình khi gỡ cài đặt (Uninstall)."
       ],
+      "categorized_notes": {
+        "features": [
+          "Tự động cập nhật (Auto Updater): Ứng dụng tự động kiểm tra, xác thực chữ ký số Ed25519 và cập nhật nhanh chóng.",
+          "Tùy chỉnh thời gian tập trung: Cho phép đặt linh hoạt thời gian phiên Focus theo nhu cầu cá nhân."
+        ],
+        "improvements": [
+          "Logo phong cách vũ trụ: Thiết kế biểu tượng Cosmos Gradient mới đồng bộ cùng chủ đề ứng dụng.",
+          "Tối ưu bộ nhớ: Giảm thiểu thêm mức tiêu thụ CPU và RAM khi chạy chế độ nền."
+        ],
+        "fixes": [
+          "Sửa triệt để lỗi xung đột gõ tiếng Việt (Telex / VNI) trong màn hình Mindfulness Typing Challenge.",
+          "Khắc phục sự cố tiến trình nền không giải phóng khi thực hiện gỡ cài đặt (Uninstall)."
+        ]
+      },
       "files": {
         "installer": {
+          "filename": "cainghien_tauri_1.2.0_x64-setup.exe",
           "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.2.0/cainghien_tauri_1.2.0_x64-setup.exe",
-          "sha256": "",
-          "size_bytes": 6426534
+          "direct_url": "/downloads/1.2.0/CaiNghien_Tauri_Setup.exe",
+          "sha256": "481c8bb0700499c520b32f41f4be6b46d45c570dccb6db9242a66fc65a791b05",
+          "size_bytes": 6426534,
+          "size_formatted": "6.1 MB",
+          "platform": "Windows 10 / 11 (64-bit)"
         }
       }
     },
     {
       "version": "1.1.0",
+      "tag": "v1.1.0",
       "published_at": "2026-09-17",
+      "is_latest": false,
+      "title": "Bản Phát Hành v1.1.0",
+      "summary": "Đại tu toàn diện thiết kế Cosmos Glassmorphism, tích hợp Heatmap 365 ngày và Focus Room Lofi.",
       "notes": [
         "Đại tu giao diện toàn diện với thiết kế Cosmos Glassmorphism.",
         "Tích hợp màn hình Dashboard Heatmap 365 ngày.",
@@ -39,11 +65,84 @@
         "Tích hợp màn hình Typing Challenge chấm điểm theo thời gian thực.",
         "Lưu trữ dữ liệu API thực tế vào ổ đĩa."
       ],
+      "categorized_notes": {
+        "features": [
+          "Tích hợp màn hình Dashboard Heatmap 365 ngày theo dõi chuỗi ngày kỷ luật liên tục.",
+          "Tích hợp màn hình Focus Room Kiosk với nhạc Lofi và âm thanh tiếng mưa tự nhiên.",
+          "Tích hợp màn hình Typing Challenge chấm điểm WPM và độ chính xác thời gian thực."
+        ],
+        "improvements": [
+          "Giao diện chuẩn Cosmos Glassmorphism với hiệu ứng mờ đa tầng và màu sắc neon.",
+          "Hệ thống lưu trữ cấu hình cục bộ tin cậy, không phụ thuộc kết nối đám mây."
+        ],
+        "fixes": [
+          "Tối ưu hóa độ mượt khi kích hoạt Kiosk Mode trên đa màn hình."
+        ]
+      },
       "files": {
         "installer": {
+          "filename": "cainghien_tauri_1.1.0_x64-setup.exe",
           "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.1.0/cainghien_tauri_1.1.0_x64-setup.exe",
           "sha256": "8d7d9c165e0b5f6e078b6aebb5b94300521272216270d2dc6fcbadea2d856e8a",
-          "size_bytes": 4753402
+          "size_bytes": 4753402,
+          "size_formatted": "4.5 MB",
+          "platform": "Windows 10 / 11 (64-bit)"
+        },
+        "msi": {
+          "filename": "cainghien_tauri_1.1.0_x64_en-US.msi",
+          "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.1.0/cainghien_tauri_1.1.0_x64_en-US.msi",
+          "sha256": "34d529d37d74b755557cd69827172f099df92c705d532cd206104c5fe2e395c2",
+          "size_bytes": 8089600,
+          "size_formatted": "7.7 MB",
+          "platform": "Windows MSI Installer"
+        }
+      }
+    },
+    {
+      "version": "1.0.0",
+      "tag": "v1.0.0",
+      "published_at": "2026-09-16",
+      "is_latest": false,
+      "title": "Bản Phát Hành Khởi Đầu v1.0.0",
+      "summary": "Phiên bản chính thức đầu tiên trên nền tảng Rust & Tauri v2 với kiến trúc bảo vệ hệ thống đa tầng.",
+      "notes": [
+        "Phiên bản v1.0.0 Chính Thức với kiến trúc Rust & Tauri tối ưu hóa bộ nhớ RAM.",
+        "Chế độ khóa cứng ứng dụng (Kiosk Mode) vô hiệu hóa Alt+Tab và Windows Key.",
+        "Giao diện Glassmorphism hoàn toàn mới bằng Vanilla CSS siêu mượt mà.",
+        "Hệ thống Heatmap theo dõi chuỗi ngày kỷ luật và Thử thách gõ phím chánh niệm."
+      ],
+      "categorized_notes": {
+        "features": [
+          "Kiến trúc Rust & Tauri tối ưu hóa tài nguyên phần cứng cực nhẹ.",
+          "Chế độ Kiosk Mode vô hiệu hóa phím tắt chuyển màn hình (Alt+Tab, WinKey).",
+          "Khóa can thiệp tầng file Hosts và Windows Service chống gỡ ngang."
+        ],
+        "improvements": [
+          "Khởi tạo cấu trúc giao diện Glassmorphism thuần túy.",
+          "Cơ chế Emergency Recovery an toàn 7 ngày đề phòng sự cố."
+        ],
+        "fixes": [
+          "Bản phát hành đầu tiên ra mắt cộng đồng."
+        ]
+      },
+      "files": {
+        "installer": {
+          "filename": "cainghien_tauri_0.1.0_x64-setup.exe",
+          "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.0.0/cainghien_tauri_0.1.0_x64-setup.exe",
+          "direct_url": "/downloads/1.0.0/CaiNghien_Tauri_Setup.exe",
+          "sha256": "bbc19c7902c51681c815374037c2a793a461f3019a6b1629700b5f388bbb08b7",
+          "size_bytes": 4590767,
+          "size_formatted": "4.4 MB",
+          "platform": "Windows 10 / 11 (64-bit)"
+        },
+        "msi": {
+          "filename": "CaiNghien_Tauri_Installer.msi",
+          "url": "/downloads/1.0.0/CaiNghien_Tauri_Installer.msi",
+          "direct_url": "/downloads/1.0.0/CaiNghien_Tauri_Installer.msi",
+          "sha256": "2a0bf9266211f5edb3fa9a9ce0524b8c4ba23d46e5e0068777ffe7a89f02c3ff",
+          "size_bytes": 5791744,
+          "size_formatted": "5.5 MB",
+          "platform": "Windows MSI Installer"
         }
       }
     }
