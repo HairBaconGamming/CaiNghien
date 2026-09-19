@@ -32,6 +32,12 @@ export interface UserProfile {
   current_xp: number;
   next_level_xp: number;
   rank: string;
+  handle?: string;
+  streak?: number;
+  longest_streak?: number;
+  total_contributions?: number;
+  activity_rate?: number;
+  next_title?: string;
 }
 
 export interface FocusSessionResult {
@@ -104,6 +110,30 @@ export function isTauriEnvironment(): boolean {
     (window as unknown as { __TAURI__?: unknown }).__TAURI__ ||
     (globalThis as unknown as { isTauri?: boolean }).isTauri
   );
+}
+
+// ----------------------------------------
+// Cross-Screen Telemetry Event Bus
+// ----------------------------------------
+
+export type TelemetryListener = () => void;
+const telemetryListeners = new Set<TelemetryListener>();
+
+export function onTelemetryUpdate(listener: TelemetryListener): () => void {
+  telemetryListeners.add(listener);
+  return () => {
+    telemetryListeners.delete(listener);
+  };
+}
+
+export function notifyTelemetryUpdate(): void {
+  telemetryListeners.forEach((listener) => {
+    try {
+      listener();
+    } catch (err) {
+      console.error('Error notifying telemetry listener:', err);
+    }
+  });
 }
 
 // ----------------------------------------
@@ -287,20 +317,22 @@ export async function getUserProfile(): Promise<UserProfile> {
  * Updates the user profile.
  */
 export async function updateUserProfile(profile: UserProfile): Promise<void> {
-  return safeInvoke<void>(
+  const res = await safeInvoke<void>(
     'update_user_profile',
     { profile },
     () => {
       safeSetStorage(STORAGE_KEYS.PROFILE, profile);
     }
   );
+  notifyTelemetryUpdate();
+  return res;
 }
 
 /**
  * Records a completed focus session, awarding XP and updating streak.
  */
 export async function recordFocusSession(duration: number, type: string): Promise<FocusSessionResult> {
-  return safeInvoke<FocusSessionResult>(
+  const result = await safeInvoke<FocusSessionResult>(
     'record_focus_session',
     {
       durationMinutes: duration,
@@ -340,6 +372,8 @@ export async function recordFocusSession(duration: number, type: string): Promis
       };
     }
   );
+  notifyTelemetryUpdate();
+  return result;
 }
 
 /**
@@ -362,7 +396,7 @@ export async function getTypingChallengeText(difficulty?: string): Promise<Typin
  * Saves a completed typing score, persists to history and awards cosmic XP.
  */
 export async function saveTypingScore(score: TypingScoreInput): Promise<TypingScoreResult> {
-  return safeInvoke<TypingScoreResult>(
+  const result = await safeInvoke<TypingScoreResult>(
     'save_typing_score',
     { score },
     async () => {
@@ -402,6 +436,8 @@ export async function saveTypingScore(score: TypingScoreInput): Promise<TypingSc
       };
     }
   );
+  notifyTelemetryUpdate();
+  return result;
 }
 
 /**
@@ -463,6 +499,8 @@ export const api = {
   enterFocusRoom,
   exitFocusRoom,
   isTauriEnvironment,
+  onTelemetryUpdate,
+  notifyTelemetryUpdate,
 };
 
 export default api;

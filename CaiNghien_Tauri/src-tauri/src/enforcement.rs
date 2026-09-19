@@ -291,6 +291,13 @@ pub fn spawn_enforcement_loop(app: tauri::AppHandle) {
                             guard.daily_history = config.daily_history.clone();
                             let _ = crate::config::save_config(&app, &guard);
                         }
+
+                        // Persist to SQLite
+                        if let Some(db_state) = app.try_state::<crate::db::DbState>() {
+                            if let Ok(mut conn) = db_state.0.lock() {
+                                let _ = crate::db::record_discipline_minute(&mut conn, &today, mins);
+                            }
+                        }
                     } else if config.current_day_focus_seconds % 10 == 0 {
                         if let Ok(mut guard) = app.state::<ConfigState>().0.lock() {
                             guard.current_day_focus_seconds = config.current_day_focus_seconds;
@@ -426,6 +433,13 @@ pub fn spawn_enforcement_loop(app: tauri::AppHandle) {
                                     hist.violations += 1;
                                     hist.is_clean = false;
                                     let _ = crate::config::save_config(&app, &guard);
+                                }
+
+                                if let Some(db_state) = app.try_state::<crate::db::DbState>() {
+                                    if let Ok(mut conn) = db_state.0.lock() {
+                                        let today = chrono::Local::now().format("%Y-%m-%d").to_string();
+                                        let _ = crate::db::record_discipline_violation(&mut conn, &today);
+                                    }
                                 }
                                 
                                 // TRIGGER LOCKSCREEN

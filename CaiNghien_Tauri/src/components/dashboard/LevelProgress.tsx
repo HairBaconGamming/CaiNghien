@@ -11,6 +11,15 @@ export interface LevelProgressProps {
   isLoading?: boolean;
 }
 
+function getRankTitleForLevel(lvl: number): string {
+  if (lvl >= 50) return 'Celestial Master';
+  if (lvl >= 35) return 'Stellar Captain';
+  if (lvl >= 25) return 'Nova Voyager';
+  if (lvl >= 15) return 'Cosmic Explorer';
+  if (lvl >= 5) return 'Stargazer';
+  return 'Cosmic Cadet';
+}
+
 export const LevelProgress: React.FC<LevelProgressProps> = ({
   profile,
   isLoading = false
@@ -20,9 +29,10 @@ export const LevelProgress: React.FC<LevelProgressProps> = ({
   const handle = profile?.handle ?? '@astro_alex';
   const level = profile?.level ?? 28;
   const rankTitle = profile?.title ?? profile?.rank ?? 'Stargazer';
-  const currentXp = profile?.current_xp ?? 14350;
-  const nextLevelXp = profile?.next_level_xp ?? 15000;
-  const nextTitle = profile?.next_title ?? 'Nova Voyager (LVL 29)';
+  const currentXp = Math.max(0, profile?.current_xp ?? 14350);
+  const nextLevelXp = Math.max(1, profile?.next_level_xp ?? 15000);
+  const nextLevel = level + 1;
+  const nextTitle = profile?.next_title ?? `${getRankTitleForLevel(nextLevel)} (LVL ${nextLevel})`;
 
   const progressPercent = Math.min(
     100,

@@ -1,4 +1,5 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
+import { Titlebar } from './components/layout/Titlebar';
 import { Navbar, NavTabId } from './components/layout/Navbar';
 import { DashboardScreen } from './components/dashboard/DashboardScreen';
 import { FocusRoomScreen } from './components/focus/FocusRoomScreen';
@@ -16,21 +17,62 @@ import {
 } from 'lucide-react';
 import { check } from '@tauri-apps/plugin-updater';
 import { relaunch } from '@tauri-apps/plugin-process';
+import { api, UserProfile, onTelemetryUpdate, notifyTelemetryUpdate } from './services/api';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<NavTabId>('dashboard');
   const [showTypingModal, setShowTypingModal] = useState(false);
-  const [userProfile] = useState({
-    name: 'Alex Chen',
+  const [userProfile, setUserProfile] = useState<UserProfile>({
+    username: 'Alex Chen',
     handle: '@astro_alex',
     level: 28,
     title: 'Stargazer',
-    currentXp: 14350,
-    nextLevelXp: 15000,
-    currentStreak: 128,
-    totalContributions: 4185,
-    activityRate: 85,
+    current_xp: 14350,
+    next_level_xp: 15000,
+    rank: 'Nova Voyager',
   });
+  const [dashboardRefreshTrigger, setDashboardRefreshTrigger] = useState(0);
+
+  const refreshProfile = useCallback(async () => {
+    try {
+      const p = await api.getUserProfile();
+      if (p) {
+        setUserProfile(p);
+      }
+    } catch (e) {
+      console.warn('Failed to load user profile in App:', e);
+    }
+  }, []);
+
+  useEffect(() => {
+    refreshProfile();
+  }, [refreshProfile]);
+
+  useEffect(() => {
+    const unsubscribe = onTelemetryUpdate(() => {
+      refreshProfile();
+      setDashboardRefreshTrigger((prev) => prev + 1);
+    });
+
+    const handleFocus = () => {
+      refreshProfile();
+      setDashboardRefreshTrigger((prev) => prev + 1);
+    };
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      unsubscribe();
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [refreshProfile]);
+
+  const handleSelectTab = (tab: NavTabId) => {
+    setActiveTab(tab);
+    if (tab === 'dashboard') {
+      refreshProfile();
+      setDashboardRefreshTrigger((prev) => prev + 1);
+    }
+  };
 
   const [updateObj, setUpdateObj] = useState<any>(null);
   const [isCheckingUpdate, setIsCheckingUpdate] = useState(false);
@@ -87,6 +129,9 @@ export default function App() {
 
   return (
     <div className="w-screen h-screen overflow-hidden select-none bg-[#030712] text-white flex flex-col relative font-sans">
+      {/* Cosmos Custom Titlebar with Drag and Window Controls */}
+      <Titlebar />
+
       {/* Cosmos Background Canvas */}
       <div className="cosmos-canvas">
         {/* Starfield */}
@@ -114,11 +159,11 @@ export default function App() {
       </div>
 
       {/* Main Glass Shell Container */}
-      <div className="relative z-10 flex flex-col w-full h-full">
+      <div className="relative z-10 flex flex-col w-full h-full overflow-hidden">
         {/* Cosmos Top Navigation Bar */}
         <Navbar
           activeTab={activeTab}
-          onSelectTab={(tab) => setActiveTab(tab)}
+          onSelectTab={handleSelectTab}
           userLevel={userProfile.level}
           userTitle={userProfile.title}
           hasNotifications={true}
@@ -128,19 +173,27 @@ export default function App() {
         <main className="flex-1 overflow-hidden relative p-4 md:p-6 flex flex-col items-center justify-center">
           <div className="w-full h-full max-w-[1560px] mx-auto flex flex-col">
             {activeTab === 'dashboard' && (
-              <DashboardScreen />
+              <DashboardScreen refreshTrigger={dashboardRefreshTrigger} />
             )}
 
             {activeTab === 'focus' && (
               <FocusRoomScreen
-                onExit={() => setActiveTab('dashboard')}
+                onExit={() => handleSelectTab('dashboard')}
+                onSessionComplete={() => {
+                  refreshProfile();
+                  notifyTelemetryUpdate();
+                }}
               />
             )}
 
             {activeTab === 'typing' && (
               <TypingChallengeScreen
-                onClose={() => setActiveTab('dashboard')}
-                onComplete={() => setActiveTab('dashboard')}
+                onClose={() => handleSelectTab('dashboard')}
+                onComplete={() => {
+                  refreshProfile();
+                  notifyTelemetryUpdate();
+                  handleSelectTab('dashboard');
+                }}
               />
             )}
 
@@ -357,7 +410,11 @@ export default function App() {
             <TypingChallengeScreen
               asModal
               onClose={() => setShowTypingModal(false)}
-              onComplete={() => setShowTypingModal(false)}
+              onComplete={() => {
+                setShowTypingModal(false);
+                refreshProfile();
+                notifyTelemetryUpdate();
+              }}
             />
           </div>
         </div>
@@ -373,6 +430,8 @@ export default function App() {
               onComplete={() => {
                 setSettingsLocked(false);
                 setShowUnlockModal(false);
+                refreshProfile();
+                notifyTelemetryUpdate();
               }}
             />
           </div>

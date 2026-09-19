@@ -3,6 +3,7 @@ pub mod config;
 pub mod enforcement;
 pub mod hooks;
 pub mod commands;
+pub mod db;
 
 use tauri::{Emitter, Manager, menu::{Menu, MenuItem}, tray::TrayIconBuilder};
 use tauri_plugin_autostart::MacosLauncher;
@@ -146,10 +147,17 @@ fn get_quota_status(state: tauri::State<'_, config::ConfigState>) -> Result<Quot
 }
 
 #[tauri::command]
-fn apply_penalty(app: tauri::AppHandle, state: tauri::State<'_, config::ConfigState>) -> Result<models::AppConfig, String> {
+fn apply_penalty(
+    app: tauri::AppHandle,
+    state: tauri::State<'_, config::ConfigState>,
+    db_state: tauri::State<'_, db::DbState>,
+) -> Result<models::AppConfig, String> {
     let mut config_data = state.0.lock().map_err(|_| "Mutex poisoned".to_string())?;
     config::apply_penalty_core(&mut config_data);
     config::save_config(&app, &config_data)?;
+    if let Ok(mut conn) = db_state.0.lock() {
+        let _ = db::apply_penalty(&mut conn);
+    }
     let _ = app.emit("penalty-applied", ());
     Ok(config_data.clone())
 }
@@ -193,6 +201,14 @@ pub fn run() {
             eprintln!("Failed to save config on penalty: {}", e);
             std::process::exit(1);
         }
+
+        let db_path = db::get_database_path();
+        if let Ok(mut conn) = db::init_db(&db_path, Some(&app_config)) {
+            if let Err(e) = db::apply_penalty(&mut conn) {
+                eprintln!("Failed to apply SQLite penalty: {}", e);
+            }
+        }
+
         println!("Penalty applied successfully: level={}, xp={}, streak={}", app_config.level, app_config.xp, app_config.streak);
         std::process::exit(0);
     }
@@ -220,6 +236,11 @@ pub fn run() {
         })
         .setup(|app| {
             let config_data = config::load_config(app.handle());
+            let db_path = db::get_database_path();
+            let db_conn = db::init_db(&db_path, Some(&config_data))
+                .expect("Failed to initialize SQLite database");
+            let db_state = db::DbState(std::sync::Arc::new(std::sync::Mutex::new(db_conn)));
+            app.manage(db_state);
             app.manage(config::ConfigState(std::sync::Mutex::new(config_data)));
             
             // Start enforcement background loop

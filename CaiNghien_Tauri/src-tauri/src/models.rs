@@ -10,6 +10,16 @@ pub struct DayDisciplineRecord {
     pub is_clean: bool,
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+pub struct DailyContribution {
+    pub date: String,
+    pub count: u32,
+    pub focus_minutes: u32,
+    pub violations: u32,
+    pub is_clean: bool,
+    pub xp_earned: u32,
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(default)]
 pub struct ScheduleConfig {
@@ -50,6 +60,10 @@ pub struct UserProfile {
     pub next_level_title: String,
     #[serde(default)]
     pub streak: u32,
+    #[serde(default)]
+    pub longest_streak: u32,
+    #[serde(default)]
+    pub total_focus_hours: u32,
 }
 
 impl Default for UserProfile {
@@ -65,7 +79,9 @@ impl Default for UserProfile {
             current_xp: 14350,
             next_level_xp: 15000,
             streak: 128,
+            longest_streak: 156,
             rank: "Stargazer".to_string(),
+            total_focus_hours: 0,
         }
     }
 }

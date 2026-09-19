@@ -7,7 +7,7 @@ import {
   RefreshCw,
   AlertCircle
 } from 'lucide-react';
-import { api, UserProfile, HeatmapData } from '../../services/api';
+import { api, UserProfile, HeatmapData, onTelemetryUpdate } from '../../services/api';
 import { LevelProgress } from './LevelProgress';
 import { ActivityHeatmap } from './ActivityHeatmap';
 import { StatsCardsGrid } from './StatsCard';
@@ -17,11 +17,13 @@ export type DashboardNavTab = 'overview' | 'contributions' | 'streak' | 'options
 export interface DashboardScreenProps {
   onOpenFocusRoom?: () => void;
   onOpenTypingChallenge?: () => void;
+  refreshTrigger?: number;
 }
 
 export const DashboardScreen: React.FC<DashboardScreenProps> = ({
   onOpenFocusRoom,
-  onOpenTypingChallenge
+  onOpenTypingChallenge,
+  refreshTrigger,
 }) => {
   const [activeSubTab, setActiveSubTab] = useState<DashboardNavTab>('contributions');
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -70,7 +72,21 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
 
   useEffect(() => {
     loadDashboardData();
-  }, []);
+
+    const unsubscribe = onTelemetryUpdate(() => {
+      loadDashboardData();
+    });
+
+    const handleFocus = () => {
+      loadDashboardData();
+    };
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      unsubscribe();
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [refreshTrigger]);
 
   return (
     <div className="w-full h-full flex flex-col md:flex-row gap-6 p-2 md:p-6 select-none overflow-y-auto">
@@ -190,18 +206,17 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
         {/* Optional Stats Cards Grid when on Overview Tab */}
         {activeSubTab === 'overview' && (
           <StatsCardsGrid
-            totalContributions={heatmapData?.total_contributions ?? 4185}
-            currentStreak={heatmapData?.current_streak ?? 128}
-            longestStreak={heatmapData?.longest_streak ?? 156}
-            activityRate={heatmapData?.activity_rate ?? 85}
+            totalContributions={heatmapData?.total_contributions ?? 0}
+            currentStreak={heatmapData?.current_streak ?? 0}
+            longestStreak={heatmapData?.longest_streak ?? 0}
+            activityRate={heatmapData?.activity_rate ?? 0}
           />
         )}
 
-        {/* Card B: Activity Heatmap 2023-2024 */}
+        {/* Card B: Activity Heatmap */}
         <ActivityHeatmap
           data={heatmapData || undefined}
           isLoading={isLoading && !heatmapData}
-          yearRange="2023-2024"
         />
       </main>
     </div>

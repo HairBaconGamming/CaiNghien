@@ -1,15 +1,13 @@
-use tauri::{AppHandle, State};
+use tauri::State;
 use chrono::{Datelike, Duration, Local, NaiveDate};
-use crate::config::ConfigState;
+use crate::db::DbState;
 use crate::models::{
-    FocusSession, FocusSessionResult, HeatmapData, HeatmapDay, TypingChallenge,
+    FocusSessionResult, HeatmapData, HeatmapDay, TypingChallenge,
     TypingScore, TypingScoreInput, TypingScoreResult, UserProfile,
 };
 
 /// Deterministic demo contribution generator for uninitialized/sparse historical days.
-/// Ensures the 365-day heatmap displays realistic activity matching the Stargazer mockup
-/// (approx. 4,185 contributions, current streak, and 85% activity rate) while preserving genuine real user entries.
-fn calculate_seed_count(date: NaiveDate) -> u32 {
+pub fn calculate_seed_count(date: NaiveDate) -> u32 {
     let day_of_year = date.ordinal();
     let weekday = date.weekday().num_days_from_monday(); // 0..=6
     
@@ -25,17 +23,11 @@ fn calculate_seed_count(date: NaiveDate) -> u32 {
     }
 }
 
-fn count_to_level(count: u32) -> u8 {
-    match count {
-        0 => 0,
-        1..=3 => 1,
-        4..=7 => 2,
-        8..=14 => 3,
-        15..=25 => 4,
-        _ => 5,
-    }
+pub fn count_to_level(count: u32) -> u8 {
+    crate::db::count_to_level(count)
 }
 
+/// Backward compatibility helper for legacy config-based heatmap data calculation.
 pub fn compute_heatmap_data_from_config(config: &crate::models::AppConfig) -> HeatmapData {
     let today = Local::now().date_naive();
     let total_days = 365;
@@ -122,96 +114,34 @@ pub fn compute_heatmap_data_from_config(config: &crate::models::AppConfig) -> He
 }
 
 #[tauri::command]
-pub fn get_heatmap_data(state: State<'_, ConfigState>) -> Result<HeatmapData, String> {
-    let config = state.0.lock().map_err(|_| "Mutex poisoned".to_string())?;
-    Ok(compute_heatmap_data_from_config(&config))
+pub fn get_heatmap_data(state: State<'_, DbState>) -> Result<HeatmapData, String> {
+    let conn = state.0.lock().map_err(|_| "Database lock poisoned".to_string())?;
+    crate::db::get_heatmap_data(&conn)
 }
 
 #[tauri::command]
-pub fn get_user_profile(state: State<'_, ConfigState>) -> Result<UserProfile, String> {
-    let config = state.0.lock().map_err(|_| "Mutex poisoned".to_string())?;
-    Ok(config.user_profile.clone())
+pub fn get_user_profile(state: State<'_, DbState>) -> Result<UserProfile, String> {
+    let conn = state.0.lock().map_err(|_| "Database lock poisoned".to_string())?;
+    crate::db::get_user_profile(&conn)
 }
 
 #[tauri::command]
 pub fn update_user_profile(
-    app: AppHandle,
-    state: State<'_, ConfigState>,
+    state: State<'_, DbState>,
     profile: UserProfile,
 ) -> Result<(), String> {
-    let mut config = state.0.lock().map_err(|_| "Mutex poisoned".to_string())?;
-    config.user_profile = profile;
-    crate::config::save_config(&app, &config)?;
-    Ok(())
+    let conn = state.0.lock().map_err(|_| "Database lock poisoned".to_string())?;
+    crate::db::update_user_profile(&conn, &profile)
 }
 
 #[tauri::command]
 pub fn record_focus_session(
-    app: AppHandle,
-    state: State<'_, ConfigState>,
+    state: State<'_, DbState>,
     duration_minutes: u32,
     session_type: String,
 ) -> Result<FocusSessionResult, String> {
-    let mut config = state.0.lock().map_err(|_| "Mutex poisoned".to_string())?;
-    let now_ts = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .unwrap()
-        .as_secs();
-
-    let session_id = format!("focus_{}", now_ts);
-    // XP reward: 4 XP per focus minute (25m = 100 XP)
-    let xp_earned = duration_minutes.saturating_mul(4);
-    let today = Local::now().format("%Y-%m-%d").to_string();
-
-    // Increment today's heatmap count
-    let count_inc = (duration_minutes / 25).max(1);
-    let today_entry = config.heatmap_days.entry(today.clone()).or_insert(0);
-    *today_entry = today_entry.saturating_add(count_inc);
-    let today_count = *today_entry;
-
-    // Increment daily history
-    let hist = config
-        .daily_history
-        .entry(today.clone())
-        .or_insert_with(|| crate::models::DayDisciplineRecord {
-            date: today.clone(),
-            focus_minutes: 0,
-            violations: 0,
-            is_clean: true,
-        });
-    hist.focus_minutes = hist.focus_minutes.saturating_add(duration_minutes);
-
-    // Save session
-    config.focus_sessions.push(FocusSession {
-        id: session_id,
-        timestamp: now_ts,
-        duration_minutes,
-        quote: None,
-        session_type,
-        completed: true,
-        xp_earned,
-    });
-
-    // Update user profile gamification
-    config.user_profile.current_xp = config.user_profile.current_xp.saturating_add(xp_earned);
-    while config.user_profile.current_xp >= config.user_profile.next_level_xp {
-        config.user_profile.current_xp -= config.user_profile.next_level_xp;
-        config.user_profile.level += 1;
-        config.user_profile.next_level_xp =
-            ((config.user_profile.next_level_xp as f64) * 1.15) as u32;
-    }
-
-    config.user_profile.streak = config.user_profile.streak.saturating_add(1);
-    let new_streak = config.user_profile.streak;
-
-    crate::config::save_config(&app, &config)?;
-
-    Ok(FocusSessionResult {
-        success: true,
-        xp_earned,
-        new_streak,
-        today_count,
-    })
+    let mut conn = state.0.lock().map_err(|_| "Database lock poisoned".to_string())?;
+    crate::db::record_focus_session(&mut conn, duration_minutes, session_type)
 }
 
 #[tauri::command]
@@ -244,73 +174,17 @@ pub fn get_typing_challenge_text(difficulty: Option<String>) -> Result<TypingCha
 
 #[tauri::command]
 pub fn save_typing_score(
-    app: AppHandle,
-    state: State<'_, ConfigState>,
+    state: State<'_, DbState>,
     score: TypingScoreInput,
 ) -> Result<TypingScoreResult, String> {
-    let mut config = state.0.lock().map_err(|_| "Mutex poisoned".to_string())?;
-    let now_ts = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .unwrap()
-        .as_secs();
-
-    let score_id = format!("typing_{}", now_ts);
-    // Base 50 XP + WPM adjusted by accuracy
-    let accuracy_factor = (score.accuracy / 100.0).clamp(0.0, 1.0);
-    let xp_earned = 50 + ((score.wpm as f64) * accuracy_factor) as u32;
-
-    let rank = if score.wpm >= 100 && score.accuracy >= 95.0 {
-        "Hyperion".to_string()
-    } else if score.wpm >= 80 && score.accuracy >= 90.0 {
-        "Quantum Master".to_string()
-    } else if score.wpm >= 60 {
-        "Cosmic Voyager".to_string()
-    } else if score.wpm >= 40 {
-        "Stargazer".to_string()
-    } else {
-        "Novice".to_string()
-    };
-
-    config.typing_scores.push(TypingScore {
-        id: score_id,
-        timestamp: now_ts,
-        wpm: score.wpm,
-        accuracy: score.accuracy,
-        time_seconds: score.time_seconds,
-        words_count: score.words_count,
-        xp_earned,
-    });
-
-    // Increment today's activity in heatmap
-    let today = Local::now().format("%Y-%m-%d").to_string();
-    let today_entry = config.heatmap_days.entry(today).or_insert(0);
-    *today_entry = today_entry.saturating_add(1);
-
-    // Award XP
-    config.user_profile.current_xp = config.user_profile.current_xp.saturating_add(xp_earned);
-    while config.user_profile.current_xp >= config.user_profile.next_level_xp {
-        config.user_profile.current_xp -= config.user_profile.next_level_xp;
-        config.user_profile.level += 1;
-        config.user_profile.next_level_xp =
-            ((config.user_profile.next_level_xp as f64) * 1.15) as u32;
-    }
-
-    let new_streak = config.user_profile.streak;
-    crate::config::save_config(&app, &config)?;
-
-    Ok(TypingScoreResult {
-        saved: true,
-        rank,
-        xp_earned,
-        success: true,
-        new_streak,
-    })
+    let mut conn = state.0.lock().map_err(|_| "Database lock poisoned".to_string())?;
+    crate::db::save_typing_score(&mut conn, score)
 }
 
 #[tauri::command]
-pub fn get_typing_scores(state: State<'_, ConfigState>) -> Result<Vec<TypingScore>, String> {
-    let config = state.0.lock().map_err(|_| "Mutex poisoned".to_string())?;
-    Ok(config.typing_scores.clone())
+pub fn get_typing_scores(state: State<'_, DbState>) -> Result<Vec<TypingScore>, String> {
+    let conn = state.0.lock().map_err(|_| "Database lock poisoned".to_string())?;
+    crate::db::get_typing_scores(&conn)
 }
 
 #[cfg(test)]
