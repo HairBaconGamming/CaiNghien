@@ -3,14 +3,12 @@ import {
   LayoutDashboard,
   Timer,
   Keyboard,
-  FolderGit2,
-  GitBranch,
   Settings,
   Bell,
   Sparkles
 } from 'lucide-react';
 
-export type NavTabId = 'dashboard' | 'focus' | 'typing' | 'projects' | 'repository' | 'settings';
+export type NavTabId = 'dashboard' | 'focus' | 'typing' | 'settings';
 
 export interface NavbarProps {
   activeTab: NavTabId;
@@ -31,8 +29,6 @@ export const Navbar: FC<NavbarProps> = ({
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'focus', label: 'Focus Room', icon: Timer },
     { id: 'typing', label: 'Typing Challenge', icon: Keyboard },
-    { id: 'projects', label: 'Projects', icon: FolderGit2 },
-    { id: 'repository', label: 'Repository', icon: GitBranch },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
 

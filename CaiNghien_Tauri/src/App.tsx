@@ -5,13 +5,10 @@ import { DashboardScreen } from './components/dashboard/DashboardScreen';
 import { FocusRoomScreen } from './components/focus/FocusRoomScreen';
 import { TypingChallengeScreen } from './components/typing/TypingChallengeScreen';
 import {
-  FolderGit2,
-  GitBranch,
   Settings as SettingsIcon,
   Shield,
   Cpu,
   Sparkles,
-  ExternalLink,
   RefreshCw,
   Lock
 } from 'lucide-react';
@@ -22,15 +19,7 @@ import { api, UserProfile, onTelemetryUpdate, notifyTelemetryUpdate } from './se
 export default function App() {
   const [activeTab, setActiveTab] = useState<NavTabId>('dashboard');
   const [showTypingModal, setShowTypingModal] = useState(false);
-  const [userProfile, setUserProfile] = useState<UserProfile>({
-    username: 'Alex Chen',
-    handle: '@astro_alex',
-    level: 28,
-    title: 'Stargazer',
-    current_xp: 14350,
-    next_level_xp: 15000,
-    rank: 'Nova Voyager',
-  });
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [dashboardRefreshTrigger, setDashboardRefreshTrigger] = useState(0);
 
   const refreshProfile = useCallback(async () => {
@@ -164,8 +153,8 @@ export default function App() {
         <Navbar
           activeTab={activeTab}
           onSelectTab={handleSelectTab}
-          userLevel={userProfile.level}
-          userTitle={userProfile.title}
+          userLevel={userProfile?.level}
+          userTitle={userProfile?.title}
           hasNotifications={true}
         />
 
@@ -197,82 +186,6 @@ export default function App() {
               />
             )}
 
-            {activeTab === 'projects' && (
-              <div className="w-full h-full flex flex-col p-6 overflow-y-auto">
-                <div className="glass-panel rounded-2xl p-6 border border-white/10 flex items-center justify-between mb-6">
-                  <div>
-                    <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                      <FolderGit2 className="w-5 h-5 text-cyan-400" />
-                      Tracked Projects & Habit Repositories
-                    </h2>
-                    <p className="text-xs text-slate-400 mt-1">
-                      Cosmic telemetry monitoring active coding and discipline commitments.
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    className="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider text-white btn-cosmos-primary flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>New Project</span>
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {['CaiNghien Core', 'Deep Space Focus Suite', 'Rust Tauri IPC Engine'].map((proj, idx) => (
-                    <div key={proj} className="glass-panel rounded-2xl p-5 border border-white/10 hover:border-cyan-400/40 transition-all">
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-xs font-bold text-sky-400 uppercase tracking-wider">PROJECT 0{idx + 1}</span>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                          Active
-                        </span>
-                      </div>
-                      <h3 className="text-base font-bold text-white mb-2">{proj}</h3>
-                      <p className="text-xs text-slate-400 mb-4 line-clamp-2">
-                        Automated discipline guard tracking distractions and gamifying focus sessions with cryptographic verification.
-                      </p>
-                      <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs text-slate-400">
-                        <span>Updated 2 hours ago</span>
-                        <ExternalLink className="w-3.5 h-3.5 hover:text-cyan-400 cursor-pointer" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'repository' && (
-              <div className="w-full h-full flex flex-col p-6 overflow-y-auto">
-                <div className="glass-panel rounded-2xl p-6 border border-white/10 mb-6">
-                  <div className="flex items-center gap-3">
-                    <GitBranch className="w-6 h-6 text-purple-400" />
-                    <div>
-                      <h2 className="text-xl font-bold text-white">Repository Synchronization</h2>
-                      <p className="text-xs text-slate-400 mt-1">
-                        Discipline commits and cryptographic activity records synchronized with remote repositories.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="glass-panel rounded-2xl p-6 border border-white/10 space-y-4">
-                  <div className="flex items-center justify-between p-3 rounded-xl bg-slate-900/60 border border-white/5">
-                    <div>
-                      <span className="text-xs font-mono font-bold text-cyan-300">branch: main (verified)</span>
-                      <p className="text-xs text-slate-400 mt-0.5">Commit 9f2a4b8: Cosmos UI Shell and design system integration</p>
-                    </div>
-                    <span className="text-[11px] font-mono text-slate-400">Just now</span>
-                  </div>
-                  <div className="flex items-center justify-between p-3 rounded-xl bg-slate-900/60 border border-white/5">
-                    <div>
-                      <span className="text-xs font-mono font-bold text-purple-300">branch: main</span>
-                      <p className="text-xs text-slate-400 mt-0.5">Commit a1c8d3e: Heatmap telemetry 365-day tracking pipeline</p>
-                    </div>
-                    <span className="text-[11px] font-mono text-slate-400">Yesterday</span>
-                  </div>
-                </div>
-              </div>
-            )}
 
             {activeTab === 'settings' && (
               <div className="w-full h-full flex flex-col p-6 overflow-y-auto">
