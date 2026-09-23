@@ -59,7 +59,7 @@ export const LevelProgress: React.FC<LevelProgressProps> = ({
 
   return (
     <div
-      className="bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-2xl p-6 mb-6 shadow-2xl relative overflow-hidden"
+      className="bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-2xl p-6 mb-6 shadow-2xl relative overflow-hidden shrink-0"
       style={{
         boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)'
       }}

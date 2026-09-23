@@ -189,7 +189,7 @@ export const StatsCardsGrid: React.FC<StatsCardsGridProps> = ({
   activityRate = 85
 }) => {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 shrink-0">
       <StatsCard
         title="Total Contributions"
         value={totalContributions.toLocaleString()}

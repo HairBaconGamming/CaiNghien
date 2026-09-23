@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { SlidersHorizontal, ChevronDown, Flame } from 'lucide-react';
 import { DashboardMetricsRow } from './StatsCard';
 import type { HeatmapData as ApiHeatmapData, HeatmapDay } from '../../services/api';
@@ -172,19 +173,30 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({
     }
   };
 
-  // Smart floating tooltip positioning with edge clamping and top edge flip
+  // Smart floating tooltip positioning with edge clamping
   const tooltipStyle = useMemo<React.CSSProperties | null>(() => {
     if (!coords) return null;
-    const isNearTop = coords.y < 100;
-    const clampedX = Math.max(90, Math.min(typeof window !== 'undefined' ? window.innerWidth - 90 : 800, coords.x));
-    const targetY = isNearTop ? coords.y + 16 : coords.y - 12;
-    const transform = isNearTop ? 'translate(-50%, 0%)' : 'translate(-50%, -100%)';
+    
+    // Default offsets
+    let targetX = coords.x + 15;
+    let targetY = coords.y + 15;
+    
+    // Basic edge clamping using viewport bounds (assume tooltip is roughly 120x60)
+    if (typeof window !== 'undefined') {
+      const tooltipWidth = 140;
+      const tooltipHeight = 70;
+      if (targetX + tooltipWidth > window.innerWidth) {
+        targetX = coords.x - tooltipWidth - 10;
+      }
+      if (targetY + tooltipHeight > window.innerHeight) {
+        targetY = coords.y - tooltipHeight - 10;
+      }
+    }
 
     return {
-      left: `${clampedX}px`,
+      left: `${targetX}px`,
       top: `${targetY}px`,
-      transform,
-      willChange: 'transform, left, top',
+      willChange: 'left, top',
       transition: 'opacity 0.12s ease-out',
     };
   }, [coords]);
@@ -201,7 +213,7 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({
 
   return (
     <div
-      className="bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl relative select-none"
+      className="bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl relative select-none shrink-0"
       style={{
         boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
       }}
@@ -370,9 +382,9 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({
       </div>
 
       {/* Floating Tooltip: Follows cursor at 60/120fps with zero sticking or offset */}
-      {activeCell && tooltipStyle && (
+      {activeCell && tooltipStyle && typeof document !== 'undefined' && createPortal(
         <div
-          className="fixed pointer-events-none z-50 bg-slate-900/95 backdrop-blur-xl border border-white/20 rounded-xl px-3 py-2 shadow-[0_10px_25px_rgba(0,0,0,0.8)] text-center text-xs"
+          className="fixed pointer-events-none z-[9999] bg-slate-900/95 backdrop-blur-xl border border-white/20 rounded-xl px-3 py-2 shadow-[0_10px_25px_rgba(0,0,0,0.8)] text-center text-xs"
           style={tooltipStyle}
         >
           <div className="font-semibold text-white">
@@ -386,7 +398,8 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({
           <div className="text-[10px] text-cyan-400 font-medium mt-1">
             Tier {activeCell.level} Intensity
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Bottom Summary Telemetry Row & Tier Breakdown */}
