@@ -2,7 +2,6 @@ import React, { useRef, useEffect } from 'react';
 import { RotateCcw, Sparkles } from 'lucide-react';
 
 export interface TypingInputProps {
-  value: string;
   onChange: (value: string) => void;
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   placeholder?: string;
@@ -18,7 +17,6 @@ export interface TypingInputProps {
 }
 
 export const TypingInput: React.FC<TypingInputProps> = ({
-  value,
   onChange,
   onKeyDown,
   placeholder = 'Gõ đoạn văn mẫu ở trên vào đây...',
@@ -121,7 +119,6 @@ export const TypingInput: React.FC<TypingInputProps> = ({
           <input
             ref={inputRef}
             type="text"
-            defaultValue={value}
             onChange={handleInputChange}
             onKeyDown={onKeyDown}
             onPaste={handlePaste}

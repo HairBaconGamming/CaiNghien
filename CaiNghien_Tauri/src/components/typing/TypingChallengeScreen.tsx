@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, startTransition } from 'react';
 import { ArrowRight, Lock, Award, CheckCircle2, AlertCircle, Sparkles, RotateCcw, X } from 'lucide-react';
 import TextPromptDisplay from './TextPromptDisplay';
 import TypingInput from './TypingInput';
@@ -40,8 +40,6 @@ export const TypingChallengeScreen: React.FC<TypingChallengeScreenProps> = ({
   const timerRef = useRef<number | null>(null);
 
   // Telemetry
-  const [wpm, setWpm] = useState<number>(0);
-  const [accuracy, setAccuracy] = useState<number>(100);
   const [resetKey, setResetKey] = useState<number>(0);
 
   // Result & Modals
@@ -85,29 +83,26 @@ export const TypingChallengeScreen: React.FC<TypingChallengeScreenProps> = ({
     };
   }, [isStarted, isCompleted]);
 
-  // Recalculate metrics whenever typed text or elapsed time updates
+  // Derived Telemetry
+  const targetText = challenge.text.normalize('NFC');
+  let correctCount = 0;
+  const minLen = Math.min(typedText.length, targetText.length);
+
+  for (let i = 0; i < minLen; i++) {
+    if (typedText[i] === targetText[i]) {
+      correctCount++;
+    }
+  }
+
+  const accuracy = calculateAccuracy(correctCount, typedText.length);
+  const wpm = calculateWPM(correctCount, elapsedSeconds);
+
+  // Auto-detect completion
   useEffect(() => {
-    const target = challenge.text.normalize('NFC');
-    let correctCount = 0;
-    const minLen = Math.min(typedText.length, target.length);
-
-    for (let i = 0; i < minLen; i++) {
-      if (typedText[i] === target[i]) {
-        correctCount++;
-      }
+    if (typedText.length >= targetText.length && typedText === targetText && !isCompleted) {
+      handleCompleteChallenge(wpm, accuracy);
     }
-
-    const currentAcc = calculateAccuracy(correctCount, typedText.length);
-    const currentWpm = calculateWPM(correctCount, elapsedSeconds);
-
-    setAccuracy(currentAcc);
-    setWpm(currentWpm);
-
-    // Auto-detect completion when full text is correctly matched
-    if (typedText.length >= target.length && typedText === target && !isCompleted) {
-      handleCompleteChallenge(currentWpm, currentAcc);
-    }
-  }, [typedText, elapsedSeconds, challenge.text, isCompleted]);
+  }, [typedText, targetText, isCompleted, wpm, accuracy]);
 
   // Show Toast
   const triggerToast = (msg: string) => {
@@ -128,7 +123,9 @@ export const TypingChallengeScreen: React.FC<TypingChallengeScreenProps> = ({
       setIsStarted(true);
     }
 
-    setTypedText(newVal);
+    startTransition(() => {
+      setTypedText(newVal);
+    });
   };
 
   // Reset current challenge
@@ -142,8 +139,6 @@ export const TypingChallengeScreen: React.FC<TypingChallengeScreenProps> = ({
     setIsStarted(false);
     setIsCompleted(false);
     setElapsedSeconds(0);
-    setWpm(0);
-    setAccuracy(100);
     setShowCompletionModal(false);
     setScoreResult(null);
   };
@@ -280,9 +275,8 @@ export const TypingChallengeScreen: React.FC<TypingChallengeScreenProps> = ({
 
           <TypingInput
             key={resetKey}
-            value={typedText}
             onChange={handleTypingChange}
-            placeholder={isStarted ? '' : 'Con cáo nâu nhanh nhẹn nhảy qua...'}
+            placeholder="Con cáo nâu nhanh nhẹn nhảy qua..."
             disabled={isCompleted}
             onPasteBlocked={() => triggerToast('Bạn phải tự gõ — không cho phép copy/paste')}
           />
