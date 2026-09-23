@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { RotateCcw, Sparkles } from 'lucide-react';
 
 export interface TypingInputProps {
@@ -21,7 +21,7 @@ export const TypingInput: React.FC<TypingInputProps> = ({
   value,
   onChange,
   onKeyDown,
-  placeholder = 'Type the text above here...',
+  placeholder = 'Gõ đoạn văn mẫu ở trên vào đây...',
   disabled = false,
   autoFocus = true,
   onPasteBlocked,
@@ -33,16 +33,18 @@ export const TypingInput: React.FC<TypingInputProps> = ({
   className = '',
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [isComposing, setIsComposing] = useState(false);
 
   // Sync value resets (e.g., when the user clicks Restart)
   useEffect(() => {
+    if (isComposing) return;
     if (value === '' && inputRef.current) {
       inputRef.current.value = '';
     } else if (inputRef.current && value !== '' && value !== inputRef.current.value.normalize('NFC')) {
       // In case parent forces a specific value other than what's typed
       inputRef.current.value = value;
     }
-  }, [value]);
+  }, [value, isComposing]);
 
   useEffect(() => {
     if (autoFocus && !disabled && inputRef.current) {
@@ -99,10 +101,10 @@ export const TypingInput: React.FC<TypingInputProps> = ({
                 type="button"
                 onClick={onRestart}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition-all cursor-pointer"
-                title="Restart challenge"
+                title="Bắt đầu lại thử thách"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
-                <span>Restart</span>
+                <span>Bắt đầu lại</span>
               </button>
             )}
 
@@ -111,10 +113,10 @@ export const TypingInput: React.FC<TypingInputProps> = ({
                 type="button"
                 onClick={onNewChallenge}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-950/40 hover:bg-purple-900/50 border border-purple-500/30 text-purple-300 hover:text-white transition-all cursor-pointer shadow-[0_0_10px_rgba(168,85,247,0.2)]"
-                title="Load another cosmic text"
+                title="Tải văn bản cosmic khác"
               >
                 <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-                <span>New Challenge</span>
+                <span>Thử thách mới</span>
               </button>
             )}
           </div>
@@ -134,6 +136,8 @@ export const TypingInput: React.FC<TypingInputProps> = ({
             onChange={handleInputChange}
             onKeyDown={onKeyDown}
             onPaste={handlePaste}
+            onCompositionStart={() => setIsComposing(true)}
+            onCompositionEnd={() => setIsComposing(false)}
             disabled={disabled}
             placeholder={placeholder}
             autoComplete="off"

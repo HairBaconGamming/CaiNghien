@@ -26,10 +26,10 @@ export const Navbar: FC<NavbarProps> = ({
   hasNotifications = true,
 }) => {
   const navItems: { id: NavTabId; label: string; icon: ComponentType<{ className?: string }> }[] = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'focus', label: 'Focus Room', icon: Timer },
-    { id: 'typing', label: 'Typing Challenge', icon: Keyboard },
-    { id: 'settings', label: 'Settings', icon: Settings },
+    { id: 'dashboard', label: 'Tổng quan', icon: LayoutDashboard },
+    { id: 'focus', label: 'Phòng tập trung', icon: Timer },
+    { id: 'typing', label: 'Thử thách gõ phím', icon: Keyboard },
+    { id: 'settings', label: 'Cài đặt', icon: Settings },
   ];
 
   return (
@@ -108,7 +108,7 @@ export const Navbar: FC<NavbarProps> = ({
             <Sparkles className="w-3 h-3 text-slate-950" />
           </div>
           <div className="flex items-center gap-1.5 text-xs font-semibold">
-            <span className="text-sky-300">LVL {userLevel}</span>
+            <span className="text-sky-300">CẤP {userLevel}</span>
             <span className="text-slate-500">•</span>
             <span className="text-slate-200">{userTitle}</span>
           </div>

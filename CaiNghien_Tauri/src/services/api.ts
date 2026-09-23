@@ -204,9 +204,15 @@ export const api = {
   saveAppConfig,
   enterFocusRoom,
   exitFocusRoom,
+  resetAllData,
   isTauriEnvironment,
   onTelemetryUpdate,
   notifyTelemetryUpdate,
 };
 
 export default api;
+
+export async function resetAllData(): Promise<void> {
+  return safeInvoke<void>('reset_all_data', {});
+}
+

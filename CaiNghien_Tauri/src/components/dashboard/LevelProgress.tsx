@@ -107,7 +107,7 @@ export const LevelProgress: React.FC<LevelProgressProps> = ({
             Level {level}: {rankTitle}
           </div>
           <div className="text-slate-400 text-xs mt-0.5 font-normal">
-            XP: {currentXp.toLocaleString()}/{nextLevelXp.toLocaleString()} | {progressPercent}% complete
+            XP: {currentXp.toLocaleString()}/{nextLevelXp.toLocaleString()} | {progressPercent}% hoàn thành
           </div>
         </div>
       </div>
@@ -116,9 +116,9 @@ export const LevelProgress: React.FC<LevelProgressProps> = ({
       <div className="mt-5 relative z-10">
         {/* Status Line */}
         <div className="flex items-center justify-between text-xs mb-2">
-          <span className="text-slate-300 font-medium text-sm">User Level</span>
+          <span className="text-slate-300 font-medium text-sm">Cấp độ người dùng</span>
           <div className="flex items-center gap-2">
-            <span className="text-slate-300">{progressPercent}% Complete</span>
+            <span className="text-slate-300">{progressPercent}% Hoàn thành</span>
             <span className="bg-slate-800/90 border border-white/20 px-2 py-0.5 rounded text-[11px] font-bold text-white shadow-sm">
               LVL {level}
             </span>

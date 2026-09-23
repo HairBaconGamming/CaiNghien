@@ -150,24 +150,24 @@ pub fn get_typing_challenge_text(difficulty: Option<String>) -> Result<TypingCha
     match diff.as_str() {
         "easy" => Ok(TypingChallenge {
             id: "challenge_easy".to_string(),
-            title: "Cosmic Spark".to_string(),
-            author: "Carl Sagan".to_string(),
+            title: "Tia Lửa Vũ Trụ".to_string(),
+            author: "Vũ Trụ Học".to_string(),
             difficulty: "easy".to_string(),
-            text: "The cosmos is within us. We are made of star-stuff. We are a way for the universe to know itself.".to_string(),
+            text: "Vũ trụ ở ngay bên trong chúng ta. Chúng ta được tạo ra từ những vì sao. Chúng ta là cách để vũ trụ tự nhận thức chính nó.".to_string(),
         }),
         "hard" => Ok(TypingChallenge {
             id: "challenge_hard".to_string(),
-            title: "Deep Space Singularity".to_string(),
-            author: "Cosmic Astrobiology".to_string(),
+            title: "Điểm Kỳ Dị Không Gian".to_string(),
+            author: "Sinh Vật Học Vũ Trụ".to_string(),
             difficulty: "hard".to_string(),
-            text: "Navigating across relativistic spacetime requires unmatched discipline and pristine focus. Beyond the event horizon of distraction lies the luminous core of profound human potential, where every intentional stroke weaves the fabric of achievement.".to_string(),
+            text: "Vượt qua không thời gian tương đối đòi hỏi kỷ luật vô song và sự tập trung thuần khiết. Vượt xa khỏi chân trời sự kiện của sự xao nhãng là cốt lõi rực sáng của tiềm năng con người, nơi mọi nỗ lực đều dệt nên bức tranh thành tựu.".to_string(),
         }),
         _ => Ok(TypingChallenge {
             id: "challenge_quantum".to_string(),
-            title: "Quantum Speed".to_string(),
-            author: "Cosmos Voyager".to_string(),
+            title: "Tốc Độ Lượng Tử".to_string(),
+            author: "Lữ Khách Vũ Trụ".to_string(),
             difficulty: "medium".to_string(),
-            text: "The quick brown fox jumped gracefully over the lazy, sleeping dog. He then sprinted across the galaxy, weaving through constellations of glowing nebulae and vibrant supernovas, navigating the void with speed and accuracy.".to_string(),
+            text: "Con cáo nâu nhanh nhẹn nhảy qua con chó lười biếng đang ngủ. Sau đó, nó chạy nước rút qua dải ngân hà, len lỏi qua các chòm sao, tinh vân rực rỡ và siêu tân tinh sống động, băng qua khoảng không với tốc độ và độ chính xác đáng kinh ngạc.".to_string(),
         }),
     }
 }
@@ -242,4 +242,10 @@ mod tests {
         assert_eq!(today_day.count, 10);
         assert_eq!(today_day.level, 3);
     }
+}
+
+#[tauri::command]
+pub fn reset_all_data(state: State<'_, DbState>) -> Result<(), String> {
+    let mut conn = state.0.lock().map_err(|_| "Database lock poisoned".to_string())?;
+    crate::db::reset_all_data(&mut conn)
 }

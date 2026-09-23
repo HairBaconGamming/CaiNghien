@@ -86,18 +86,18 @@ pub fn run_migrations(conn: &mut Connection) -> Result<(), rusqlite::Error> {
         tx.execute(
             "CREATE TABLE IF NOT EXISTS user_profile (
                 id INTEGER PRIMARY KEY CHECK (id = 1),
-                username TEXT NOT NULL DEFAULT 'Alex Chen',
-                handle TEXT NOT NULL DEFAULT '@astro_alex',
-                title TEXT NOT NULL DEFAULT 'Stargazer',
+                username TEXT NOT NULL DEFAULT 'Người Dùng',
+                handle TEXT NOT NULL DEFAULT '@nguoidung',
+                title TEXT NOT NULL DEFAULT 'Tân Binh',
                 avatar_type TEXT NOT NULL DEFAULT 'cosmic_singularity',
-                level INTEGER NOT NULL DEFAULT 28,
-                level_title TEXT NOT NULL DEFAULT 'Stargazer',
-                next_level_title TEXT NOT NULL DEFAULT 'Nova Voyager (LVL 29)',
-                current_xp INTEGER NOT NULL DEFAULT 14350,
-                next_level_xp INTEGER NOT NULL DEFAULT 15000,
-                streak INTEGER NOT NULL DEFAULT 128,
-                longest_streak INTEGER NOT NULL DEFAULT 156,
-                rank TEXT NOT NULL DEFAULT 'Stargazer',
+                level INTEGER NOT NULL DEFAULT 1,
+                level_title TEXT NOT NULL DEFAULT 'Tân Binh',
+                next_level_title TEXT NOT NULL DEFAULT 'Tân binh (LVL 2)',
+                current_xp INTEGER NOT NULL DEFAULT 0,
+                next_level_xp INTEGER NOT NULL DEFAULT 1000,
+                streak INTEGER NOT NULL DEFAULT 0,
+                longest_streak INTEGER NOT NULL DEFAULT 0,
+                rank TEXT NOT NULL DEFAULT 'Tân Binh',
                 total_focus_hours INTEGER NOT NULL DEFAULT 0,
                 created_at TEXT NOT NULL DEFAULT (datetime('now')),
                 updated_at TEXT NOT NULL DEFAULT (datetime('now'))
@@ -1108,4 +1108,31 @@ mod tests {
         assert_eq!(penalized.current_xp, 0);
         assert_eq!(penalized.streak, 0);
     }
+}
+
+
+pub fn reset_all_data(conn: &mut Connection) -> Result<(), String> {
+    let tx = conn.transaction().map_err(|e| e.to_string())?;
+
+    tx.execute("DELETE FROM daily_contributions;", []).map_err(|e| e.to_string())?;
+    tx.execute("DELETE FROM focus_sessions;", []).map_err(|e| e.to_string())?;
+    tx.execute("DELETE FROM typing_scores;", []).map_err(|e| e.to_string())?;
+
+    tx.execute(
+        "UPDATE user_profile SET
+            level = 1,
+            level_title = 'Người mới',
+            next_level_title = 'Tân binh (LVL 2)',
+            current_xp = 0,
+            next_level_xp = 1000,
+            streak = 0,
+            longest_streak = 0,
+            total_focus_hours = 0,
+            rank = 'Tân Binh'
+         WHERE id = 1;",
+        [],
+    ).map_err(|e| e.to_string())?;
+
+    tx.commit().map_err(|e| e.to_string())?;
+    Ok(())
 }

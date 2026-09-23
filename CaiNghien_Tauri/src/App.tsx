@@ -44,7 +44,7 @@ export default function App() {
       refreshConfig();
     } catch (e) {
       console.error('Failed to save config:', e);
-      alert('Failed to save config: ' + e);
+      alert('Lưu cài đặt thất bại: ' + e);
       refreshConfig();
     }
   };
@@ -129,11 +129,11 @@ export default function App() {
       if (update) {
         setUpdateObj(update);
       } else {
-        alert("System is up to date.");
+        alert("Hệ thống đã được cập nhật phiên bản mới nhất.");
       }
     } catch (e) {
       console.error(e);
-      alert("Failed to check for updates.");
+      alert("Kiểm tra bản cập nhật thất bại.");
     }
     setIsCheckingUpdate(false);
   };
@@ -229,14 +229,14 @@ export default function App() {
                   <div className="flex items-center gap-3">
                     <SettingsIcon className="w-6 h-6 text-sky-400" />
                     <div>
-                      <h2 className="text-xl font-bold text-white">Focus Guard & Cosmos Settings</h2>
+                      <h2 className="text-xl font-bold text-white">Cài đặt Focus Guard & Cosmos</h2>
                       <p className="text-xs text-slate-400 mt-1">
-                        Configure discipline thresholds, password protection, and deep space aesthetics.
+                        Định cấu hình kỷ luật, mật khẩu bảo vệ và giao diện.
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 bg-slate-900/50 p-2 rounded-xl border border-white/10">
-                    <span className="text-sm font-bold text-white">Master Protection</span>
+                    <span className="text-sm font-bold text-white">Bảo vệ chính</span>
                     <input 
                       type="checkbox" 
                       checked={appConfig.protection_enabled} 
@@ -251,16 +251,16 @@ export default function App() {
                   {settingsLocked && (
                     <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[#030712]/80 backdrop-blur-sm rounded-2xl border border-white/10">
                       <Shield className="w-12 h-12 text-cyan-400 mb-4 animate-pulse" />
-                      <h3 className="text-white font-bold text-xl mb-2">Active Protection Engaged</h3>
+                      <h3 className="text-white font-bold text-xl mb-2">Đã bật bảo vệ</h3>
                       <p className="text-slate-300 text-sm mb-6 text-center max-w-sm">
-                        Focus Guard is active. Settings and password modifications are strictly locked. Complete a challenge to unlock.
+                        Focus Guard đang hoạt động. Cài đặt và mật khẩu đã bị khóa. Hoàn thành thử thách để mở khóa.
                       </p>
                       <button
                         onClick={() => setShowUnlockModal(true)}
                         className="px-6 py-2.5 rounded-xl font-bold text-sm tracking-wider uppercase text-white flex items-center gap-2 bg-gradient-to-r from-cyan-500/40 to-sky-500/30 border border-cyan-400 shadow-[0_0_18px_rgba(0,240,255,0.45)] hover:shadow-[0_0_25px_rgba(0,240,255,0.7)] transition-all cursor-pointer"
                       >
                         <Shield className="w-4 h-4 text-cyan-300" />
-                        <span>Type to Unlock</span>
+                        <span>Gõ để mở khóa</span>
                       </button>
                     </div>
                   )}
@@ -269,31 +269,31 @@ export default function App() {
                   <div className="glass-panel rounded-2xl p-6 border border-white/10">
                     <div className="flex items-center gap-2 mb-4">
                       <Lock className="w-5 h-5 text-fuchsia-400" />
-                      <h3 className="text-base font-bold text-white">Password & Security</h3>
+                      <h3 className="text-base font-bold text-white">Mật khẩu & Bảo mật</h3>
                     </div>
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                          <div>
-                           <p className="text-sm font-semibold text-slate-200">App Password is {appConfig.password_hash ? 'Set' : 'Not Set'}</p>
-                           <p className="text-xs text-slate-400">Enforce strict exit barriers</p>
+                           <p className="text-sm font-semibold text-slate-200">Mật khẩu app {appConfig.password_hash ? 'Đã đặt' : 'Chưa đặt'}</p>
+                           <p className="text-xs text-slate-400">Áp đặt rào cản thoát nghiêm ngặt</p>
                          </div>
                       </div>
                       <div className="pt-2 border-t border-white/10">
                         <button
                           disabled={settingsLocked}
                           onClick={() => {
-                            const newPwd = prompt("Enter new password (leave empty to remove):");
+                            const newPwd = prompt("Nhập mật khẩu mới (để trống để xóa):");
                             if (newPwd !== null) {
                                import('@tauri-apps/api/core').then(({ invoke }) => {
                                   invoke('set_password', { password: newPwd || null })
-                                    .then(() => alert('Password updated'))
+                                    .then(() => alert('Đã cập nhật mật khẩu'))
                                     .catch(e => alert(e));
                                });
                             }
                           }}
                           className="w-full py-2 rounded-lg border border-fuchsia-500/30 text-xs font-bold uppercase tracking-wider text-fuchsia-300 hover:bg-fuchsia-500/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                         >
-                          Change Password
+                          Đổi mật khẩu
                         </button>
                       </div>
                     </div>
@@ -302,13 +302,13 @@ export default function App() {
                   <div className="glass-panel rounded-2xl p-6 border border-white/10">
                     <div className="flex items-center gap-2 mb-4">
                       <Shield className="w-5 h-5 text-cyan-400" />
-                      <h3 className="text-base font-bold text-white">Discipline Enforcement</h3>
+                      <h3 className="text-base font-bold text-white">Thực thi kỷ luật</h3>
                     </div>
                     <div className="space-y-4">
                       <div className="flex flex-col gap-2">
                         <div>
-                          <p className="text-sm font-semibold text-slate-200">Blocked Domains</p>
-                          <p className="text-xs text-slate-400 mb-2">One domain per line</p>
+                          <p className="text-sm font-semibold text-slate-200">Tên miền bị chặn</p>
+                          <p className="text-xs text-slate-400 mb-2">Mỗi tên miền một dòng</p>
                         </div>
                         <textarea 
                           value={blockedDomainsInput}
@@ -321,7 +321,7 @@ export default function App() {
                            onClick={handleSaveDomains}
                            className="w-full py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold transition-colors cursor-pointer disabled:opacity-50"
                         >
-                           Save Domains
+                           Lưu tên miền
                         </button>
                       </div>
                     </div>
@@ -330,13 +330,13 @@ export default function App() {
                   <div className="glass-panel rounded-2xl p-6 border border-white/10">
                     <div className="flex items-center gap-2 mb-4">
                       <Cpu className="w-5 h-5 text-purple-400" />
-                      <h3 className="text-base font-bold text-white">System & Startup</h3>
+                      <h3 className="text-base font-bold text-white">Hệ thống & Khởi động</h3>
                     </div>
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-semibold text-slate-200">Start with Windows</p>
-                          <p className="text-xs text-slate-400">Launch CaiNghien in background on system boot</p>
+                          <p className="text-sm font-semibold text-slate-200">Khởi động cùng window</p>
+                          <p className="text-xs text-slate-400">Chạy CaiNghien ngầm khi khởi động hệ thống</p>
                         </div>
                         <input 
                           type="checkbox" 
@@ -348,8 +348,8 @@ export default function App() {
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-semibold text-slate-200">Block NSFW</p>
-                          <p className="text-xs text-slate-400">Automatically block known adult content</p>
+                          <p className="text-sm font-semibold text-slate-200">Chặn nội dung NSFW</p>
+                          <p className="text-xs text-slate-400">Tự động chặn nội dung người lớn</p>
                         </div>
                         <input 
                           type="checkbox" 
@@ -361,8 +361,8 @@ export default function App() {
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-semibold text-slate-200">Settings Lock Delay</p>
-                          <p className="text-xs text-slate-400">Enforce a delay when disabling protection</p>
+                          <p className="text-sm font-semibold text-slate-200">Độ trễ khóa cài đặt</p>
+                          <p className="text-xs text-slate-400">Áp đặt độ trễ khi tắt bảo vệ</p>
                         </div>
                         <input 
                           type="checkbox" 
@@ -378,20 +378,51 @@ export default function App() {
                   <div className="glass-panel rounded-2xl p-6 border border-white/10">
                     <div className="flex items-center gap-2 mb-4">
                       <RefreshCw className="w-5 h-5 text-emerald-400" />
-                      <h3 className="text-base font-bold text-white">System Updates</h3>
+                      <h3 className="text-base font-bold text-white">Cập nhật hệ thống</h3>
                     </div>
                     <div className="flex flex-col gap-4">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-semibold text-slate-200">Cosmic Core Engine</p>
-                          <p className="text-xs text-slate-400">Check for the latest features</p>
+                          <p className="text-sm font-semibold text-slate-200">Cập nhật phần mềm</p>
+                          <p className="text-xs text-slate-400">Kiểm tra tính năng mới nhất</p>
                         </div>
                         <button
                           onClick={handleManualCheck}
                           disabled={isCheckingUpdate || settingsLocked}
                           className="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider text-white bg-emerald-600/80 hover:bg-emerald-500 transition-colors flex items-center gap-2 disabled:opacity-50 cursor-pointer"
                         >
-                          {isCheckingUpdate ? 'Checking...' : 'Check'}
+                          {isCheckingUpdate ? 'Đang kiểm tra...' : 'Kiểm tra'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="glass-panel rounded-2xl p-6 border border-red-500/30">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Shield className="w-5 h-5 text-red-400" />
+                      <h3 className="text-base font-bold text-white">Xóa dữ liệu (Reset Data)</h3>
+                    </div>
+                    <div className="flex flex-col gap-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-semibold text-slate-200">Xóa toàn bộ dữ liệu</p>
+                          <p className="text-xs text-slate-400">Xóa lịch sử tập trung, thành tích và đưa tài khoản về cấp độ 1</p>
+                        </div>
+                        <button
+                          onClick={async () => {
+                            if (confirm('Bạn có chắc chắn muốn xóa toàn bộ dữ liệu? Thao tác này không thể hoàn tác.')) {
+                              try {
+                                await api.resetAllData();
+                                alert('Đã xóa dữ liệu thành công!');
+                                window.location.reload();
+                              } catch (e) {
+                                alert('Lỗi: ' + e);
+                              }
+                            }
+                          }}
+                          disabled={settingsLocked}
+                          className="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider text-white bg-red-600/80 hover:bg-red-500 transition-colors flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                        >
+                          Xóa dữ liệu
                         </button>
                       </div>
                     </div>
@@ -444,10 +475,10 @@ export default function App() {
           <div className="glass-panel w-full max-w-md p-6 rounded-2xl border border-cyan-500/30 shadow-[0_0_40px_rgba(6,182,212,0.2)]">
             <h2 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-cyan-400" />
-              Cosmic Update Available
+              Bản cập nhật Cosmic có sẵn
             </h2>
             <p className="text-sm text-slate-300 mb-4">
-              Version {updateObj.version} is ready for deployment.
+              Phiên bản {updateObj.version} đã sẵn sàng để cài đặt.
             </p>
             {updateObj.body && (
               <div className="bg-slate-900/50 rounded-lg p-3 mb-6 border border-white/5 max-h-32 overflow-y-auto text-xs text-slate-400 whitespace-pre-wrap">
@@ -460,7 +491,7 @@ export default function App() {
                 className="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-300 bg-white/5 hover:bg-white/10 transition-colors cursor-pointer"
                 disabled={isUpdating}
               >
-                Later
+                Để sau
               </button>
               <button
                 onClick={async () => {
@@ -470,14 +501,14 @@ export default function App() {
                     await relaunch();
                   } catch (e) {
                     console.error(e);
-                    alert("Failed to install update.");
+                    alert("Cài đặt bản cập nhật thất bại.");
                   }
                   setIsUpdating(false);
                 }}
                 className="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider text-white bg-cyan-600 hover:bg-cyan-500 transition-colors flex items-center gap-2 cursor-pointer"
                 disabled={isUpdating}
               >
-                {isUpdating ? 'Deploying...' : 'Install & Restart'}
+                {isUpdating ? 'Đang cài đặt...' : 'Cài đặt & Khởi động lại'}
               </button>
             </div>
           </div>

@@ -228,20 +228,20 @@ export const TypingChallengeScreen: React.FC<TypingChallengeScreenProps> = ({
         {/* Header Region */}
         <div className="text-center relative z-10 mb-6">
           <h1 className="text-2xl md:text-3xl font-black text-white tracking-wider drop-shadow-[0_0_14px_rgba(0,240,255,0.45)]">
-            TYPING CHALLENGE
+            THỬ THÁCH GÕ PHÍM
           </h1>
           <p className="text-xs font-bold text-sky-400 tracking-[0.3em] uppercase mt-1">
-            QUANTUM SPEED
+            TỐC ĐỘ LƯỢNG TỬ
           </p>
         </div>
 
         {/* Section 1: Paragraph To Type + Realtime Stats */}
         <div className="relative z-10">
           <div className="text-xs font-bold text-cyan-400 tracking-wider uppercase mb-2 flex items-center justify-between">
-            <span>PARAGRAPH TO TYPE</span>
+            <span>ĐOẠN VĂN MẪU</span>
             {/* Subtle difficulty badge */}
             <span className="text-[10px] font-mono text-slate-500 uppercase">
-              Mode: {difficulty}
+              Chế độ: {difficulty}
             </span>
           </div>
 
@@ -273,15 +273,15 @@ export const TypingChallengeScreen: React.FC<TypingChallengeScreenProps> = ({
         {/* Section 2: Your Typing Input */}
         <div className="relative z-10">
           <div className="text-xs font-bold text-cyan-400 tracking-wider uppercase mb-2">
-            YOUR TYPING INPUT
+            PHẦN GÕ CỦA BẠN
           </div>
 
           <TypingInput
             value={typedText}
             onChange={handleTypingChange}
-            placeholder={isStarted ? '' : 'The quick brown fox jumped...'}
+            placeholder={isStarted ? '' : 'Con cáo nâu nhanh nhẹn nhảy qua...'}
             disabled={isCompleted}
-            onPasteBlocked={() => triggerToast('Typing must be typed by hand — copy/paste disabled')}
+            onPasteBlocked={() => triggerToast('Bạn phải tự gõ — không cho phép copy/paste')}
           />
         </div>
 
@@ -290,7 +290,7 @@ export const TypingChallengeScreen: React.FC<TypingChallengeScreenProps> = ({
           <div
             className="relative w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center transition-transform hover:scale-105 cursor-pointer"
             onClick={handleReset}
-            title="Click vortex to reset challenge"
+            title="Nhấp vào vòng xoáy để tải lại thử thách"
           >
             {/* Swirling Gravitational Vortex Glow */}
             <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_center,rgba(168,85,247,0.45)_0%,rgba(124,58,237,0.2)_45%,transparent_70%)] shadow-[0_0_35px_rgba(168,85,247,0.5)] animate-pulse" />
@@ -305,7 +305,7 @@ export const TypingChallengeScreen: React.FC<TypingChallengeScreenProps> = ({
 
           {/* Caption */}
           <span className="text-[11px] md:text-xs font-semibold text-slate-400 tracking-[0.25em] uppercase text-center mt-2">
-            LOCK PROGRESS
+            TIẾN TRÌNH KHÓA
           </span>
         </div>
 
@@ -316,7 +316,7 @@ export const TypingChallengeScreen: React.FC<TypingChallengeScreenProps> = ({
             onClick={onClose || handleReset}
             className="px-4 py-2 text-xs md:text-sm font-semibold text-slate-400 hover:text-white transition-colors uppercase tracking-wider cursor-pointer"
           >
-            CANCEL
+            HỦY
           </button>
 
           <button
@@ -325,7 +325,7 @@ export const TypingChallengeScreen: React.FC<TypingChallengeScreenProps> = ({
             disabled={saving || typedText.length === 0}
             className="px-6 py-2.5 rounded-xl font-bold text-xs md:text-sm tracking-wider uppercase text-white flex items-center gap-2 bg-gradient-to-r from-cyan-500/40 to-sky-500/30 border border-cyan-400 shadow-[0_0_18px_rgba(0,240,255,0.45)] hover:shadow-[0_0_25px_rgba(0,240,255,0.7)] hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            <span>{saving ? 'SAVING...' : 'SUBMIT'}</span>
+            <span>{saving ? 'ĐANG LƯU...' : 'NỘP'}</span>
             <ArrowRight className="w-4 h-4 text-cyan-300" />
           </button>
         </div>
@@ -354,28 +354,28 @@ export const TypingChallengeScreen: React.FC<TypingChallengeScreenProps> = ({
             </div>
 
             <h2 className="text-xl font-bold text-white tracking-wide">
-              QUANTUM LOCK ACHIEVED!
+              ĐẠT MỐC LƯỢNG TỬ!
             </h2>
             <p className="text-xs font-semibold text-sky-400 uppercase tracking-widest mt-1">
-              Rank: {scoreResult?.rank || 'Quantum Voyager'}
+              Hạng: {scoreResult?.rank || 'Lữ khách lượng tử'}
             </p>
 
             {/* Metrics Breakdown Grid */}
             <div className="grid grid-cols-3 gap-3 my-6">
               <div className="p-3 rounded-xl bg-white/5 border border-white/10">
-                <span className="text-[11px] text-slate-400 block">Speed</span>
+                <span className="text-[11px] text-slate-400 block">Tốc độ</span>
                 <span className="text-lg font-bold text-cyan-300 font-mono">
                   {wpm} <span className="text-[10px]">WPM</span>
                 </span>
               </div>
               <div className="p-3 rounded-xl bg-white/5 border border-white/10">
-                <span className="text-[11px] text-slate-400 block">Accuracy</span>
+                <span className="text-[11px] text-slate-400 block">Độ chính xác</span>
                 <span className="text-lg font-bold text-purple-300 font-mono">
                   {accuracy}%
                 </span>
               </div>
               <div className="p-3 rounded-xl bg-white/5 border border-white/10">
-                <span className="text-[11px] text-slate-400 block">Time</span>
+                <span className="text-[11px] text-slate-400 block">Thời gian</span>
                 <span className="text-lg font-bold text-emerald-300 font-mono">
                   {formatTime(elapsedSeconds)}
                 </span>
@@ -386,7 +386,7 @@ export const TypingChallengeScreen: React.FC<TypingChallengeScreenProps> = ({
             <div className="flex items-center justify-center gap-2 p-3 rounded-xl bg-gradient-to-r from-purple-900/40 via-cyan-900/40 to-purple-900/40 border border-purple-500/30 mb-6">
               <Sparkles className="w-4 h-4 text-cyan-300" />
               <span className="text-xs font-semibold text-slate-200">
-                Cosmic XP Earned:{' '}
+                Cosmic XP Đạt được:{' '}
                 <strong className="text-cyan-300 font-bold">
                   +{scoreResult?.xp_earned || 120} XP
                 </strong>
@@ -396,7 +396,7 @@ export const TypingChallengeScreen: React.FC<TypingChallengeScreenProps> = ({
             {/* Status note */}
             <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-400 mb-6">
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Score verified and synced to Activity Heatmap</span>
+              <span>Điểm đã được xác minh và đồng bộ vào Bản đồ Hoạt động</span>
             </div>
 
             {/* Action buttons */}
@@ -407,7 +407,7 @@ export const TypingChallengeScreen: React.FC<TypingChallengeScreenProps> = ({
                 className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-xs font-semibold text-white tracking-wider uppercase transition-all"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
-                <span>Try Again</span>
+                <span>Thử lại</span>
               </button>
 
               <button
@@ -419,7 +419,7 @@ export const TypingChallengeScreen: React.FC<TypingChallengeScreenProps> = ({
                 className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-cyan-500/30 hover:bg-cyan-500/40 border border-cyan-400/60 text-xs font-bold text-cyan-300 tracking-wider uppercase transition-all shadow-[0_0_12px_rgba(0,240,255,0.3)]"
               >
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>Next Difficulty</span>
+                <span>Mức khó tiếp theo</span>
               </button>
             </div>
           </div>

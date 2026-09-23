@@ -248,7 +248,7 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({
               className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-white/10 transition-all cursor-pointer"
             >
               <SlidersHorizontal className="w-3.5 h-3.5 text-slate-400" />
-              <span>Heatmap Options</span>
+              <span>Tùy chọn bản đồ</span>
               <ChevronDown className="w-3 h-3 text-slate-400" />
             </button>
 
