@@ -12,12 +12,12 @@ export interface LevelProgressProps {
 }
 
 function getRankTitleForLevel(lvl: number): string {
-  if (lvl >= 50) return 'Celestial Master';
+  if (lvl >= 50) return 'Bậc Thầy Vũ Trụ';
   if (lvl >= 35) return 'Stellar Captain';
-  if (lvl >= 25) return 'Nova Voyager';
-  if (lvl >= 15) return 'Cosmic Explorer';
-  if (lvl >= 5) return 'Stargazer';
-  return 'Cosmic Cadet';
+  if (lvl >= 25) return 'Lữ Khách Tinh Tú';
+  if (lvl >= 15) return 'Nhà Thám Hiểm';
+  if (lvl >= 5) return 'Người Ngắm Sao';
+  return 'Cosmic Tân binh';
 }
 
 export const LevelProgress: React.FC<LevelProgressProps> = ({
@@ -28,11 +28,11 @@ export const LevelProgress: React.FC<LevelProgressProps> = ({
   const username = profile?.username ?? 'Alex Chen';
   const handle = profile?.handle ?? '@astro_alex';
   const level = profile?.level ?? 28;
-  const rankTitle = profile?.title ?? profile?.rank ?? 'Stargazer';
+  const rankTitle = profile?.title ?? profile?.rank ?? 'Người Ngắm Sao';
   const currentXp = Math.max(0, profile?.current_xp ?? 14350);
   const nextLevelXp = Math.max(1, profile?.next_level_xp ?? 15000);
   const nextLevel = level + 1;
-  const nextTitle = profile?.next_title ?? `${getRankTitleForLevel(nextLevel)} (LVL ${nextLevel})`;
+  const nextTitle = profile?.next_title ?? `${getRankTitleForLevel(nextLevel)} (CẤP ${nextLevel})`;
 
   const progressPercent = Math.min(
     100,
@@ -104,7 +104,7 @@ export const LevelProgress: React.FC<LevelProgressProps> = ({
             <span className="text-slate-400 text-sm font-normal ml-2">{handle}</span>
           </div>
           <div className="text-sky-400 font-semibold text-sm tracking-wide mt-0.5">
-            Level {level}: {rankTitle}
+            Cấp độ {level}: {rankTitle}
           </div>
           <div className="text-slate-400 text-xs mt-0.5 font-normal">
             XP: {currentXp.toLocaleString()}/{nextLevelXp.toLocaleString()} | {progressPercent}% hoàn thành
@@ -118,9 +118,9 @@ export const LevelProgress: React.FC<LevelProgressProps> = ({
         <div className="flex items-center justify-between text-xs mb-2">
           <span className="text-slate-300 font-medium text-sm">Cấp độ người dùng</span>
           <div className="flex items-center gap-2">
-            <span className="text-slate-300">{progressPercent}% Hoàn thành</span>
+            <span className="text-slate-300">{progressPercent}% hoàn thành</span>
             <span className="bg-slate-800/90 border border-white/20 px-2 py-0.5 rounded text-[11px] font-bold text-white shadow-sm">
-              LVL {level}
+              CẤP {level}
             </span>
             <span className="text-slate-400 text-xs">Next: {nextTitle}</span>
           </div>

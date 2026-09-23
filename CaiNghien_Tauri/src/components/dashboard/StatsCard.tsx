@@ -109,17 +109,17 @@ export const DashboardMetricsRow: React.FC<DashboardMetricsRowProps> = ({
             {contributions.toLocaleString()}
           </div>
           <div className="text-xs text-slate-400 mt-0.5 font-normal">
-            Contributions (Year)
+            Đóng góp (Năm)
           </div>
         </div>
 
-        {/* Current Streak */}
+        {/* Chuỗi hiện tại */}
         <div>
           <div className="text-2xl md:text-3xl font-bold text-white tracking-tight">
-            {currentStreak} Days
+            {currentStreak} Ngày
           </div>
           <div className="text-xs text-slate-400 mt-0.5 font-normal">
-            Current Streak
+            Chuỗi hiện tại
           </div>
         </div>
 
@@ -129,7 +129,7 @@ export const DashboardMetricsRow: React.FC<DashboardMetricsRowProps> = ({
             {activityRate}%
           </div>
           <div className="text-xs text-slate-400 mt-0.5 font-normal">
-            Activity (avg.)
+            Hoạt động (TB)
           </div>
         </div>
       </div>
@@ -154,10 +154,10 @@ export const DashboardMetricsRow: React.FC<DashboardMetricsRowProps> = ({
           <span className="text-slate-400 text-[11px]">0</span>
         </div>
 
-        {/* Tier 3 & 4 (Violet) */}
+        {/* Tier 3 & 4 (Tím) */}
         <div className="flex items-center gap-1.5 bg-slate-950/40 border border-white/5 px-2 py-1 rounded-md">
           <div className="w-3.5 h-3.5 rounded-[3px] bg-[#8b5cf6] border border-white/10" />
-          <span className="text-slate-400 text-[11px]">Violet</span>
+          <span className="text-slate-400 text-[11px]">Tím</span>
         </div>
 
         {/* Tier 5 (30+ Neon Cyan Glow) */}
@@ -191,34 +191,34 @@ export const StatsCardsGrid: React.FC<StatsCardsGridProps> = ({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 shrink-0">
       <StatsCard
-        title="Total Contributions"
+        title="Tổng đóng góp"
         value={totalContributions.toLocaleString()}
-        subtitle="This year"
+        subtitle="Năm nay"
         trend="+12.4%"
         trendPositive={true}
         icon={<Calendar className="w-5 h-5" />}
         colorScheme="cyan"
       />
       <StatsCard
-        title="Current Streak"
-        value={`${currentStreak} Days`}
-        subtitle="Consistent discipline"
-        trend="On fire!"
+        title="Chuỗi hiện tại"
+        value={`${currentStreak} Ngày`}
+        subtitle="Kỷ luật bền bỉ"
+        trend="Đang bùng nổ!"
         trendPositive={true}
         icon={<Flame className="w-5 h-5" />}
         colorScheme="purple"
       />
       <StatsCard
-        title="Longest Streak"
-        value={`${longestStreak} Days`}
-        subtitle="Personal record"
+        title="Chuỗi dài nhất"
+        value={`${longestStreak} Ngày`}
+        subtitle="Kỷ lục cá nhân"
         icon={<Trophy className="w-5 h-5" />}
         colorScheme="amber"
       />
       <StatsCard
-        title="Activity Rate"
+        title="Tỷ lệ hoạt động"
         value={`${activityRate}%`}
-        subtitle="Yearly average"
+        subtitle="Trung bình năm"
         trend="+3.2%"
         trendPositive={true}
         icon={<Activity className="w-5 h-5" />}

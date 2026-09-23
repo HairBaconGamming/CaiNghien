@@ -221,7 +221,7 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({
       {/* Header Row */}
       <div className="flex items-center justify-between mb-5">
         <h3 className="text-base md:text-lg font-bold text-white tracking-wide flex items-center gap-2">
-          Activity Heatmap <span className="text-slate-500 font-normal">|</span> {displayYearRange}
+          Biểu đồ hoạt động <span className="text-slate-500 font-normal">|</span> {displayYearRange}
         </h3>
 
         {/* Right Controls */}
@@ -259,21 +259,21 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({
                   onClick={() => setShowOptionsDropdown(false)}
                   className="w-full text-left px-3.5 py-2 text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
                 >
-                  View {displayYearRange}
+                  Xem {displayYearRange}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowOptionsDropdown(false)}
                   className="w-full text-left px-3.5 py-2 text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
                 >
-                  High Intensity Only
+                  Chỉ ngày tích cực
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowOptionsDropdown(false)}
                   className="w-full text-left px-3.5 py-2 text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
                 >
-                  Export Activity Log
+                  Xuất nhật ký
                 </button>
               </div>
             )}
@@ -307,13 +307,13 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({
           <div className="flex gap-2">
             {/* Day of Week Labels (M, W, F) */}
             <div className="flex flex-col justify-between w-5 text-[10px] text-slate-500 font-medium select-none pt-0.5 pb-0.5 pointer-events-none">
-              <span className="h-3.5 flex items-center leading-none opacity-0">S</span>
-              <span className="h-3.5 flex items-center leading-none">M</span>
-              <span className="h-3.5 flex items-center leading-none opacity-0">T</span>
-              <span className="h-3.5 flex items-center leading-none">W</span>
-              <span className="h-3.5 flex items-center leading-none opacity-0">T</span>
-              <span className="h-3.5 flex items-center leading-none">F</span>
-              <span className="h-3.5 flex items-center leading-none opacity-0">S</span>
+              <span className="h-3.5 flex items-center leading-none opacity-0">CN</span>
+              <span className="h-3.5 flex items-center leading-none">T2</span>
+              <span className="h-3.5 flex items-center leading-none opacity-0">T3</span>
+              <span className="h-3.5 flex items-center leading-none">T4</span>
+              <span className="h-3.5 flex items-center leading-none opacity-0">T5</span>
+              <span className="h-3.5 flex items-center leading-none">T6</span>
+              <span className="h-3.5 flex items-center leading-none opacity-0">T7</span>
             </div>
 
             {/* 52 Columns Grid */}
@@ -365,7 +365,7 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({
 
           {/* Heatmap Legend: Less [dots] More (Bottom Right) */}
           <div className="flex items-center justify-end gap-1.5 mt-3 text-xs text-slate-400 pointer-events-none">
-            <span className="text-[11px] mr-1">Less</span>
+            <span className="text-[11px] mr-1">Ít</span>
             {[0, 1, 2, 3, 4, 5].map((lvl) => (
               <div
                 key={lvl}
@@ -376,7 +376,7 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({
                 }}
               />
             ))}
-            <span className="text-[11px] ml-1">More</span>
+            <span className="text-[11px] ml-1">Nhiều</span>
           </div>
         </div>
       </div>
@@ -389,8 +389,8 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({
         >
           <div className="font-semibold text-white">
             {activeCell.count > 0
-              ? `${activeCell.count} ${activeCell.count === 1 ? 'contribution' : 'contributions'}`
-              : 'No contributions'}
+              ? `${activeCell.count} đóng góp`
+              : 'Không có đóng góp'}
           </div>
           <div className="text-[11px] text-slate-400 mt-0.5 font-mono">
             {formatDateDisplay(activeCell.date)}

@@ -52,7 +52,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
       }
     } catch (err) {
       console.error('Error in loadDashboardData:', err);
-      setError('Unable to sync telemetry from Cosmos core. Displaying offline snapshot.');
+      setError('Không thể đồng bộ dữ liệu. Đang hiển thị bản lưu ngoại tuyến.');
     } finally {
       setIsLoading(false);
     }
@@ -90,7 +90,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
             onClick={loadDashboardData}
             className="flex items-center gap-1 text-amber-200 underline hover:text-white ml-3"
           >
-            <RefreshCw className="w-3 h-3" /> Retry
+            <RefreshCw className="w-3 h-3" /> Thử lại
           </button>
         </div>
       )}
