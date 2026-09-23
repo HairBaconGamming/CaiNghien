@@ -181,7 +181,7 @@ export async function getAppConfig(): Promise<AppConfig | null> {
 }
 
 export async function saveAppConfig(config: AppConfig): Promise<void> {
-  return safeInvoke<void>('save_app_config', { config });
+  return safeInvoke<void>('save_app_config', { newConfig: config });
 }
 
 export async function enterFocusRoom(): Promise<void> {
