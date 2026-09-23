@@ -14,6 +14,7 @@ export interface TypingChallengeScreenProps {
   onComplete?: (result: TypingScoreResult) => void;
   initialDifficulty?: 'novice' | 'stargazer' | 'quantum';
   asModal?: boolean;
+  customText?: string;
 }
 
 export const TypingChallengeScreen: React.FC<TypingChallengeScreenProps> = ({
@@ -21,6 +22,7 @@ export const TypingChallengeScreen: React.FC<TypingChallengeScreenProps> = ({
   onComplete,
   initialDifficulty = 'quantum',
   asModal = false,
+  customText,
 }) => {
   // Challenge State
   const [difficulty, setDifficulty] = useState<'novice' | 'stargazer' | 'quantum'>(initialDifficulty);
@@ -51,13 +53,23 @@ export const TypingChallengeScreen: React.FC<TypingChallengeScreenProps> = ({
 
   // Load challenge from API or fallback
   const loadChallenge = useCallback(async (diff: 'novice' | 'stargazer' | 'quantum') => {
+    if (customText) {
+      setChallenge({
+        id: 'custom-challenge',
+        title: 'Lời Cam Kết',
+        author: 'Bản Thân',
+        difficulty: 'custom',
+        text: customText,
+      });
+      return;
+    }
     try {
       const data = await api.getTypingChallengeText(diff);
       setChallenge(data);
     } catch {
       // Fallback already handled inside api.ts
     }
-  }, []);
+  }, [customText]);
 
   useEffect(() => {
     loadChallenge(difficulty);

@@ -127,4 +127,10 @@ permissions = [
   "allow-get-typing-challenge-text",
   "allow-save-typing-score",
   "allow-get-typing-scores",
+  "allow-reset-all-data",
 ]
+
+[[permission]]
+identifier = "allow-reset-all-data"
+description = "Allows the reset_all_data command"
+commands.allow = ["reset_all_data"]

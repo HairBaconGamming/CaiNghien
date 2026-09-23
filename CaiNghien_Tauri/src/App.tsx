@@ -15,6 +15,8 @@ import {
 import { check } from '@tauri-apps/plugin-updater';
 import { relaunch } from '@tauri-apps/plugin-process';
 import { api, UserProfile, onTelemetryUpdate, notifyTelemetryUpdate, AppConfig } from './services/api';
+import { Toast, ToastType } from './components/Toast';
+import { ConfirmModal } from './components/ConfirmModal';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<NavTabId>('dashboard');
@@ -22,13 +24,24 @@ export default function App() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [appConfig, setAppConfig] = useState<AppConfig | null>(null);
   const [blockedDomainsInput, setBlockedDomainsInput] = useState('');
+  const [toasts, setToasts] = useState<{id: string, type: ToastType, message: string}[]>([]);
+  const [confirmDialog, setConfirmDialog] = useState<{title: string, message: string, onConfirm: () => void} | null>(null);
+
+  const addToast = useCallback((type: ToastType, message: string) => {
+    const id = Math.random().toString(36).substring(7);
+    setToasts(prev => [...prev, { id, type, message }]);
+  }, []);
+
+  const removeToast = useCallback((id: string) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  }, []);
 
   const refreshConfig = useCallback(async () => {
     try {
       const c = await api.getAppConfig();
       if (c) {
         setAppConfig(c);
-        setBlockedDomainsInput(c.blocked_domains.join('\\n'));
+        setBlockedDomainsInput(c.blocked_domains.join('\n'));
       }
     } catch (e) {
       console.warn('Failed to load app config:', e);
@@ -44,7 +57,7 @@ export default function App() {
       refreshConfig();
     } catch (e) {
       console.error('Failed to save config:', e);
-      alert('Lưu cài đặt thất bại: ' + e);
+      addToast('error', 'Lưu cài đặt thất bại: ' + e);
       refreshConfig();
     }
   };
@@ -118,8 +131,9 @@ export default function App() {
 
 
   const handleSaveDomains = () => {
-    const domains = blockedDomainsInput.split('\\n').map(d => d.trim()).filter(d => d.length > 0);
+    const domains = blockedDomainsInput.split('\n').map(d => d.trim()).filter(d => d.length > 0);
     updateConfig({ blocked_domains: domains });
+    addToast('success', 'Đã lưu cài đặt website!');
   };
 
   const handleManualCheck = async () => {
@@ -129,11 +143,11 @@ export default function App() {
       if (update) {
         setUpdateObj(update);
       } else {
-        alert("Hệ thống đã được cập nhật phiên bản mới nhất.");
+        addToast('info', "Hệ thống đã được cập nhật phiên bản mới nhất.");
       }
     } catch (e) {
       console.error(e);
-      alert("Kiểm tra bản cập nhật thất bại.");
+      addToast('error', "Kiểm tra bản cập nhật thất bại.");
     }
     setIsCheckingUpdate(false);
   };
@@ -286,8 +300,8 @@ export default function App() {
                             if (newPwd !== null) {
                                import('@tauri-apps/api/core').then(({ invoke }) => {
                                   invoke('set_password', { password: newPwd || null })
-                                    .then(() => alert('Đã cập nhật mật khẩu'))
-                                    .catch(e => alert(e));
+                                    .then(() => addToast('success', 'Đã cập nhật mật khẩu'))
+                                    .catch(e => addToast('error', e as string));
                                });
                             }
                           }}
@@ -408,16 +422,22 @@ export default function App() {
                           <p className="text-xs text-slate-400">Xóa lịch sử tập trung, thành tích và đưa tài khoản về cấp độ 1</p>
                         </div>
                         <button
-                          onClick={async () => {
-                            if (confirm('Bạn có chắc chắn muốn xóa toàn bộ dữ liệu? Thao tác này không thể hoàn tác.')) {
-                              try {
-                                await api.resetAllData();
-                                alert('Đã xóa dữ liệu thành công!');
-                                window.location.reload();
-                              } catch (e) {
-                                alert('Lỗi: ' + e);
+                          onClick={() => {
+                            setConfirmDialog({
+                              title: 'Xóa toàn bộ dữ liệu',
+                              message: 'Bạn có chắc chắn muốn xóa toàn bộ dữ liệu? Thao tác này không thể hoàn tác.',
+                              onConfirm: async () => {
+                                try {
+                                  await api.resetAllData();
+                                  addToast('success', 'Đã xóa dữ liệu thành công!');
+                                  setConfirmDialog(null);
+                                  setTimeout(() => window.location.reload(), 1500);
+                                } catch (e) {
+                                  addToast('error', 'Lỗi: ' + e);
+                                  setConfirmDialog(null);
+                                }
                               }
-                            }
+                            });
                           }}
                           disabled={settingsLocked}
                           className="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider text-white bg-red-600/80 hover:bg-red-500 transition-colors flex items-center gap-2 disabled:opacity-50 cursor-pointer"
@@ -457,6 +477,7 @@ export default function App() {
           <div className="relative w-full max-w-2xl">
             <TypingChallengeScreen
               asModal
+              customText="Tôi cam kết chịu trách nhiệm với bản thân, kỷ luật để vượt qua cám dỗ. Việc gỡ bỏ rào cản lúc này có thể phá hủy mọi nỗ lực. Tôi chọn sự tự do thực sự chứ không phải khoái cảm nhất thời."
               onClose={() => setShowUnlockModal(false)}
               onComplete={() => {
                 setSettingsLocked(false);
@@ -501,7 +522,7 @@ export default function App() {
                     await relaunch();
                   } catch (e) {
                     console.error(e);
-                    alert("Cài đặt bản cập nhật thất bại.");
+                    addToast('error', "Cài đặt bản cập nhật thất bại.");
                   }
                   setIsUpdating(false);
                 }}
@@ -513,6 +534,23 @@ export default function App() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Toast Notifications */}
+      <div className="fixed bottom-4 right-4 z-[100] flex flex-col items-end pointer-events-none">
+        {toasts.map(t => (
+          <Toast key={t.id} id={t.id} type={t.type} message={t.message} onClose={removeToast} />
+        ))}
+      </div>
+
+      {/* Confirm Modal */}
+      {confirmDialog && (
+        <ConfirmModal
+          title={confirmDialog.title}
+          message={confirmDialog.message}
+          onConfirm={confirmDialog.onConfirm}
+          onCancel={() => setConfirmDialog(null)}
+        />
       )}
     </div>
   );
