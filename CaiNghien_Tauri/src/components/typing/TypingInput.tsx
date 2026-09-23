@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { RotateCcw, Sparkles } from 'lucide-react';
 
 export interface TypingInputProps {
@@ -33,16 +33,15 @@ export const TypingInput: React.FC<TypingInputProps> = ({
   className = '',
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [localValue, setLocalValue] = useState(value);
 
-  // Sync local value when external value changes fundamentally (e.g. restart)
-  // Normalizing to NFC ensures byte/length mismatches don't falsely trigger a sync
+  // Sync value resets (e.g., when the user clicks Restart)
   useEffect(() => {
-    setLocalValue((prev) => {
-      if (value === '') return '';
-      if (value.normalize('NFC') !== prev.normalize('NFC')) return value;
-      return prev;
-    });
+    if (value === '' && inputRef.current) {
+      inputRef.current.value = '';
+    } else if (inputRef.current && value !== '' && value !== inputRef.current.value.normalize('NFC')) {
+      // In case parent forces a specific value other than what's typed
+      inputRef.current.value = value;
+    }
   }, [value]);
 
   useEffect(() => {
@@ -65,10 +64,7 @@ export const TypingInput: React.FC<TypingInputProps> = ({
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const rawValue = e.target.value;
-    setLocalValue(rawValue);
-    // Propagate NFC normalized value to avoid length mismatches in parent
-    onChange(rawValue.normalize('NFC'));
+    onChange(e.target.value.normalize('NFC'));
   };
 
   return (
@@ -134,7 +130,7 @@ export const TypingInput: React.FC<TypingInputProps> = ({
           <input
             ref={inputRef}
             type="text"
-            value={localValue}
+            defaultValue={value}
             onChange={handleInputChange}
             onKeyDown={onKeyDown}
             onPaste={handlePaste}

@@ -14,12 +14,41 @@ import {
 } from 'lucide-react';
 import { check } from '@tauri-apps/plugin-updater';
 import { relaunch } from '@tauri-apps/plugin-process';
-import { api, UserProfile, onTelemetryUpdate, notifyTelemetryUpdate } from './services/api';
+import { api, UserProfile, onTelemetryUpdate, notifyTelemetryUpdate, AppConfig } from './services/api';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<NavTabId>('dashboard');
   const [showTypingModal, setShowTypingModal] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [appConfig, setAppConfig] = useState<AppConfig | null>(null);
+  const [blockedDomainsInput, setBlockedDomainsInput] = useState('');
+
+  const refreshConfig = useCallback(async () => {
+    try {
+      const c = await api.getAppConfig();
+      if (c) {
+        setAppConfig(c);
+        setBlockedDomainsInput(c.blocked_domains.join('\\n'));
+      }
+    } catch (e) {
+      console.warn('Failed to load app config:', e);
+    }
+  }, []);
+
+  const updateConfig = async (updates: Partial<AppConfig>) => {
+    if (!appConfig) return;
+    const newConfig = { ...appConfig, ...updates };
+    setAppConfig(newConfig);
+    try {
+      await api.saveAppConfig(newConfig);
+      refreshConfig();
+    } catch (e) {
+      console.error('Failed to save config:', e);
+      alert('Failed to save config: ' + e);
+      refreshConfig();
+    }
+  };
+
   const [dashboardRefreshTrigger, setDashboardRefreshTrigger] = useState(0);
 
   const refreshProfile = useCallback(async () => {
@@ -35,7 +64,8 @@ export default function App() {
 
   useEffect(() => {
     refreshProfile();
-  }, [refreshProfile]);
+    refreshConfig();
+  }, [refreshProfile, refreshConfig]);
 
   useEffect(() => {
     const unsubscribe = onTelemetryUpdate(() => {
@@ -85,6 +115,12 @@ export default function App() {
       }
     }).catch(console.error);
   }, []);
+
+
+  const handleSaveDomains = () => {
+    const domains = blockedDomainsInput.split('\\n').map(d => d.trim()).filter(d => d.length > 0);
+    updateConfig({ blocked_domains: domains });
+  };
 
   const handleManualCheck = async () => {
     setIsCheckingUpdate(true);
@@ -187,7 +223,7 @@ export default function App() {
             )}
 
 
-            {activeTab === 'settings' && (
+            {activeTab === 'settings' && appConfig && (
               <div className="w-full h-full flex flex-col p-6 overflow-y-auto">
                 <div className="glass-panel rounded-2xl p-6 border border-white/10 mb-6 flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -198,6 +234,16 @@ export default function App() {
                         Configure discipline thresholds, password protection, and deep space aesthetics.
                       </p>
                     </div>
+                  </div>
+                  <div className="flex items-center gap-3 bg-slate-900/50 p-2 rounded-xl border border-white/10">
+                    <span className="text-sm font-bold text-white">Master Protection</span>
+                    <input 
+                      type="checkbox" 
+                      checked={appConfig.protection_enabled} 
+                      onChange={(e) => updateConfig({ protection_enabled: e.target.checked })}
+                      className="toggle-checkbox accent-cyan-400 w-6 h-6 cursor-pointer" 
+                      disabled={settingsLocked} 
+                    />
                   </div>
                 </div>
 
@@ -227,16 +273,25 @@ export default function App() {
                     </div>
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-semibold text-slate-200">Require Password to Exit</p>
-                          <p className="text-xs text-slate-400">Enforce strict exit barriers</p>
-                        </div>
-                        <input type="checkbox" defaultChecked className="toggle-checkbox accent-fuchsia-400 w-5 h-5 cursor-pointer" disabled={settingsLocked} />
+                         <div>
+                           <p className="text-sm font-semibold text-slate-200">App Password is {appConfig.password_hash ? 'Set' : 'Not Set'}</p>
+                           <p className="text-xs text-slate-400">Enforce strict exit barriers</p>
+                         </div>
                       </div>
                       <div className="pt-2 border-t border-white/10">
                         <button
                           disabled={settingsLocked}
-                          className="w-full py-2 rounded-lg border border-fuchsia-500/30 text-xs font-bold uppercase tracking-wider text-fuchsia-300 hover:bg-fuchsia-500/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                          onClick={() => {
+                            const newPwd = prompt("Enter new password (leave empty to remove):");
+                            if (newPwd !== null) {
+                               import('@tauri-apps/api/core').then(({ invoke }) => {
+                                  invoke('set_password', { password: newPwd || null })
+                                    .then(() => alert('Password updated'))
+                                    .catch(e => alert(e));
+                               });
+                            }
+                          }}
+                          className="w-full py-2 rounded-lg border border-fuchsia-500/30 text-xs font-bold uppercase tracking-wider text-fuchsia-300 hover:bg-fuchsia-500/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                         >
                           Change Password
                         </button>
@@ -250,19 +305,24 @@ export default function App() {
                       <h3 className="text-base font-bold text-white">Discipline Enforcement</h3>
                     </div>
                     <div className="space-y-4">
-                      <div className="flex items-center justify-between">
+                      <div className="flex flex-col gap-2">
                         <div>
-                          <p className="text-sm font-semibold text-slate-200">Active Website Barrier</p>
-                          <p className="text-xs text-slate-400">Block adult and distracting domain queries</p>
+                          <p className="text-sm font-semibold text-slate-200">Blocked Domains</p>
+                          <p className="text-xs text-slate-400 mb-2">One domain per line</p>
                         </div>
-                        <input type="checkbox" defaultChecked className="toggle-checkbox accent-cyan-400 w-5 h-5 cursor-pointer" />
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-semibold text-slate-200">Kiosk Focus Mode Hooks</p>
-                          <p className="text-xs text-slate-400">Prevent window switching during active focus sessions</p>
-                        </div>
-                        <input type="checkbox" defaultChecked className="toggle-checkbox accent-cyan-400 w-5 h-5 cursor-pointer" />
+                        <textarea 
+                          value={blockedDomainsInput}
+                          onChange={(e) => setBlockedDomainsInput(e.target.value)}
+                          disabled={settingsLocked}
+                          className="w-full h-24 bg-slate-900/50 border border-white/10 rounded-lg p-2 text-sm text-white resize-none"
+                        />
+                        <button 
+                           disabled={settingsLocked}
+                           onClick={handleSaveDomains}
+                           className="w-full py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold transition-colors cursor-pointer disabled:opacity-50"
+                        >
+                           Save Domains
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -278,35 +338,62 @@ export default function App() {
                           <p className="text-sm font-semibold text-slate-200">Start with Windows</p>
                           <p className="text-xs text-slate-400">Launch CaiNghien in background on system boot</p>
                         </div>
-                        <input type="checkbox" defaultChecked className="toggle-checkbox accent-purple-400 w-5 h-5 cursor-pointer" />
+                        <input 
+                          type="checkbox" 
+                          checked={appConfig.start_with_windows} 
+                          onChange={(e) => updateConfig({ start_with_windows: e.target.checked })}
+                          className="toggle-checkbox accent-purple-400 w-5 h-5 cursor-pointer" 
+                          disabled={settingsLocked}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-semibold text-slate-200">Celestial Particle Dust</p>
-                          <p className="text-xs text-slate-400">Enable high-fidelity animated starfield</p>
+                          <p className="text-sm font-semibold text-slate-200">Block NSFW</p>
+                          <p className="text-xs text-slate-400">Automatically block known adult content</p>
                         </div>
-                        <input type="checkbox" defaultChecked className="toggle-checkbox accent-purple-400 w-5 h-5 cursor-pointer" />
+                        <input 
+                          type="checkbox" 
+                          checked={appConfig.block_nsfw} 
+                          onChange={(e) => updateConfig({ block_nsfw: e.target.checked })}
+                          className="toggle-checkbox accent-purple-400 w-5 h-5 cursor-pointer" 
+                          disabled={settingsLocked}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-semibold text-slate-200">Settings Lock Delay</p>
+                          <p className="text-xs text-slate-400">Enforce a delay when disabling protection</p>
+                        </div>
+                        <input 
+                          type="checkbox" 
+                          checked={appConfig.change_delay_enabled} 
+                          onChange={(e) => updateConfig({ change_delay_enabled: e.target.checked })}
+                          className="toggle-checkbox accent-purple-400 w-5 h-5 cursor-pointer" 
+                          disabled={settingsLocked}
+                        />
                       </div>
                     </div>
                   </div>
 
-                  <div className="glass-panel rounded-2xl p-6 border border-white/10 md:col-span-2">
+                  <div className="glass-panel rounded-2xl p-6 border border-white/10">
                     <div className="flex items-center gap-2 mb-4">
                       <RefreshCw className="w-5 h-5 text-emerald-400" />
                       <h3 className="text-base font-bold text-white">System Updates</h3>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-semibold text-slate-200">Cosmic Core Engine</p>
-                        <p className="text-xs text-slate-400">Check for the latest features and security enhancements</p>
+                    <div className="flex flex-col gap-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-semibold text-slate-200">Cosmic Core Engine</p>
+                          <p className="text-xs text-slate-400">Check for the latest features</p>
+                        </div>
+                        <button
+                          onClick={handleManualCheck}
+                          disabled={isCheckingUpdate || settingsLocked}
+                          className="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider text-white bg-emerald-600/80 hover:bg-emerald-500 transition-colors flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                        >
+                          {isCheckingUpdate ? 'Checking...' : 'Check'}
+                        </button>
                       </div>
-                      <button
-                        onClick={handleManualCheck}
-                        disabled={isCheckingUpdate}
-                        className="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider text-white bg-emerald-600/80 hover:bg-emerald-500 transition-colors flex items-center gap-2 disabled:opacity-50"
-                      >
-                        {isCheckingUpdate ? 'Checking...' : 'Check for Updates'}
-                      </button>
                     </div>
                   </div>
                 </div>

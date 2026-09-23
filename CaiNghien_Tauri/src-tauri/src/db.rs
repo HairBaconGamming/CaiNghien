@@ -337,7 +337,7 @@ pub fn seed_database_if_empty(
                 default_profile.current_xp,
                 default_profile.next_level_xp,
                 default_profile.streak,
-                if default_profile.longest_streak > 0 { default_profile.longest_streak } else { 156 },
+                default_profile.longest_streak,
                 default_profile.rank,
                 default_profile.total_focus_hours,
             ],
@@ -352,25 +352,8 @@ pub fn seed_database_if_empty(
     )?;
 
     if contributions_count == 0 {
-        let today = Local::now().date_naive();
-        let seed_days = generate_dynamic_365_seed(today);
-
-        let mut stmt = tx.prepare(
-            "INSERT INTO daily_contributions (
-                date, count, focus_minutes, violations, is_clean, xp_earned
-            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6);",
-        )?;
-
-        for day in seed_days {
-            stmt.execute(params![
-                day.date,
-                day.count,
-                day.focus_minutes,
-                day.violations,
-                if day.is_clean { 1 } else { 0 },
-                day.xp_earned,
-            ])?;
-        }
+        // No mock data generated per requirement. 
+        // Backend returns empty real data if empty.
     }
 
     // 3. Import focus sessions if table is empty and config has them

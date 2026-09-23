@@ -69,18 +69,18 @@ pub struct UserProfile {
 impl Default for UserProfile {
     fn default() -> Self {
         Self {
-            username: "Alex Chen".to_string(),
-            handle: "@astro_alex".to_string(),
-            title: "Stargazer".to_string(),
-            avatar_type: "cosmic_singularity".to_string(),
-            level: 28,
-            level_title: "Stargazer".to_string(),
-            next_level_title: "Nova Voyager (LVL 29)".to_string(),
-            current_xp: 14350,
-            next_level_xp: 15000,
-            streak: 128,
-            longest_streak: 156,
-            rank: "Stargazer".to_string(),
+            username: "User".to_string(),
+            handle: "@user".to_string(),
+            title: "Novice".to_string(),
+            avatar_type: "default".to_string(),
+            level: 1,
+            level_title: "Novice".to_string(),
+            next_level_title: "Level 2".to_string(),
+            current_xp: 0,
+            next_level_xp: 100,
+            streak: 0,
+            longest_streak: 0,
+            rank: "Unranked".to_string(),
             total_focus_hours: 0,
         }
     }
