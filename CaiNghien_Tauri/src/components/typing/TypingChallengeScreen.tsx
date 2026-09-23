@@ -119,11 +119,10 @@ export const TypingChallengeScreen: React.FC<TypingChallengeScreenProps> = ({
   const handleTypingChange = (newVal: string) => {
     if (isCompleted) return;
 
-    if (!isStarted && newVal.length > 0) {
-      setIsStarted(true);
-    }
-
     startTransition(() => {
+      if (!isStarted && newVal.length > 0) {
+        setIsStarted(true);
+      }
       setTypedText(newVal);
     });
   };

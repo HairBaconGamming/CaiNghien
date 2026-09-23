@@ -52,9 +52,23 @@ export const TypingInput: React.FC<TypingInputProps> = ({
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(e.target.value.normalize('NFC'));
-  };
+  const onChangeRef = useRef(onChange);
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
+
+  useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    
+    const onNativeInput = (e: Event) => {
+      const target = e.target as HTMLInputElement;
+      onChangeRef.current(target.value.normalize('NFC'));
+    };
+
+    el.addEventListener('input', onNativeInput);
+    return () => el.removeEventListener('input', onNativeInput);
+  }, []);
 
   return (
     <div className={`w-full flex flex-col gap-3 ${className}`}>
@@ -119,7 +133,6 @@ export const TypingInput: React.FC<TypingInputProps> = ({
           <input
             ref={inputRef}
             type="text"
-            onChange={handleInputChange}
             onKeyDown={onKeyDown}
             onPaste={handlePaste}
             disabled={disabled}
