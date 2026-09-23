@@ -42,6 +42,7 @@ export const TypingChallengeScreen: React.FC<TypingChallengeScreenProps> = ({
   // Telemetry
   const [wpm, setWpm] = useState<number>(0);
   const [accuracy, setAccuracy] = useState<number>(100);
+  const [resetKey, setResetKey] = useState<number>(0);
 
   // Result & Modals
   const [saving, setSaving] = useState<boolean>(false);
@@ -137,6 +138,7 @@ export const TypingChallengeScreen: React.FC<TypingChallengeScreenProps> = ({
       timerRef.current = null;
     }
     setTypedText('');
+    setResetKey(prev => prev + 1);
     setIsStarted(false);
     setIsCompleted(false);
     setElapsedSeconds(0);
@@ -196,7 +198,7 @@ export const TypingChallengeScreen: React.FC<TypingChallengeScreenProps> = ({
     handleCompleteChallenge();
   };
 
-  const isTargetMatched = typedText.length > 0 && typedText === challenge.text;
+  const isTargetMatched = typedText.length > 0 && typedText === challenge.text.normalize('NFC');
 
   return (
     <div className={`w-full min-h-screen flex items-center justify-center p-4 bg-[#030712] relative overflow-hidden select-none font-sans ${asModal ? 'fixed inset-0 z-50 bg-black/80 backdrop-blur-xl' : ''}`}>
@@ -249,7 +251,7 @@ export const TypingChallengeScreen: React.FC<TypingChallengeScreenProps> = ({
             {/* Left Paragraph Display (~75% width) */}
             <div className="flex-1 min-w-0 pr-2">
               <TextPromptDisplay
-                targetText={challenge.text}
+                targetText={challenge.text.normalize('NFC')}
                 typedText={typedText}
                 isActive={!isCompleted}
               />
@@ -277,6 +279,7 @@ export const TypingChallengeScreen: React.FC<TypingChallengeScreenProps> = ({
           </div>
 
           <TypingInput
+            key={resetKey}
             value={typedText}
             onChange={handleTypingChange}
             placeholder={isStarted ? '' : 'Con cáo nâu nhanh nhẹn nhảy qua...'}

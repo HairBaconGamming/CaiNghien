@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { RotateCcw, Sparkles } from 'lucide-react';
 
 export interface TypingInputProps {
@@ -33,18 +33,7 @@ export const TypingInput: React.FC<TypingInputProps> = ({
   className = '',
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [isComposing, setIsComposing] = useState(false);
 
-  // Sync value resets (e.g., when the user clicks Restart)
-  useEffect(() => {
-    if (isComposing) return;
-    if (value === '' && inputRef.current) {
-      inputRef.current.value = '';
-    } else if (inputRef.current && value !== '' && value !== inputRef.current.value.normalize('NFC')) {
-      // In case parent forces a specific value other than what's typed
-      inputRef.current.value = value;
-    }
-  }, [value, isComposing]);
 
   useEffect(() => {
     if (autoFocus && !disabled && inputRef.current) {
@@ -136,8 +125,6 @@ export const TypingInput: React.FC<TypingInputProps> = ({
             onChange={handleInputChange}
             onKeyDown={onKeyDown}
             onPaste={handlePaste}
-            onCompositionStart={() => setIsComposing(true)}
-            onCompositionEnd={() => setIsComposing(false)}
             disabled={disabled}
             placeholder={placeholder}
             autoComplete="off"
