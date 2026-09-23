@@ -141,7 +141,7 @@ export const TypingInput: React.FC<TypingInputProps> = ({
             autoCorrect="off"
             autoCapitalize="off"
             spellCheck={false}
-            className="w-full bg-transparent text-white font-sans text-sm md:text-base outline-none tracking-normal placeholder-slate-600 disabled:opacity-50"
+            className="w-full bg-transparent text-white font-sans text-sm md:text-base outline-none tracking-normal placeholder-slate-600 disabled:opacity-50 select-text cursor-text"
             aria-label="Typing input box"
           />
         </div>
