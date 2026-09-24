@@ -17,6 +17,8 @@ import { relaunch } from '@tauri-apps/plugin-process';
 import { api, UserProfile, onTelemetryUpdate, notifyTelemetryUpdate, AppConfig } from './services/api';
 import { Toast, ToastType } from './components/Toast';
 import { ConfirmModal } from './components/ConfirmModal';
+import { AccountScreen } from './components/AccountScreen';
+
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<NavTabId>('dashboard');
@@ -236,6 +238,10 @@ export default function App() {
               />
             )}
 
+
+            {activeTab === 'account' && (
+              <AccountScreen addToast={addToast} />
+            )}
 
             {activeTab === 'settings' && appConfig && (
               <div className="w-full h-full flex flex-col p-6 overflow-y-auto">

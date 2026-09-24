@@ -5,10 +5,11 @@ import {
   Keyboard,
   Settings,
   Bell,
-  Sparkles
+  Sparkles,
+  User
 } from 'lucide-react';
 
-export type NavTabId = 'dashboard' | 'focus' | 'typing' | 'settings';
+export type NavTabId = 'dashboard' | 'focus' | 'typing' | 'settings' | 'account';
 
 export interface NavbarProps {
   activeTab: NavTabId;
@@ -30,6 +31,7 @@ export const Navbar: FC<NavbarProps> = ({
     { id: 'focus', label: 'Phòng tập trung', icon: Timer },
     { id: 'typing', label: 'Thử thách gõ phím', icon: Keyboard },
     { id: 'settings', label: 'Cài đặt', icon: Settings },
+    { id: 'account', label: 'Tài khoản', icon: User },
   ];
 
   return (
