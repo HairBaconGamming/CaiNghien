@@ -6,15 +6,15 @@
       "tag": "v1.3.0",
       "published_at": "2026-09-25",
       "is_latest": true,
-      "title": "B?n c?p nh?t B?o m?t Tuy?t d?i & ?n d?nh H? th?ng v1.3.0",
-      "summary": "S?a hon 30 l?i b?o m?t nghi�m tr?ng, t�ch h?p React Error Boundaries, t?i uu RAM Web Audio v� si?t ch?t ph�n quy?n h? th?ng.",
+      "title": "Bản cập nhật Bảo mật Tuyệt đối & Ổn định Hệ thống v1.3.0",
+      "summary": "Sửa hơn 30 lỗi bảo mật nghiêm trọng, tích hợp React Error Boundaries, tối ưu RAM Web Audio và siết chặt phân quyền hệ thống.",
       "notes": [
-        "S?a hon 30 l?i b?o m?t nghi�m tr?ng (du?c b�o c�o b?i h? th?ng Audit �?c l?p).",
-        "Trang b? c�ng ngh? React Error Boundaries gi�p tho�t kh?i Kiosk Mode an to�n.",
-        "Thi?t k? l?i lu?ng ph�n quy?n Windows (UAC): Ho?t d?ng ho�n to�n du?i quy?n ngu?i d�ng.",
-        "S?a d?t di?m l?i tr�n RAM r� r? b? nh? khi nghe nh?c Lofi.",
-        "Co ch? ch?ng gian l?n m?i: Kh�a API n?i b? ch?n hack gi? choi (Study-to-Earn).",
-        "Thay d?i ID c?a Co s? d? li?u SQLite ch?ng s?p khi spam ph�m."
+        "Sửa hơn 30 lỗi bảo mật nghiêm trọng (được báo cáo bởi hệ thống Audit Độc lập).",
+        "Trang bị công nghệ React Error Boundaries giúp thoát khỏi Kiosk Mode an toàn.",
+        "Thiết kế lại luồng phân quyền Windows (UAC): Hoạt động hoàn toàn dưới quyền người dùng.",
+        "Sửa dứt điểm lỗi tràn RAM rò rỉ bộ nhớ khi nghe nhạc Lofi.",
+        "Cơ chế chống gian lận mới: Khóa API nội bộ chặn hack giờ chơi (Study-to-Earn).",
+        "Thay đổi ID của Cơ sở dữ liệu SQLite chống sập khi spam phím."
       ],
       "files": {
         "installer": {
@@ -37,13 +37,13 @@
       "tag": "v1.1.0",
       "published_at": "2026-09-17",
       "is_latest": false,
-      "title": "B?n Ph�t H�nh v1.1.0",
-      "summary": "�?i tu to�n di?n thi?t k? Cosmos Glassmorphism, t�ch h?p Heatmap 365 ng�y v� Focus Room Lofi.",
+      "title": "Bản Phát Hành v1.1.0",
+      "summary": "Đại tu toàn diện thiết kế Cosmos Glassmorphism, tích hợp Heatmap 365 ngày và Focus Room Lofi.",
       "notes": [
-        "�?i tu giao di?n to�n di?n v?i thi?t k? Cosmos Glassmorphism.",
-        "T�ch h?p m�n h�nh Dashboard Heatmap 365 ng�y.",
-        "T�ch h?p m�n h�nh Focus Room v?i nh?c Lofi.",
-        "T�ch h?p m�n h�nh Typing Challenge ch?m di?m theo th?i gian th?c."
+        "Đại tu giao diện toàn diện với thiết kế Cosmos Glassmorphism.",
+        "Tích hợp màn hình Dashboard Heatmap 365 ngày.",
+        "Tích hợp màn hình Focus Room với nhạc Lofi.",
+        "Tích hợp màn hình Typing Challenge chấm điểm theo thời gian thực."
       ],
       "files": {
         "installer": {
@@ -65,11 +65,11 @@
       "tag": "v1.0.0",
       "published_at": "2026-09-16",
       "is_latest": false,
-      "title": "B?n Ph�t H�nh Kh?i �?u v1.0.0",
-      "summary": "Phi�n b?n ch�nh th?c d?u ti�n tr�n n?n t?ng Rust & Tauri v2 v?i ki?n tr�c b?o v? h? th?ng da t?ng.",
+      "title": "Bản Phát Hành Khởi Đầu v1.0.0",
+      "summary": "Phiên bản chính thức đầu tiên trên nền tảng Rust & Tauri v2 với kiến trúc bảo vệ hệ thống đa tầng.",
       "notes": [
-        "Phi�n b?n v1.0.0 Ch�nh Th?c v?i ki?n tr�c Rust & Tauri t?i uu h�a b? nh? RAM.",
-        "Ch? d? kh�a c?ng ?ng d?ng (Kiosk Mode) v� hi?u h�a Alt+Tab v� Windows Key."
+        "Phiên bản v1.0.0 Chính Thức với kiến trúc Rust & Tauri tối ưu hóa bộ nhớ RAM.",
+        "Chế độ khóa cứng ứng dụng (Kiosk Mode) vô hiệu hóa Alt+Tab và Windows Key."
       ],
       "files": {
         "installer": {
