@@ -141,6 +141,16 @@ pub struct FocusSessionResult {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct StudyRewardResult {
+    pub success: bool,
+    pub added_quota_minutes: u32,
+    pub new_daily_quota_minutes: u32,
+    pub xp_earned: u32,
+    pub message: String,
+}
+
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct TypingChallenge {
     pub id: String,
     pub text: String,
@@ -196,6 +206,10 @@ pub struct AppConfig {
     pub daily_quota_minutes: u32,
     pub quota_used_seconds: u32,
     pub quota_last_reset_date: String,
+    
+    // Study-to-Earn Conversion Settings
+    pub study_minutes_required: u32,
+    pub reward_quota_minutes: u32,
     
     // R1: Hardcore Mode
     pub hardcore_until: Option<i64>,
@@ -253,6 +267,8 @@ impl Default for AppConfig {
             daily_quota_minutes: 60,
             quota_used_seconds: 0,
             quota_last_reset_date: "".to_string(),
+            study_minutes_required: 60,
+            reward_quota_minutes: 15,
             hardcore_until: None,
             daily_stats: HashMap::new(),
             total_focus_hours: 0,
@@ -286,8 +302,11 @@ mod tests {
         assert_eq!(config.schedule.end_time, "17:00");
         assert_eq!(config.schedule.days_of_week, vec![1, 2, 3, 4, 5]);
         assert!(config.daily_history.is_empty());
-        assert_eq!(config.user_profile.level, 28);
-        assert_eq!(config.user_profile.title, "Stargazer");
+        assert_eq!(config.daily_quota_minutes, 60);
+        assert_eq!(config.study_minutes_required, 60);
+        assert_eq!(config.reward_quota_minutes, 15);
+        assert_eq!(config.user_profile.level, 1);
+        assert_eq!(config.user_profile.title, "Novice");
         assert!(config.focus_sessions.is_empty());
         assert!(config.typing_scores.is_empty());
     }
@@ -307,7 +326,10 @@ mod tests {
         assert!(config.daily_history.is_empty());
         assert_eq!(config.violations_count, 3);
         assert!(config.protection_enabled);
-        assert_eq!(config.user_profile.title, "Stargazer");
+        assert_eq!(config.daily_quota_minutes, 60);
+        assert_eq!(config.study_minutes_required, 60);
+        assert_eq!(config.reward_quota_minutes, 15);
+        assert_eq!(config.user_profile.title, "Novice");
     }
 
     #[test]
@@ -369,4 +391,31 @@ mod tests {
         assert_eq!(deserialized.typing_scores.len(), 1);
         assert_eq!(deserialized.heatmap_days.get("2026-09-17"), Some(&4));
     }
+
+    #[test]
+    fn test_study_reward_config_serialization() {
+        let mut config = AppConfig::default();
+        config.study_minutes_required = 90;
+        config.reward_quota_minutes = 20;
+
+        let json = serde_json::to_string(&config).expect("Must serialize");
+        let deserialized: AppConfig = serde_json::from_str(&json).expect("Must deserialize");
+        assert_eq!(deserialized.study_minutes_required, 90);
+        assert_eq!(deserialized.reward_quota_minutes, 20);
+
+        let reward_res = StudyRewardResult {
+            success: true,
+            added_quota_minutes: 20,
+            new_daily_quota_minutes: 80,
+            xp_earned: 360,
+            message: "Hoàn thành bài thu hoạch!".to_string(),
+        };
+        let res_json = serde_json::to_string(&reward_res).expect("Must serialize result");
+        let res_deserialized: StudyRewardResult = serde_json::from_str(&res_json).expect("Must deserialize result");
+        assert!(res_deserialized.success);
+        assert_eq!(res_deserialized.added_quota_minutes, 20);
+        assert_eq!(res_deserialized.new_daily_quota_minutes, 80);
+        assert_eq!(res_deserialized.xp_earned, 360);
+    }
 }
+

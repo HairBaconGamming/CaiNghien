@@ -2,7 +2,7 @@ use tauri::State;
 use chrono::{Datelike, Duration, Local, NaiveDate};
 use crate::db::DbState;
 use crate::models::{
-    FocusSessionResult, HeatmapData, HeatmapDay, TypingChallenge,
+    FocusSessionResult, HeatmapData, HeatmapDay, StudyRewardResult, TypingChallenge,
     TypingScore, TypingScoreInput, TypingScoreResult, UserProfile,
 };
 
@@ -187,6 +187,101 @@ pub fn get_typing_scores(state: State<'_, DbState>) -> Result<Vec<TypingScore>, 
     crate::db::get_typing_scores(&conn)
 }
 
+#[tauri::command]
+pub fn reset_all_data(state: State<'_, DbState>) -> Result<(), String> {
+    let mut conn = state.0.lock().map_err(|_| "Database lock poisoned".to_string())?;
+    crate::db::reset_all_data(&mut conn)
+}
+
+/// Helper to validate proof-of-work text length (at least 100 words).
+pub fn validate_study_report_text(summary_text: &str) -> Result<usize, String> {
+    let word_count = summary_text.split_whitespace().count();
+    if word_count < 100 {
+        Err(format!(
+            "Báo cáo chưa đạt yêu cầu độ dài. Yêu cầu tối thiểu 100 từ, hiện có {} từ.",
+            word_count
+        ))
+    } else {
+        Ok(word_count)
+    }
+}
+
+/// Helper to calculate proportional recreation quota from study duration.
+pub fn calculate_study_reward_quota(
+    study_duration_minutes: u32,
+    study_minutes_required: u32,
+    reward_quota_minutes: u32,
+) -> u32 {
+    let req = if study_minutes_required == 0 { 60 } else { study_minutes_required };
+    let reward_unit = if reward_quota_minutes == 0 { 15 } else { reward_quota_minutes };
+    let quota = ((study_duration_minutes as u128) * (reward_unit as u128)) / (req as u128);
+    quota.min(u32::MAX as u128) as u32
+}
+
+#[tauri::command]
+pub fn submit_study_report(
+    app: tauri::AppHandle,
+    state: State<'_, crate::config::ConfigState>,
+    db_state: State<'_, DbState>,
+    summary_text: String,
+    study_duration_minutes: u32,
+) -> Result<StudyRewardResult, String> {
+    // 1. Validate proof-of-work: minimum 100 words
+    validate_study_report_text(&summary_text)?;
+
+    // 2. Lock config and calculate earned quota
+    let (reward_quota, new_total_quota) = {
+        let mut config_data = state.0.lock().map_err(|_| "Config lock poisoned".to_string())?;
+        let earned = calculate_study_reward_quota(
+            study_duration_minutes,
+            config_data.study_minutes_required,
+            config_data.reward_quota_minutes,
+        );
+
+        config_data.daily_quota_minutes = config_data.daily_quota_minutes.saturating_add(earned);
+        crate::config::save_config(&app, &config_data)?;
+        (earned, config_data.daily_quota_minutes)
+    };
+
+    // 3. Record session in SQLite database (awards XP and updates heatmap)
+    let xp_earned = if let Ok(mut conn) = db_state.0.lock() {
+        let res = crate::db::record_focus_session(&mut conn, study_duration_minutes, "study_to_earn".to_string());
+        res.map(|r| r.xp_earned).unwrap_or(study_duration_minutes.saturating_mul(4))
+    } else {
+        study_duration_minutes.saturating_mul(4)
+    };
+
+    Ok(StudyRewardResult {
+        success: true,
+        added_quota_minutes: reward_quota,
+        new_daily_quota_minutes: new_total_quota,
+        xp_earned,
+        message: format!("Hoàn thành bài thu hoạch! Đã cộng {} phút vào Quota giải trí.", reward_quota),
+    })
+}
+
+#[tauri::command]
+pub fn add_study_reward_quota(
+    app: tauri::AppHandle,
+    state: State<'_, crate::config::ConfigState>,
+    minutes: Option<u32>,
+) -> Result<u32, String> {
+    let mut config_data = state.0.lock().map_err(|_| "Config lock poisoned".to_string())?;
+    let reward = minutes.unwrap_or_else(|| {
+        if config_data.reward_quota_minutes == 0 {
+            15
+        } else {
+            config_data.reward_quota_minutes
+        }
+    });
+    if reward == 0 {
+        return Err("Phần thưởng phút phải lớn hơn 0.".to_string());
+    }
+    config_data.daily_quota_minutes = config_data.daily_quota_minutes.saturating_add(reward);
+    crate::config::save_config(&app, &config_data)?;
+    Ok(config_data.daily_quota_minutes)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -195,15 +290,15 @@ mod tests {
     fn test_typing_challenge_selection() {
         let easy = get_typing_challenge_text(Some("easy".to_string())).unwrap();
         assert_eq!(easy.difficulty, "easy");
-        assert!(easy.text.contains("star-stuff"));
+        assert!(easy.text.contains("vì sao"));
 
         let medium = get_typing_challenge_text(None).unwrap();
         assert_eq!(medium.difficulty, "medium");
-        assert!(medium.text.contains("quick brown fox"));
+        assert!(medium.text.contains("Con cáo nâu"));
 
         let hard = get_typing_challenge_text(Some("hard".to_string())).unwrap();
         assert_eq!(hard.difficulty, "hard");
-        assert!(hard.text.contains("event horizon"));
+        assert!(hard.text.contains("chân trời sự kiện"));
     }
 
     #[test]
@@ -227,7 +322,7 @@ mod tests {
         let heatmap = compute_heatmap_data_from_config(&config);
         assert_eq!(heatmap.days.len(), 365);
         assert!(heatmap.total_contributions > 0);
-        assert!(heatmap.current_streak >= 128);
+        assert!(heatmap.longest_streak > 0);
         assert!(heatmap.activity_rate > 50.0);
     }
 
@@ -242,10 +337,42 @@ mod tests {
         assert_eq!(today_day.count, 10);
         assert_eq!(today_day.level, 3);
     }
-}
 
-#[tauri::command]
-pub fn reset_all_data(state: State<'_, DbState>) -> Result<(), String> {
-    let mut conn = state.0.lock().map_err(|_| "Database lock poisoned".to_string())?;
-    crate::db::reset_all_data(&mut conn)
+    #[test]
+    fn test_validate_study_report_word_count() {
+        let short_text = "Đây là một đoạn văn ngắn không đủ một trăm từ.";
+        let err = validate_study_report_text(short_text);
+        assert!(err.is_err());
+        assert!(err.unwrap_err().contains("Yêu cầu tối thiểu 100 từ"));
+
+        let valid_text = (0..105).map(|i| format!("từ{}", i)).collect::<Vec<_>>().join(" ");
+        let ok = validate_study_report_text(&valid_text);
+        assert!(ok.is_ok());
+        assert_eq!(ok.unwrap(), 105);
+    }
+
+    #[test]
+    fn test_calculate_study_reward_quota() {
+        // Default ratio 60m study -> 15m quota
+        assert_eq!(calculate_study_reward_quota(60, 60, 15), 15);
+        assert_eq!(calculate_study_reward_quota(30, 60, 15), 7);
+        assert_eq!(calculate_study_reward_quota(120, 60, 15), 30);
+        assert_eq!(calculate_study_reward_quota(0, 60, 15), 0);
+
+        // Custom ratio 45m study -> 20m quota
+        assert_eq!(calculate_study_reward_quota(45, 45, 20), 20);
+        assert_eq!(calculate_study_reward_quota(90, 45, 20), 40);
+
+        // Zero safety fallbacks
+        assert_eq!(calculate_study_reward_quota(60, 0, 0), 15);
+
+        // Precise integer arithmetic eliminating IEEE-754 precision loss
+        assert_eq!(calculate_study_reward_quota(245, 60, 60), 245);
+        assert_eq!(calculate_study_reward_quota(115, 45, 45), 115);
+        assert_eq!(calculate_study_reward_quota(230, 90, 45), 115);
+        assert_eq!(calculate_study_reward_quota(35, 25, 45), 63);
+
+        // Large number overflow resistance
+        assert_eq!(calculate_study_reward_quota(u32::MAX, 1, 1), u32::MAX);
+    }
 }

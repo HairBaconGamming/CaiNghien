@@ -1061,26 +1061,28 @@ mod tests {
 
         // Check user profile
         let profile = get_user_profile(&conn).unwrap();
-        assert_eq!(profile.username, "Alex Chen");
-        assert_eq!(profile.level, 28);
-        assert_eq!(profile.streak, 128);
+        assert_eq!(profile.username, "User");
+        assert_eq!(profile.level, 1);
+        assert_eq!(profile.streak, 0);
 
         // Check heatmap
         let heatmap = get_heatmap_data(&conn).unwrap();
         assert_eq!(heatmap.days.len(), 365);
-        assert_eq!(heatmap.total_contributions, 4185);
-        assert_eq!(heatmap.current_streak, 128);
-        assert_eq!(heatmap.longest_streak, 156);
-        assert_eq!(heatmap.activity_rate, 85.0);
+        assert_eq!(heatmap.total_contributions, 0);
+        assert_eq!(heatmap.current_streak, 0);
+        assert_eq!(heatmap.longest_streak, 0);
+        assert_eq!(heatmap.activity_rate, 0.0);
 
         // Record focus session
         let res = record_focus_session(&mut conn, 25, "deep_work".into()).unwrap();
         assert!(res.success);
         assert_eq!(res.xp_earned, 100);
 
-        // Verify profile updated
+        // Verify profile updated (100 XP leveled up from LVL 1 to LVL 2, 0 rollover XP, streak 1)
         let profile2 = get_user_profile(&conn).unwrap();
-        assert_eq!(profile2.current_xp, 14450);
+        assert_eq!(profile2.level, 2);
+        assert_eq!(profile2.current_xp, 0);
+        assert_eq!(profile2.streak, 1);
 
         // Save typing score
         let typing_res = save_typing_score(

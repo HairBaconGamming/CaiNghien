@@ -128,9 +128,22 @@ permissions = [
   "allow-save-typing-score",
   "allow-get-typing-scores",
   "allow-reset-all-data",
+  "allow-submit-study-report",
+  "allow-add-study-reward-quota",
 ]
 
 [[permission]]
 identifier = "allow-reset-all-data"
 description = "Allows the reset_all_data command"
 commands.allow = ["reset_all_data"]
+
+[[permission]]
+identifier = "allow-submit-study-report"
+description = "Allows the submit_study_report command"
+commands.allow = ["submit_study_report"]
+
+[[permission]]
+identifier = "allow-add-study-reward-quota"
+description = "Allows the add_study_reward_quota command"
+commands.allow = ["add_study_reward_quota"]
+

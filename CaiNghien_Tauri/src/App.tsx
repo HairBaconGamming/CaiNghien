@@ -10,7 +10,8 @@ import {
   Cpu,
   Sparkles,
   RefreshCw,
-  Lock
+  Lock,
+  GraduationCap
 } from 'lucide-react';
 import { check } from '@tauri-apps/plugin-updater';
 import { relaunch } from '@tauri-apps/plugin-process';
@@ -26,8 +27,16 @@ export default function App() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [appConfig, setAppConfig] = useState<AppConfig | null>(null);
   const [blockedDomainsInput, setBlockedDomainsInput] = useState('');
+  const [studyMinutesInput, setStudyMinutesInput] = useState<number | string>(60);
+  const [rewardQuotaInput, setRewardQuotaInput] = useState<number | string>(15);
   const [toasts, setToasts] = useState<{id: string, type: ToastType, message: string}[]>([]);
   const [confirmDialog, setConfirmDialog] = useState<{title: string, message: string, onConfirm: () => void} | null>(null);
+
+  const isRatioValid = useMemo(() => {
+    const req = Number(studyMinutesInput);
+    const reward = Number(rewardQuotaInput);
+    return Number.isInteger(req) && req >= 1 && Number.isInteger(reward) && reward >= 1;
+  }, [studyMinutesInput, rewardQuotaInput]);
 
   const addToast = useCallback((type: ToastType, message: string) => {
     const id = Math.random().toString(36).substring(7);
@@ -44,6 +53,8 @@ export default function App() {
       if (c) {
         setAppConfig(c);
         setBlockedDomainsInput(c.blocked_domains.join('\n'));
+        setStudyMinutesInput(c.study_minutes_required ?? 60);
+        setRewardQuotaInput(c.reward_quota_minutes ?? 15);
       }
     } catch (e) {
       console.warn('Failed to load app config:', e);
@@ -62,6 +73,20 @@ export default function App() {
       addToast('error', 'Lưu cài đặt thất bại: ' + e);
       refreshConfig();
     }
+  };
+
+  const handleSaveStudyRatio = () => {
+    const req = Number(studyMinutesInput);
+    const reward = Number(rewardQuotaInput);
+    if (!isRatioValid) {
+      addToast('error', 'Thời gian học yêu cầu và thưởng Quota phải là số nguyên dương lớn hơn 0');
+      return;
+    }
+    updateConfig({
+      study_minutes_required: req,
+      reward_quota_minutes: reward,
+    });
+    addToast('success', 'Đã lưu cấu hình Study-to-Earn thành công!');
   };
 
   const [dashboardRefreshTrigger, setDashboardRefreshTrigger] = useState(0);
@@ -344,6 +369,77 @@ export default function App() {
                            Lưu tên miền
                         </button>
                       </div>
+                    </div>
+                  </div>
+
+                  {/* Study-to-Earn Conversion Ratio Settings Card */}
+                  <div className="glass-panel rounded-2xl p-6 border border-white/10">
+                    <div className="flex items-center gap-2 mb-4">
+                      <GraduationCap className="w-5 h-5 text-amber-400" />
+                      <h3 className="text-base font-bold text-white">Quy đổi Study-to-Earn (Học để kiếm giờ chơi)</h3>
+                    </div>
+                    <div className="space-y-4">
+                      <div>
+                        <p className="text-xs text-slate-400">
+                          Học tập trung và nộp bài thu hoạch để nhận thời gian giải trí tự do vào Quota hàng ngày.
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-xs font-semibold text-slate-200 block mb-1.5">
+                            Thời gian học yêu cầu (phút)
+                          </label>
+                          <input
+                            type="number"
+                            min={1}
+                            value={studyMinutesInput}
+                            onChange={(e) => setStudyMinutesInput(e.target.value)}
+                            disabled={settingsLocked}
+                            placeholder="60"
+                            className="w-full bg-slate-900/50 border border-white/10 rounded-lg p-2 text-sm text-white focus:outline-none focus:border-amber-400 disabled:opacity-50"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-xs font-semibold text-slate-200 block mb-1.5">
+                            Thời gian thưởng Quota (phút)
+                          </label>
+                          <input
+                            type="number"
+                            min={1}
+                            value={rewardQuotaInput}
+                            onChange={(e) => setRewardQuotaInput(e.target.value)}
+                            disabled={settingsLocked}
+                            placeholder="15"
+                            className="w-full bg-slate-900/50 border border-white/10 rounded-lg p-2 text-sm text-white focus:outline-none focus:border-amber-400 disabled:opacity-50"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Real-time conversion preview summary & validation */}
+                      <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                        {isRatioValid ? (
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-slate-300">Quy đổi:</span>
+                            <span className="font-bold text-amber-300 font-mono">
+                              Học {studyMinutesInput} phút = Nhận {rewardQuotaInput} phút chơi
+                            </span>
+                          </div>
+                        ) : (
+                          <p className="text-xs text-rose-400 font-medium">
+                            ⚠️ Thời gian học yêu cầu và thưởng Quota phải là số nguyên dương lớn hơn hoặc bằng 1.
+                          </p>
+                        )}
+                      </div>
+
+                      <button
+                        disabled={settingsLocked || !isRatioValid}
+                        onClick={handleSaveStudyRatio}
+                        className="w-full py-2 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-bold text-xs uppercase tracking-wider transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-[0_0_15px_rgba(245,158,11,0.2)]"
+                      >
+                        Lưu tỷ lệ quy đổi
+                      </button>
                     </div>
                   </div>
 

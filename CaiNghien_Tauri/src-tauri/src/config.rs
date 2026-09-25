@@ -40,13 +40,13 @@ pub fn load_config_from_path(path: &std::path::Path) -> AppConfig {
     if path.exists() {
         if let Ok(content) = fs::read_to_string(path) {
             if let Ok(parsed) = serde_json::from_str::<serde_json::Value>(&content) {
-                if let Some(data) = parsed.get("data") {
+                if let Some(data) = parsed.get("data").filter(|d| d.is_object()) {
                     if let Ok(c) = serde_json::from_value(data.clone()) {
                         config = c;
                     }
+                } else if let Ok(c) = serde_json::from_value::<AppConfig>(parsed) {
+                    config = c;
                 }
-            } else if let Ok(c) = serde_json::from_str::<AppConfig>(&content) {
-                config = c;
             }
         }
     }
@@ -166,6 +166,7 @@ pub fn save_app_config(
     }
     
     new_config.violations_count = config.violations_count; // Preserve violations count
+    new_config.daily_quota_minutes = config.daily_quota_minutes.max(new_config.daily_quota_minutes);
     new_config.temporary_unlock_until = config.temporary_unlock_until;
     new_config.quota_used_seconds = config.quota_used_seconds;
     new_config.quota_last_reset_date = config.quota_last_reset_date.clone();
@@ -180,6 +181,12 @@ pub fn save_app_config(
     }
     if new_config.heatmap_days.is_empty() && !config.heatmap_days.is_empty() {
         new_config.heatmap_days = config.heatmap_days.clone();
+    }
+    if new_config.study_minutes_required == 0 {
+        new_config.study_minutes_required = 60;
+    }
+    if new_config.reward_quota_minutes == 0 {
+        new_config.reward_quota_minutes = 15;
     }
     *config = new_config.clone();
     save_config(&app, &config)?;
@@ -235,6 +242,32 @@ mod tests {
         assert_eq!(loaded.level, 3);
         assert_eq!(loaded.xp, 120);
         assert_eq!(loaded.streak, 5);
+
+        let _ = fs::remove_dir_all(&tmp_dir);
+    }
+
+    #[test]
+    fn test_load_config_raw_legacy_v1_without_wrapper() {
+        let tmp_dir = std::env::temp_dir().join(format!("cainghien_legacy_{}", std::process::id()));
+        let _ = fs::create_dir_all(&tmp_dir);
+        let path = tmp_dir.join("legacy_config.json");
+
+        let legacy_json = r#"{
+            "protection_enabled": true,
+            "blocked_domains": ["facebook.com", "youtube.com"],
+            "violations_count": 42,
+            "daily_quota_minutes": 120
+        }"#;
+        fs::write(&path, legacy_json).expect("Write legacy json");
+
+        let loaded = load_config_from_path(&path);
+        assert!(loaded.protection_enabled);
+        assert_eq!(loaded.violations_count, 42);
+        assert_eq!(loaded.daily_quota_minutes, 120);
+        assert_eq!(loaded.blocked_domains, vec!["facebook.com", "youtube.com"]);
+        // Ensure defaults for study ratio are filled
+        assert_eq!(loaded.study_minutes_required, 60);
+        assert_eq!(loaded.reward_quota_minutes, 15);
 
         let _ = fs::remove_dir_all(&tmp_dir);
     }

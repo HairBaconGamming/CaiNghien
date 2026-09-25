@@ -10,12 +10,15 @@ import {
   Play, 
   AlertTriangle, 
   CheckCircle2, 
-  Sparkles
+  Sparkles,
+  GraduationCap
 } from 'lucide-react';
 
 import { TimerRing } from './TimerRing';
 import { MotivationalQuote } from './MotivationalQuote';
 import { LofiPlayer } from './LofiPlayer';
+import { StudyHarvestReportModal } from './StudyHarvestReportModal';
+import { api, AppConfig, StudyRewardResult } from '../../services/api';
 
 export interface FocusSessionResult {
   success?: boolean;
@@ -48,6 +51,34 @@ export const FocusRoomScreen: React.FC<FocusRoomScreenProps> = ({
   const [isRunning, setIsRunning] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Study Mode & Harvest Modal States
+  const [isStudyMode, setIsStudyMode] = useState<boolean>(false);
+  const [showHarvestModal, setShowHarvestModal] = useState<boolean>(false);
+  const [appConfig, setAppConfig] = useState<AppConfig | null>(null);
+
+  // Load config for conversion ratios
+  useEffect(() => {
+    api.getAppConfig().then((c) => {
+      if (c) setAppConfig(c);
+    }).catch(() => {});
+  }, []);
+
+  const studyRequired = appConfig?.study_minutes_required ?? 60;
+  const rewardQuota = appConfig?.reward_quota_minutes ?? 15;
+
+  const rewardForecast = useMemo(() => {
+    const duration = Math.max(0, Math.floor(Number(selectedMinutes)) || 0);
+    const req = Math.max(1, Math.floor(Number(studyRequired)) || 60);
+    const reward = Math.max(0, Math.floor(Number(rewardQuota)) || 15);
+    return Math.floor((duration / req) * reward);
+  }, [selectedMinutes, studyRequired, rewardQuota]);
+
+  const minMinutesForOneReward = useMemo(() => {
+    const req = Math.max(1, Math.floor(Number(studyRequired)) || 60);
+    const reward = Math.max(0, Math.floor(Number(rewardQuota)) || 15);
+    return reward > 0 ? Math.ceil(req / reward) : 0;
+  }, [studyRequired, rewardQuota]);
 
   // Gamification & Completion Results
   const [xpEarned, setXpEarned] = useState(0);
@@ -202,6 +233,14 @@ export const FocusRoomScreen: React.FC<FocusRoomScreenProps> = ({
   // Handle Session Completion
   const handleSessionCompletion = async () => {
     setIsRunning(false);
+
+    // Study Mode interceptor: do NOT show standard celebration modal
+    if (isStudyMode) {
+      playVictoryChime();
+      setShowHarvestModal(true);
+      return;
+    }
+
     setIsCompleted(true);
     playVictoryChime();
 
@@ -232,6 +271,26 @@ export const FocusRoomScreen: React.FC<FocusRoomScreenProps> = ({
     }
 
     onSessionComplete?.(selectedMinutes, earned);
+  };
+
+  // Handle Harvest Report Submission Success
+  const handleHarvestSuccess = async (result: StudyRewardResult) => {
+    setShowHarvestModal(false);
+    playVictoryChime();
+
+    if (result.xp_earned) {
+      setXpEarned(result.xp_earned);
+    }
+    setCurrentStreak((prev) => prev + 1);
+
+    try {
+      await invoke('exit_focus_room', { completed: true, minutes_elapsed: selectedMinutes });
+    } catch {
+      // Fallback
+    }
+
+    onSessionComplete?.(selectedMinutes, result.xp_earned);
+    handleReset();
   };
 
   // Toggle Play / Pause
@@ -414,6 +473,62 @@ export const FocusRoomScreen: React.FC<FocusRoomScreenProps> = ({
       {/* 3. CENTER REGION: TIMER RING & MOTIVATIONAL QUOTE                         */}
       {/* ------- */}
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center -mt-4">
+        {/* Mode Selector Segmented Toggle Pills */}
+        <div className="mb-5 flex flex-col items-center gap-2.5 pointer-events-auto">
+          <div 
+            className="flex items-center p-1 rounded-2xl border border-white/10 backdrop-blur-md shadow-lg"
+            style={{ background: 'rgba(15, 23, 42, 0.7)' }}
+          >
+            <button
+              type="button"
+              onClick={() => !isRunning && setIsStudyMode(false)}
+              disabled={isRunning}
+              title={isRunning ? "Đang chạy phiên tập trung - Không thể đổi chế độ" : "Chuyển sang chế độ Tập trung sâu"}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                !isStudyMode
+                  ? 'bg-cyan-500/25 text-cyan-300 border border-cyan-400/40 shadow-[0_0_15px_rgba(0,240,255,0.25)]'
+                  : 'text-slate-400 hover:text-slate-200'
+              } ${isRunning ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
+            >
+              <Sparkles size={14} className={!isStudyMode ? 'text-cyan-400' : 'text-slate-400'} />
+              <span>Tập trung sâu</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => !isRunning && setIsStudyMode(true)}
+              disabled={isRunning}
+              title={isRunning ? "Đang chạy phiên tập trung - Không thể đổi chế độ" : "Chuyển sang Chế độ Học tập"}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                isStudyMode
+                  ? 'bg-amber-500/25 text-amber-300 border border-amber-400/40 shadow-[0_0_15px_rgba(245,158,11,0.25)]'
+                  : 'text-slate-400 hover:text-slate-200'
+              } ${isRunning ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
+            >
+              <GraduationCap size={15} className={isStudyMode ? 'text-amber-400' : 'text-slate-400'} />
+              <span>Chế độ Học tập (Study-to-Earn)</span>
+            </button>
+          </div>
+
+          {/* Dynamic Real-time Reward Forecast Badge */}
+          {isStudyMode && (
+            <div className="flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-medium bg-amber-500/10 border border-amber-500/30 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.15)] animate-fade-in">
+              <GraduationCap size={14} className="shrink-0 text-amber-400" />
+              <span>
+                {rewardForecast > 0 ? (
+                  <>
+                    🎓 Dự kiến nhận: <strong className="font-bold text-amber-200 font-mono">+{rewardForecast} phút</strong> giải trí khi hoàn thành (Tỷ lệ: {studyRequired}p học = {rewardQuota}p chơi)
+                  </>
+                ) : (
+                  <>
+                    ⚠️ Dự kiến nhận: 0 phút giải trí (Cần học tối thiểu {minMinutesForOneReward} phút để nhận 1 phút thưởng)
+                  </>
+                )}
+              </span>
+            </div>
+          )}
+        </div>
+
         {/* Central Circular Timer Ring */}
         <TimerRing
           secondsRemaining={secondsRemaining}
@@ -619,6 +734,19 @@ export const FocusRoomScreen: React.FC<FocusRoomScreenProps> = ({
             </div>
           </div>
         </div>
+      )}
+
+      {/* ------- */}
+      {/* 7. STUDY HARVEST REPORT MODAL (Proof of Work)                               */}
+      {/* ------- */}
+      {showHarvestModal && (
+        <StudyHarvestReportModal
+          isOpen={showHarvestModal}
+          studyDurationMinutes={selectedMinutes}
+          studyRequired={studyRequired}
+          rewardQuota={rewardQuota}
+          onSuccess={handleHarvestSuccess}
+        />
       )}
     </div>
   );

@@ -348,7 +348,9 @@ pub fn run() {
             commands::get_typing_challenge_text,
             commands::save_typing_score,
             commands::get_typing_scores,
-            commands::reset_all_data
+            commands::reset_all_data,
+            commands::submit_study_report,
+            commands::add_study_reward_quota
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

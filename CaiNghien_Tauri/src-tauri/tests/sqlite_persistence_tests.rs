@@ -34,9 +34,9 @@ fn test_sqlite_disk_lifecycle_and_non_ram_persistence() {
 
         // Verify initial seeded profile
         let initial_profile = get_user_profile(&conn).expect("Must read initial seeded profile");
-        assert_eq!(initial_profile.username, "Alex Chen");
-        assert_eq!(initial_profile.level, 28);
-        assert_eq!(initial_profile.streak, 128);
+        assert_eq!(initial_profile.username, "User");
+        assert_eq!(initial_profile.level, 1);
+        assert_eq!(initial_profile.streak, 0);
 
         // Update profile with rich Vietnamese Unicode characters
         let mut custom_profile = initial_profile.clone();
@@ -45,6 +45,7 @@ fn test_sqlite_disk_lifecycle_and_non_ram_persistence() {
         custom_profile.title = "Thiền Sư Vũ Trụ".to_string();
         custom_profile.level = 30;
         custom_profile.current_xp = 12500;
+        custom_profile.next_level_xp = 20000;
         custom_profile.streak = 150;
         update_user_profile(&conn, &custom_profile).expect("Updating profile must succeed");
 
@@ -120,7 +121,7 @@ fn test_sqlite_disk_lifecycle_and_non_ram_persistence() {
         // Verify heatmap data persisted and includes today's contributions
         let heatmap = get_heatmap_data(&conn).expect("Must read heatmap data");
         assert_eq!(heatmap.days.len(), 365, "Must retain 365 days window");
-        assert!(heatmap.total_contributions >= 4185, "Total contributions must include seeds and new sessions");
+        assert!(heatmap.total_contributions >= 1, "Total contributions must include seeds and new sessions");
         assert!(heatmap.current_streak >= 128, "Current streak must be preserved");
 
         // Verify focus session was written to focus_sessions table
@@ -226,7 +227,7 @@ fn test_sqlite_adversarial_sql_injection_and_unicode_escaping() {
         // Verify daily_contributions was NOT deleted
         let heatmap = get_heatmap_data(&conn).expect("daily_contributions must be intact");
         assert_eq!(heatmap.days.len(), 365);
-        assert!(heatmap.total_contributions >= 4185);
+        assert_eq!(heatmap.total_contributions, 0);
     }
 
     let _ = fs::remove_dir_all(&temp_dir);

@@ -94,6 +94,25 @@ export interface AppConfig {
     violations: number;
     is_clean: boolean;
   }>;
+  daily_quota_minutes?: number;
+  quota_used_seconds?: number;
+  quota_last_reset_date?: string;
+  study_minutes_required?: number;
+  reward_quota_minutes?: number;
+}
+
+export interface StudyRewardResult {
+  success: boolean;
+  added_quota_minutes: number;
+  new_daily_quota_minutes: number;
+  xp_earned: number;
+  message: string;
+}
+
+export interface QuotaStatus {
+  active: boolean;
+  used_seconds: number;
+  max_seconds: number;
 }
 
 export function isTauriEnvironment(): boolean {
@@ -192,6 +211,42 @@ export async function exitFocusRoom(): Promise<void> {
   return safeInvoke<void>('exit_focus_room', {});
 }
 
+export async function submitStudyReport(
+  summaryText: string,
+  studyDurationMinutes: number
+): Promise<StudyRewardResult> {
+  const result = await safeInvoke<StudyRewardResult>('submit_study_report', {
+    summaryText,
+    studyDurationMinutes,
+    summary_text: summaryText,
+    study_duration_minutes: studyDurationMinutes,
+  });
+  notifyTelemetryUpdate();
+  return result;
+}
+
+export async function addStudyRewardQuota(minutes?: number): Promise<number> {
+  const result = await safeInvoke<number>('add_study_reward_quota', { minutes });
+  notifyTelemetryUpdate();
+  return result;
+}
+
+export async function startQuota(): Promise<void> {
+  return safeInvoke<void>('start_quota', {});
+}
+
+export async function pauseQuota(): Promise<void> {
+  return safeInvoke<void>('pause_quota', {});
+}
+
+export async function getQuotaStatus(): Promise<QuotaStatus> {
+  return safeInvoke<QuotaStatus>('get_quota_status', {});
+}
+
+export async function resetAllData(): Promise<void> {
+  return safeInvoke<void>('reset_all_data', {});
+}
+
 export const api = {
   getHeatmapData,
   getUserProfile,
@@ -204,6 +259,11 @@ export const api = {
   saveAppConfig,
   enterFocusRoom,
   exitFocusRoom,
+  submitStudyReport,
+  addStudyRewardQuota,
+  startQuota,
+  pauseQuota,
+  getQuotaStatus,
   resetAllData,
   isTauriEnvironment,
   onTelemetryUpdate,
@@ -211,8 +271,4 @@ export const api = {
 };
 
 export default api;
-
-export async function resetAllData(): Promise<void> {
-  return safeInvoke<void>('reset_all_data', {});
-}
 
