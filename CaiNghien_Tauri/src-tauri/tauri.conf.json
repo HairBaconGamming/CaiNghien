@@ -13,7 +13,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "COSMOS \u2014 CaiNghi\u1ec7n Desktop Suite",
+        "title": "COSMOS — CaiNghiện Desktop Suite",
         "width": 1280,
         "height": 800,
         "minWidth": 1024,
@@ -39,7 +39,8 @@
     "active": true,
     "createUpdaterArtifacts": true,
     "targets": [
-      "nsis"
+      "nsis",
+      "msi"
     ],
     "windows": {
       "nsis": {
