@@ -1,55 +1,22 @@
 {
-  "latest": {
-    "version": "1.2.0",
-    "published_at": "2026-09-18",
-    "notes": [
-      "Ra mắt tính năng Tự động cập nhật (Auto Updater).",
-      "Sửa lỗi gõ tiếng Việt (VNI/Telex) khi gõ phím.",
-      "Thêm nút tùy chỉnh số phút tập trung.",
-      "Thay đổi Logo ứng dụng phong cách vũ trụ.",
-      "Vá lỗi kẹt tiến trình khi gỡ cài đặt (Uninstall)."
-    ]
-  },
+  "latest": "v1.3.0",
   "releases": [
     {
-      "version": "1.2.0",
-      "tag": "v1.2.0",
-      "published_at": "2026-09-18",
-      "is_latest": true,
-      "title": "Bản Phát Hành Ổn Định v1.2.0",
-      "summary": "Tích hợp tính năng Tự động Cập nhật (Auto Updater), hoàn thiện bộ gõ tiếng Việt trong Thử thách Gõ phím và nâng cấp giao diện Cosmos phong cách vũ trụ.",
+      "version": "v1.3.0",
+      "date": "2026-09-25",
+      "title": "Ban cap nhat Bao mat Tuyet doi & On dinh He thong",
       "notes": [
-        "Ra mắt tính năng Tự động cập nhật (Auto Updater).",
-        "Sửa lỗi gõ tiếng Việt (VNI/Telex) khi gõ phím.",
-        "Thêm nút tùy chỉnh số phút tập trung.",
-        "Thay đổi Logo ứng dụng phong cách vũ trụ.",
-        "Vá lỗi kẹt tiến trình khi gỡ cài đặt (Uninstall)."
+        "Sua hon 30 loi bao mat nghiem trong (duoc bao cao boi he thong Audit Doc lap).",
+        "Trang bi cong nghe React Error Boundaries giup thoat khoi Kiosk Mode an toan.",
+        "Thiet ke lai luong phan quyen Windows (UAC): Hoat dong hoan toan duoi quyen nguoi dung.",
+        "Sua dut diem loi tran RAM ro ri bo nho khi nghe nhac Lofi.",
+        "Co che chong gian lan moi: Khoa API noi bo chan hack gio choi (Study-to-Earn).",
+        "Thay doi ID cua Co so du lieu SQLite chong sap khi spam phim."
       ],
-      "categorized_notes": {
-        "features": [
-          "Tự động cập nhật (Auto Updater): Ứng dụng tự động kiểm tra, xác thực chữ ký số Ed25519 và cập nhật nhanh chóng.",
-          "Tùy chỉnh thời gian tập trung: Cho phép đặt linh hoạt thời gian phiên Focus theo nhu cầu cá nhân."
-        ],
-        "improvements": [
-          "Logo phong cách vũ trụ: Thiết kế biểu tượng Cosmos Gradient mới đồng bộ cùng chủ đề ứng dụng.",
-          "Tối ưu bộ nhớ: Giảm thiểu thêm mức tiêu thụ CPU và RAM khi chạy chế độ nền."
-        ],
-        "fixes": [
-          "Sửa triệt để lỗi xung đột gõ tiếng Việt (Telex / VNI) trong màn hình Mindfulness Typing Challenge.",
-          "Khắc phục sự cố tiến trình nền không giải phóng khi thực hiện gỡ cài đặt (Uninstall)."
-        ]
-      },
-      "files": {
-        "installer": {
-          "filename": "cainghien_tauri_1.2.0_x64-setup.exe",
-          "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.2.0/cainghien_tauri_1.2.0_x64-setup.exe",
-          "direct_url": "/downloads/1.2.0/CaiNghien_Tauri_Setup.exe",
-          "sha256": "481c8bb0700499c520b32f41f4be6b46d45c570dccb6db9242a66fc65a791b05",
-          "size_bytes": 6426534,
-          "size_formatted": "6.1 MB",
-          "platform": "Windows 10 / 11 (64-bit)"
-        }
-      }
+      "isStable": true,
+      "downloadUrl": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.0/cainghien_tauri_1.3.0_x64-setup.exe",
+      "fileSize": "10 MB",
+      "hash": "SHA-256"
     },
     {
       "version": "1.1.0",
