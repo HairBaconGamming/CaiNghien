@@ -2,64 +2,59 @@
   "latest": "v1.3.0",
   "releases": [
     {
-      "version": "v1.3.0",
-      "date": "2026-09-25",
-      "title": "Ban cap nhat Bao mat Tuyet doi & On dinh He thong",
+      "version": "1.3.0",
+      "tag": "v1.3.0",
+      "published_at": "2026-09-25",
+      "is_latest": true,
+      "title": "B?n c?p nh?t B?o m?t Tuy?t d?i & ?n d?nh H? th?ng v1.3.0",
+      "summary": "S?a hon 30 l?i b?o m?t nghi�m tr?ng, t�ch h?p React Error Boundaries, t?i uu RAM Web Audio v� si?t ch?t ph�n quy?n h? th?ng.",
       "notes": [
-        "Sua hon 30 loi bao mat nghiem trong (duoc bao cao boi he thong Audit Doc lap).",
-        "Trang bi cong nghe React Error Boundaries giup thoat khoi Kiosk Mode an toan.",
-        "Thiet ke lai luong phan quyen Windows (UAC): Hoat dong hoan toan duoi quyen nguoi dung.",
-        "Sua dut diem loi tran RAM ro ri bo nho khi nghe nhac Lofi.",
-        "Co che chong gian lan moi: Khoa API noi bo chan hack gio choi (Study-to-Earn).",
-        "Thay doi ID cua Co so du lieu SQLite chong sap khi spam phim."
+        "S?a hon 30 l?i b?o m?t nghi�m tr?ng (du?c b�o c�o b?i h? th?ng Audit �?c l?p).",
+        "Trang b? c�ng ngh? React Error Boundaries gi�p tho�t kh?i Kiosk Mode an to�n.",
+        "Thi?t k? l?i lu?ng ph�n quy?n Windows (UAC): Ho?t d?ng ho�n to�n du?i quy?n ngu?i d�ng.",
+        "S?a d?t di?m l?i tr�n RAM r� r? b? nh? khi nghe nh?c Lofi.",
+        "Co ch? ch?ng gian l?n m?i: Kh�a API n?i b? ch?n hack gi? choi (Study-to-Earn).",
+        "Thay d?i ID c?a Co s? d? li?u SQLite ch?ng s?p khi spam ph�m."
       ],
-      "isStable": true,
-      "downloadUrl": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.0/cainghien_tauri_1.3.0_x64-setup.exe",
-      "fileSize": "10 MB",
-      "hash": "SHA-256"
+      "files": {
+        "installer": {
+          "filename": "cainghien_tauri_1.3.0_x64-setup.exe",
+          "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.0/cainghien_tauri_1.3.0_x64-setup.exe",
+          "direct_url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.0/cainghien_tauri_1.3.0_x64-setup.exe",
+          "size_formatted": "10 MB",
+          "platform": "Windows 10 / 11 (64-bit)"
+        },
+        "msi": {
+          "filename": "cainghien_tauri_1.3.0_x64_en-US.msi",
+          "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.0/cainghien_tauri_1.3.0_x64_en-US.msi",
+          "size_formatted": "12 MB",
+          "platform": "Windows MSI Installer"
+        }
+      }
     },
     {
       "version": "1.1.0",
       "tag": "v1.1.0",
       "published_at": "2026-09-17",
       "is_latest": false,
-      "title": "Bản Phát Hành v1.1.0",
-      "summary": "Đại tu toàn diện thiết kế Cosmos Glassmorphism, tích hợp Heatmap 365 ngày và Focus Room Lofi.",
+      "title": "B?n Ph�t H�nh v1.1.0",
+      "summary": "�?i tu to�n di?n thi?t k? Cosmos Glassmorphism, t�ch h?p Heatmap 365 ng�y v� Focus Room Lofi.",
       "notes": [
-        "Đại tu giao diện toàn diện với thiết kế Cosmos Glassmorphism.",
-        "Tích hợp màn hình Dashboard Heatmap 365 ngày.",
-        "Tích hợp màn hình Focus Room với nhạc Lofi.",
-        "Tích hợp màn hình Typing Challenge chấm điểm theo thời gian thực.",
-        "Lưu trữ dữ liệu API thực tế vào ổ đĩa."
+        "�?i tu giao di?n to�n di?n v?i thi?t k? Cosmos Glassmorphism.",
+        "T�ch h?p m�n h�nh Dashboard Heatmap 365 ng�y.",
+        "T�ch h?p m�n h�nh Focus Room v?i nh?c Lofi.",
+        "T�ch h?p m�n h�nh Typing Challenge ch?m di?m theo th?i gian th?c."
       ],
-      "categorized_notes": {
-        "features": [
-          "Tích hợp màn hình Dashboard Heatmap 365 ngày theo dõi chuỗi ngày kỷ luật liên tục.",
-          "Tích hợp màn hình Focus Room Kiosk với nhạc Lofi và âm thanh tiếng mưa tự nhiên.",
-          "Tích hợp màn hình Typing Challenge chấm điểm WPM và độ chính xác thời gian thực."
-        ],
-        "improvements": [
-          "Giao diện chuẩn Cosmos Glassmorphism với hiệu ứng mờ đa tầng và màu sắc neon.",
-          "Hệ thống lưu trữ cấu hình cục bộ tin cậy, không phụ thuộc kết nối đám mây."
-        ],
-        "fixes": [
-          "Tối ưu hóa độ mượt khi kích hoạt Kiosk Mode trên đa màn hình."
-        ]
-      },
       "files": {
         "installer": {
           "filename": "cainghien_tauri_1.1.0_x64-setup.exe",
           "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.1.0/cainghien_tauri_1.1.0_x64-setup.exe",
-          "sha256": "8d7d9c165e0b5f6e078b6aebb5b94300521272216270d2dc6fcbadea2d856e8a",
-          "size_bytes": 4753402,
           "size_formatted": "4.5 MB",
           "platform": "Windows 10 / 11 (64-bit)"
         },
         "msi": {
           "filename": "cainghien_tauri_1.1.0_x64_en-US.msi",
           "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.1.0/cainghien_tauri_1.1.0_x64_en-US.msi",
-          "sha256": "34d529d37d74b755557cd69827172f099df92c705d532cd206104c5fe2e395c2",
-          "size_bytes": 8089600,
           "size_formatted": "7.7 MB",
           "platform": "Windows MSI Installer"
         }
@@ -70,46 +65,19 @@
       "tag": "v1.0.0",
       "published_at": "2026-09-16",
       "is_latest": false,
-      "title": "Bản Phát Hành Khởi Đầu v1.0.0",
-      "summary": "Phiên bản chính thức đầu tiên trên nền tảng Rust & Tauri v2 với kiến trúc bảo vệ hệ thống đa tầng.",
+      "title": "B?n Ph�t H�nh Kh?i �?u v1.0.0",
+      "summary": "Phi�n b?n ch�nh th?c d?u ti�n tr�n n?n t?ng Rust & Tauri v2 v?i ki?n tr�c b?o v? h? th?ng da t?ng.",
       "notes": [
-        "Phiên bản v1.0.0 Chính Thức với kiến trúc Rust & Tauri tối ưu hóa bộ nhớ RAM.",
-        "Chế độ khóa cứng ứng dụng (Kiosk Mode) vô hiệu hóa Alt+Tab và Windows Key.",
-        "Giao diện Glassmorphism hoàn toàn mới bằng Vanilla CSS siêu mượt mà.",
-        "Hệ thống Heatmap theo dõi chuỗi ngày kỷ luật và Thử thách gõ phím chánh niệm."
+        "Phi�n b?n v1.0.0 Ch�nh Th?c v?i ki?n tr�c Rust & Tauri t?i uu h�a b? nh? RAM.",
+        "Ch? d? kh�a c?ng ?ng d?ng (Kiosk Mode) v� hi?u h�a Alt+Tab v� Windows Key."
       ],
-      "categorized_notes": {
-        "features": [
-          "Kiến trúc Rust & Tauri tối ưu hóa tài nguyên phần cứng cực nhẹ.",
-          "Chế độ Kiosk Mode vô hiệu hóa phím tắt chuyển màn hình (Alt+Tab, WinKey).",
-          "Khóa can thiệp tầng file Hosts và Windows Service chống gỡ ngang."
-        ],
-        "improvements": [
-          "Khởi tạo cấu trúc giao diện Glassmorphism thuần túy.",
-          "Cơ chế Emergency Recovery an toàn 7 ngày đề phòng sự cố."
-        ],
-        "fixes": [
-          "Bản phát hành đầu tiên ra mắt cộng đồng."
-        ]
-      },
       "files": {
         "installer": {
           "filename": "cainghien_tauri_0.1.0_x64-setup.exe",
           "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.0.0/cainghien_tauri_0.1.0_x64-setup.exe",
-          "direct_url": "/downloads/1.0.0/CaiNghien_Tauri_Setup.exe",
-          "sha256": "bbc19c7902c51681c815374037c2a793a461f3019a6b1629700b5f388bbb08b7",
-          "size_bytes": 4590767,
+          "direct_url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.0.0/cainghien_tauri_0.1.0_x64-setup.exe",
           "size_formatted": "4.4 MB",
           "platform": "Windows 10 / 11 (64-bit)"
-        },
-        "msi": {
-          "filename": "CaiNghien_Tauri_Installer.msi",
-          "url": "/downloads/1.0.0/CaiNghien_Tauri_Installer.msi",
-          "direct_url": "/downloads/1.0.0/CaiNghien_Tauri_Installer.msi",
-          "sha256": "2a0bf9266211f5edb3fa9a9ce0524b8c4ba23d46e5e0068777ffe7a89f02c3ff",
-          "size_bytes": 5791744,
-          "size_formatted": "5.5 MB",
-          "platform": "Windows MSI Installer"
         }
       }
     }
