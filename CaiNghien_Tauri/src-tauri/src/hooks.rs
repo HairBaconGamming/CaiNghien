@@ -47,7 +47,11 @@ unsafe extern "system" fn mouse_proc(code: i32, wparam: WPARAM, lparam: LPARAM) 
 
 unsafe extern "system" fn kiosk_keyboard_proc(code: i32, wparam: WPARAM, lparam: LPARAM) -> LRESULT {
     if code >= 0 && KIOSK_ACTIVE.load(Ordering::Relaxed) {
-        let kbd = *(lparam.0 as *const KBDLLHOOKSTRUCT);
+        let ptr = lparam.0 as *const KBDLLHOOKSTRUCT;
+        if ptr.is_null() {
+            return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam);
+        }
+        let kbd = *ptr;
         let vk = kbd.vkCode;
         let alt_down = (kbd.flags.0 & LLKHF_ALTDOWN) != 0;
 

@@ -114,7 +114,11 @@ pub fn apply_penalty_core(config: &mut AppConfig) {
 #[tauri::command]
 pub fn get_app_config(state: tauri::State<'_, ConfigState>) -> Result<AppConfig, String> {
     let config = state.0.lock().map_err(|_| "Mutex poisoned".to_string())?;
-    Ok(config.clone())
+    let mut safe_config = config.clone();
+    if safe_config.password_hash.is_some() {
+        safe_config.password_hash = Some("SET".to_string());
+    }
+    Ok(safe_config)
 }
 
 #[tauri::command]
@@ -125,7 +129,7 @@ pub fn save_app_config(
 ) -> Result<(), String> {
     let mut config = state.0.lock().map_err(|_| "Mutex poisoned".to_string())?;
     
-    let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_secs();
+    let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap_or_default().as_secs();
 
     if let Some(current_hardcore) = config.hardcore_until {
         if (now as i64) < current_hardcore {

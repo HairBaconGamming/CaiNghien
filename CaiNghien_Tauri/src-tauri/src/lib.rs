@@ -15,19 +15,34 @@ use std::os::windows::process::CommandExt;
 fn set_password(app: tauri::AppHandle, state: tauri::State<'_, config::ConfigState>, password: Option<String>) -> Result<(), String> {
     let mut config_data = state.0.lock().map_err(|_| "Mutex poisoned".to_string())?;
     
+    let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_secs();
     if let Some(hardcore_until) = config_data.hardcore_until {
-        let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64;
-        if now < hardcore_until {
+        if (now as i64) < hardcore_until {
             return Err("Hardcore mode is active.".to_string());
+        }
+    }
+
+    if config_data.password_hash.is_some() {
+        let mut can_change = false;
+        if let Some(until) = config_data.temporary_unlock_until {
+            if now <= until {
+                can_change = true;
+            }
+        }
+        if !can_change {
+            return Err("Authentication required to change or remove password.".to_string());
         }
     }
     
     if let Some(pwd) = password {
-        let mut hasher = Sha256::new();
-        hasher.update(pwd.as_bytes());
-        let result = hasher.finalize();
-        config_data.password_hash = Some(hex::encode(result));
-        config_data.unlock_requested_at = None; // Reset unlock request when password changes
+        use rand::RngCore;
+        let mut salt = [0u8; 16];
+        rand::thread_rng().fill_bytes(&mut salt);
+        let mut hash = [0u8; 32];
+        pbkdf2::pbkdf2_hmac::<sha2::Sha256>(pwd.as_bytes(), &salt, 600_000, &mut hash);
+        let stored = format!("{}:{}", hex::encode(salt), hex::encode(hash));
+        config_data.password_hash = Some(stored);
+        config_data.unlock_requested_at = None;
     } else {
         config_data.password_hash = None;
         config_data.unlock_requested_at = None;
@@ -40,7 +55,7 @@ fn set_password(app: tauri::AppHandle, state: tauri::State<'_, config::ConfigSta
 #[tauri::command]
 fn set_hardcore_mode(app: tauri::AppHandle, state: tauri::State<'_, config::ConfigState>, hours: u32) -> Result<(), String> {
     let mut config_data = state.0.lock().map_err(|_| "Mutex poisoned".to_string())?;
-    let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64;
+    let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_secs() as i64;
     let until = now + (hours as i64) * 3600;
     
     if let Some(current) = config_data.hardcore_until {
@@ -59,19 +74,30 @@ fn verify_password(state: tauri::State<'_, config::ConfigState>, password: Strin
     let mut config_data = state.0.lock().map_err(|_| "Mutex poisoned".to_string())?;
     
     if let Some(hardcore_until) = config_data.hardcore_until {
-        let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64;
+        let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_secs() as i64;
         if now < hardcore_until {
             return Err("Hardcore mode is active.".to_string());
         }
     }
 
-    if let Some(ref hash) = config_data.password_hash {
-        let mut hasher = Sha256::new();
-        hasher.update(password.as_bytes());
-        let result = hex::encode(hasher.finalize());
-        let ok = &result == hash;
+    if let Some(ref stored) = config_data.password_hash {
+        let parts: Vec<&str> = stored.split(':').collect();
+        let ok = if parts.len() == 2 {
+            let salt = hex::decode(parts[0]).map_err(|_| "Invalid salt format".to_string())?;
+            let hash = hex::decode(parts[1]).map_err(|_| "Invalid hash format".to_string())?;
+            let mut derived = [0u8; 32];
+            pbkdf2::pbkdf2_hmac::<sha2::Sha256>(password.as_bytes(), &salt, 600_000, &mut derived);
+            derived.as_ref() == hash.as_slice()
+        } else {
+            // Support legacy SHA-256 for migration
+            let mut hasher = sha2::Sha256::new();
+            sha2::Digest::update(&mut hasher, password.as_bytes());
+            let result = hex::encode(sha2::Digest::finalize(hasher));
+            &result == stored
+        };
+        
         if ok {
-            config_data.temporary_unlock_until = Some(SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() + 60);
+            config_data.temporary_unlock_until = Some(SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_secs() + 60);
         }
         Ok(ok)
     } else {
@@ -84,13 +110,13 @@ fn request_unlock(app: tauri::AppHandle, state: tauri::State<'_, config::ConfigS
     let mut config_data = state.0.lock().map_err(|_| "Mutex poisoned".to_string())?;
     
     if let Some(hardcore_until) = config_data.hardcore_until {
-        let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64;
+        let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_secs() as i64;
         if now < hardcore_until {
             return Err("Hardcore mode is active.".to_string());
         }
     }
 
-    let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
+    let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_secs();
     config_data.unlock_requested_at = Some(now);
     
     let _ = config::save_config(&app, &config_data);
@@ -115,7 +141,7 @@ fn pause_quota(app: tauri::AppHandle, state: tauri::State<'_, config::ConfigStat
     {
         let config_data = state.0.lock().map_err(|_| "Mutex poisoned".to_string())?;
         if let Some(hardcore_until) = config_data.hardcore_until {
-            let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64;
+            let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_secs() as i64;
             if now < hardcore_until {
                 return Err("Hardcore mode is active.".to_string());
             }
@@ -237,8 +263,15 @@ pub fn run() {
         .setup(|app| {
             let config_data = config::load_config(app.handle());
             let db_path = db::get_database_path();
-            let db_conn = db::init_db(&db_path, Some(&config_data))
-                .expect("Failed to initialize SQLite database");
+            let db_conn = match db::init_db(&db_path, Some(&config_data)) {
+                Ok(c) => c,
+                Err(e) => {
+                    eprintln!("Database corrupted or locked: {}", e);
+                    let backup_path = db_path.with_extension(format!("corrupt.{}", std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap_or_default().as_secs()));
+                    let _ = std::fs::rename(&db_path, &backup_path);
+                    db::init_db(&db_path, Some(&config_data)).expect("Failed to recreate database after corruption")
+                }
+            };
             let db_state = db::DbState(std::sync::Arc::new(std::sync::Mutex::new(db_conn)));
             app.manage(db_state);
             app.manage(config::ConfigState(std::sync::Mutex::new(config_data)));
@@ -277,7 +310,7 @@ pub fn run() {
                             
                             let pid = enforcement::WATCHDOG_PID.load(std::sync::atomic::Ordering::Relaxed);
                             if pid != 0 {
-                                let _ = std::process::Command::new("taskkill")
+                                let _ = std::process::Command::new(r"C:\Windows\System32\taskkill.exe")
                                     .args(&["/F", "/PID", &pid.to_string()])
                                     .creation_flags(0x08000000)
                                     .output();
@@ -336,8 +369,6 @@ pub fn run() {
             pause_quota,
             set_hardcore_mode,
             get_quota_status,
-            hooks::lock_hardware_input,
-            hooks::unlock_hardware_input,
             apply_penalty,
             enter_focus_room,
             exit_focus_room,
@@ -349,8 +380,7 @@ pub fn run() {
             commands::save_typing_score,
             commands::get_typing_scores,
             commands::reset_all_data,
-            commands::submit_study_report,
-            commands::add_study_reward_quota
+            commands::submit_study_report
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

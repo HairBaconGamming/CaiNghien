@@ -260,27 +260,7 @@ pub fn submit_study_report(
     })
 }
 
-#[tauri::command]
-pub fn add_study_reward_quota(
-    app: tauri::AppHandle,
-    state: State<'_, crate::config::ConfigState>,
-    minutes: Option<u32>,
-) -> Result<u32, String> {
-    let mut config_data = state.0.lock().map_err(|_| "Config lock poisoned".to_string())?;
-    let reward = minutes.unwrap_or_else(|| {
-        if config_data.reward_quota_minutes == 0 {
-            15
-        } else {
-            config_data.reward_quota_minutes
-        }
-    });
-    if reward == 0 {
-        return Err("Phần thưởng phút phải lớn hơn 0.".to_string());
-    }
-    config_data.daily_quota_minutes = config_data.daily_quota_minutes.saturating_add(reward);
-    crate::config::save_config(&app, &config_data)?;
-    Ok(config_data.daily_quota_minutes)
-}
+
 
 #[cfg(test)]
 mod tests {

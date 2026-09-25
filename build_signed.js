@@ -1,8 +1,0 @@
-const { execSync } = require('child_process');
-
-process.env.TAURI_SIGNING_PRIVATE_KEY = "dW50cnVzdGVkIGNvbW1lbnQ6IHJzaWduIGVuY3J5cHRlZCBzZWNyZXQga2V5ClJXUlRZMEl5dWt4TFlLdm1HRmkwVXpERXh3UnkwWld1TENSTE14OXpTL1J4WHhiSEl3UUFBQkFBQUFBQUFBQUFBQUlBQUFBQWd2bkY4QUc4WURsTzdiT2NmV0RkVE1nOWJDWCsrMURVVEZzZGxwTWcyYm9SNXJqMHA3OVlGd0VCS0RrVkJQQmRCTkhBUm1oNytzMFY4eDZ3M0luS3U2Z1hHQWFDSDMyQ2NZZTBjWVNYaVg5VVQvaEdENkwxY3ZZS2dyQUNTMGtJVUl0cll6Q25aZ289Cg==";
-process.env.TAURI_SIGNING_PRIVATE_KEY_PASSWORD = "";
-
-console.log("Running tauri build with signed env vars...");
-execSync('npm run tauri build', { cwd: 'CaiNghien_Tauri', stdio: 'inherit' });
-console.log("Build and sign completed.");

@@ -62,43 +62,31 @@ const MARKER_END: &str = "# CAINGHIEN END";
 const CREATE_NO_WINDOW: u32 = 0x08000000;
 const DETACHED_PROCESS: u32 = 0x00000008;
 
-use std::os::windows::fs::OpenOptionsExt;
-
-static HOSTS_HANDLE: std::sync::Mutex<Option<std::fs::File>> = std::sync::Mutex::new(None);
-
+// Note: Exclusive file locking on hosts via share_mode(1) is removed because it triggers
+// ERROR_SHARING_VIOLATION in Windows Defender (SettingsModifier:Win32/HostsFileHijack)
+// and Windows Dnscache, causing excessive Defender CPU overhead.
 pub fn lock_hosts() {
-    if let Ok(mut guard) = HOSTS_HANDLE.lock() {
-        if guard.is_none() {
-            if let Ok(file) = std::fs::OpenOptions::new()
-                .read(true)
-                .write(false)
-                .share_mode(1)
-                .open(r"C:\Windows\System32\drivers\etc\hosts")
-            {
-                *guard = Some(file);
-            }
-        }
-    }
+    // No-op: Kept for API compatibility without locking the file exclusively
 }
 
 pub fn unlock_hosts() {
-    if let Ok(mut guard) = HOSTS_HANDLE.lock() {
-        *guard = None;
-    }
+    // No-op
 }
 
 pub fn watchdog_loop(main_pid: u32) {
     let mut sys = sysinfo::System::new();
+    let main_pid_obj = sysinfo::Pid::from_u32(main_pid);
     loop {
-        sys.refresh_processes(sysinfo::ProcessesToUpdate::All, true);
-        if sys.process(sysinfo::Pid::from_u32(main_pid)).is_none() {
+        // Only refresh the specific target process to prevent high CPU / kernel overhead
+        sys.refresh_processes(sysinfo::ProcessesToUpdate::Some(&[main_pid_obj]), true);
+        if sys.process(main_pid_obj).is_none() {
             let exe_path = std::env::current_exe().unwrap();
             let _ = Command::new(exe_path)
                 .creation_flags(DETACHED_PROCESS)
                 .spawn();
             std::process::exit(0);
         }
-        std::thread::sleep(Duration::from_secs(1));
+        std::thread::sleep(Duration::from_secs(2));
     }
 }
 
@@ -106,27 +94,54 @@ fn get_hosts_path() -> PathBuf {
     PathBuf::from(r"C:\Windows\System32\drivers\etc\hosts")
 }
 
-fn flush_dns() {
-    let _ = Command::new("ipconfig")
-        .arg("/flushdns")
-        .creation_flags(CREATE_NO_WINDOW)
-        .output();
-}
+
 
 pub fn apply_family_dns(enable: bool) {
-    if enable {
-        let script = "Get-NetAdapter | Where-Object Status -eq 'Up' | Set-DnsClientServerAddress -ServerAddresses (\"1.1.1.3\",\"1.0.0.3\")";
-        let _ = Command::new("powershell")
-            .args(&["-NoProfile", "-Command", script])
-            .creation_flags(CREATE_NO_WINDOW)
-            .output();
+    let backup_file = std::env::temp_dir().join("cainghien_dns_backup.json").display().to_string();
+    let inner_script = if enable {
+        format!(
+            "try {{ \
+                $adapters = Get-DnsClientServerAddress | Where-Object {{ $_.ServerAddresses -notcontains '1.1.1.3' }}; \
+                $backup = $adapters | Select-Object InterfaceIndex, ServerAddresses; \
+                $backup | ConvertTo-Json -Depth 3 -Compress | Out-File -FilePath '{}' -Encoding UTF8; \
+                Get-NetAdapter | Where-Object Status -eq 'Up' | Set-DnsClientServerAddress -ServerAddresses '1.1.1.3','1.0.0.3'; \
+            }} catch {{}}",
+            backup_file
+        )
     } else {
-        let script = "Get-NetAdapter | Set-DnsClientServerAddress -ResetServerAddresses";
-        let _ = Command::new("powershell")
-            .args(&["-NoProfile", "-Command", script])
-            .creation_flags(CREATE_NO_WINDOW)
-            .output();
-    }
+        format!(
+            "try {{ \
+                if (Test-Path '{}') {{ \
+                    $backup = Get-Content '{}' -Raw | ConvertFrom-Json; \
+                    $adapters = @($backup); \
+                    foreach ($adapter in $adapters) {{ \
+                        if ($null -ne $adapter.ServerAddresses -and $adapter.ServerAddresses.Count -gt 0) {{ \
+                            Set-DnsClientServerAddress -InterfaceIndex $adapter.InterfaceIndex -ServerAddresses $adapter.ServerAddresses; \
+                        }} else {{ \
+                            Set-DnsClientServerAddress -InterfaceIndex $adapter.InterfaceIndex -ResetServerAddresses; \
+                        }} \
+                    }} \
+                }} else {{ \
+                    Get-NetAdapter | Set-DnsClientServerAddress -ResetServerAddresses; \
+                }} \
+            }} catch {{}}",
+            backup_file, backup_file
+        )
+    };
+
+    let system_root = std::env::var("SystemRoot").unwrap_or_else(|_| "C:\\Windows".to_string());
+    let ps_path = format!("{}\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", system_root);
+
+    let script = format!(
+        "Start-Process -FilePath \"{}\" -ArgumentList \"-NoProfile -Command `\"{}\"`\" -Verb RunAs -WindowStyle Hidden -Wait",
+        ps_path,
+        inner_script.replace("\"", "\"\"")
+    );
+
+    let _ = Command::new(&ps_path)
+        .args(&["-WindowStyle", "Hidden", "-Command", &script])
+        .creation_flags(CREATE_NO_WINDOW)
+        .output();
 }
 
 pub fn apply_hosts_block(domains: &[String]) -> Result<(), String> {
@@ -153,9 +168,14 @@ pub fn apply_hosts_block(domains: &[String]) -> Result<(), String> {
     }
     let mut final_content = new_content.trim_end().to_string();
 
+    let domain_regex = regex::Regex::new(r"^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$").unwrap();
+
     if !domains.is_empty() {
         let mut block_lines = vec![String::from(MARKER_START)];
         for domain in domains {
+            if !domain_regex.is_match(domain) || domain.contains('\r') || domain.contains('\n') || domain.contains(' ') {
+                return Err("Invalid domain format".to_string());
+            }
             let base_domain = if domain.starts_with("www.") {
                 domain.strip_prefix("www.").unwrap_or(domain).to_string()
             } else {
@@ -174,14 +194,43 @@ pub fn apply_hosts_block(domains: &[String]) -> Result<(), String> {
         final_content.push('\n');
     }
 
-    let write_res = fs::write(&path, final_content).map_err(|e| format!("Failed to write hosts file: {}", e));
-    flush_dns();
-
-    if !domains.is_empty() {
-        lock_hosts();
+    let tmp_path = std::env::temp_dir().join(format!("cainghien_hosts_tmp_{}.txt", std::process::id()));
+    let write_res = fs::write(&tmp_path, final_content);
+    
+    if write_res.is_err() {
+        return Err("Failed to write to temp file".to_string());
     }
 
-    write_res
+    let system_root = std::env::var("SystemRoot").unwrap_or_else(|_| "C:\\Windows".to_string());
+    let ps_path = format!("{}\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", system_root);
+    
+    // Backup and atomic write via elevated PS
+    let script = format!(
+        "try {{ Copy-Item -Path '{}' -Destination '{}\\hosts.cainghien.bak' -ErrorAction SilentlyContinue; Move-Item -Path '{}' -Destination '{}' -Force; ipconfig /flushdns; }} catch {{ exit 1 }}",
+        path.display(),
+        path.parent().unwrap().display(),
+        tmp_path.display(),
+        path.display()
+    );
+
+    let status = Command::new(&ps_path)
+        .args(&[
+            "-WindowStyle", "Hidden",
+            "-Command",
+            &format!("Start-Process -FilePath \"{}\" -ArgumentList \"-NoProfile -Command `\"{}\"`\" -Verb RunAs -WindowStyle Hidden -Wait", ps_path, script.replace("\"", "\"\""))
+        ])
+        .creation_flags(CREATE_NO_WINDOW)
+        .status();
+
+    if let Ok(st) = status {
+        if st.success() {
+            Ok(())
+        } else {
+            Err("PowerShell script failed or UAC denied".to_string())
+        }
+    } else {
+        Err("Failed to execute PowerShell".to_string())
+    }
 }
 
 use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
@@ -195,9 +244,15 @@ pub fn spawn_enforcement_loop(app: tauri::AppHandle) {
         let mut last_nsfw_state = None;
         let mut last_schedule_state: Option<bool> = None;
         let mut last_domains: Option<Vec<String>> = None;
+        let mut last_attempted_protection: Option<bool> = None;
+        let mut hosts_retry_cooldown: u32 = 0;
         let mut sys = sysinfo::System::new();
 
         loop {
+            if hosts_retry_cooldown > 0 {
+                hosts_retry_cooldown -= 1;
+            }
+
             // Lấy config hiện tại
             let config = {
                 let state = app.state::<ConfigState>();
@@ -310,8 +365,9 @@ pub fn spawn_enforcement_loop(app: tauri::AppHandle) {
                     let mut needs_spawn = false;
                     let pid = WATCHDOG_PID.load(Ordering::Relaxed);
                     if pid != 0 {
-                        sys.refresh_processes(sysinfo::ProcessesToUpdate::All, true);
-                        if sys.process(sysinfo::Pid::from_u32(pid)).is_none() {
+                        let target_pid = sysinfo::Pid::from_u32(pid);
+                        sys.refresh_processes(sysinfo::ProcessesToUpdate::Some(&[target_pid]), true);
+                        if sys.process(target_pid).is_none() {
                             needs_spawn = true;
                         }
                     } else {
@@ -332,7 +388,7 @@ pub fn spawn_enforcement_loop(app: tauri::AppHandle) {
                 } else {
                     let pid = WATCHDOG_PID.load(Ordering::Relaxed);
                     if pid != 0 {
-                        let _ = Command::new("taskkill")
+                        let _ = Command::new(r"C:\Windows\System32\taskkill.exe")
                             .args(&["/F", "/PID", &pid.to_string()])
                             .creation_flags(CREATE_NO_WINDOW)
                             .output();
@@ -340,8 +396,14 @@ pub fn spawn_enforcement_loop(app: tauri::AppHandle) {
                     }
                 }
 
-                // Sync hosts file
-                if last_protection_state != Some(effective_hosts_protection) || (effective_hosts_protection && domains_changed) {
+                // Reset cooldown if user explicitly toggles protection or changes domains
+                if last_attempted_protection != Some(effective_hosts_protection) || domains_changed {
+                    hosts_retry_cooldown = 0;
+                    last_attempted_protection = Some(effective_hosts_protection);
+                }
+
+                // Sync hosts file (avoid infinite 1-second retry storm if permissions denied)
+                if (last_protection_state != Some(effective_hosts_protection) || (effective_hosts_protection && domains_changed)) && hosts_retry_cooldown == 0 {
                     let result = if effective_hosts_protection {
                         apply_hosts_block(&domains)
                     } else {
@@ -358,10 +420,9 @@ pub fn spawn_enforcement_loop(app: tauri::AppHandle) {
                             }
                         }
                         Err(e) => {
-                            eprintln!("Failed to apply hosts block: {}", e);
-                            // force retry on next tick
-                            last_protection_state = None;
-                            last_domains = None;
+                            eprintln!("Failed to apply hosts block (backing off 60s): {}", e);
+                            // Backoff 60 seconds instead of thrashing every 1 second
+                            hosts_retry_cooldown = 60;
                         }
                     }
                 }
@@ -378,26 +439,21 @@ pub fn spawn_enforcement_loop(app: tauri::AppHandle) {
                         let title = window.title.to_lowercase();
                         let app_name = window.app_name.to_lowercase();
                         
-                        // Danh sách an toàn: CHỈ giết nếu app_name là trình duyệt web
-                        // Đề phòng trường hợp người dùng đặt tên thư mục là "jav" và mở bằng File Explorer (explorer.exe),
-                        // nếu giết explorer.exe sẽ làm sập toàn bộ giao diện Windows.
                         let target_browsers = [
                             "chrome", "msedge", "firefox", "brave", "opera", "coccoc"
                         ];
 
                         if target_browsers.iter().any(|b| app_name.contains(b)) {
-                            let mut should_kill = false;
+                            let mut should_lock = false;
 
                             if block_nsfw || in_schedule {
-                                let nsfw_keywords = [
-                                    "pornhub", "xvideos", "sex", "jav", "hentai", "xnxx", "xhamster", "nhentai"
-                                ];
-                                if nsfw_keywords.iter().any(|k| title.contains(k)) {
-                                    should_kill = true;
+                                let nsfw_regex = regex::Regex::new(r"\b(pornhub|xvideos|sex|jav|hentai|xnxx|xhamster|nhentai)\b").unwrap();
+                                if nsfw_regex.is_match(&title) {
+                                    should_lock = true;
                                 }
                             }
 
-                            if effective_hosts_protection {
+                            if effective_hosts_protection && !should_lock {
                                 for domain in &domains {
                                     let base_domain = if domain.starts_with("www.") {
                                         domain.strip_prefix("www.").unwrap_or(domain)
@@ -407,19 +463,13 @@ pub fn spawn_enforcement_loop(app: tauri::AppHandle) {
                                     let domain_no_tld = base_domain.split('.').next().unwrap_or(base_domain);
                                     
                                     if title.contains(base_domain) || (domain_no_tld.len() > 3 && title.contains(domain_no_tld)) {
-                                        should_kill = true;
+                                        should_lock = true;
                                         break;
                                     }
                                 }
                             }
 
-                            if should_kill {
-                                // Chỉ đóng trình duyệt, không gây hại cho OS
-                                let _ = Command::new("taskkill")
-                                    .args(&["/F", "/PID", &window.process_id.to_string()])
-                                    .creation_flags(CREATE_NO_WINDOW)
-                                    .output();
-                                
+                            if should_lock {
                                 // UPDATE VIOLATIONS COUNT & DAILY HISTORY
                                 if let Ok(mut guard) = app.state::<ConfigState>().0.lock() {
                                     guard.violations_count += 1;

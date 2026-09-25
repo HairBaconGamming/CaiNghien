@@ -115,8 +115,6 @@ permissions = [
   "allow-pause-quota",
   "allow-set-hardcore-mode",
   "allow-get-quota-status",
-  "allow-lock-hardware",
-  "allow-unlock-hardware",
   "allow-apply-penalty",
   "allow-enter-focus-room",
   "allow-exit-focus-room",
@@ -129,7 +127,6 @@ permissions = [
   "allow-get-typing-scores",
   "allow-reset-all-data",
   "allow-submit-study-report",
-  "allow-add-study-reward-quota",
 ]
 
 [[permission]]

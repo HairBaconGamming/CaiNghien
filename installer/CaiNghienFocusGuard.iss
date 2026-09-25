@@ -25,8 +25,8 @@ DisableProgramGroupPage=yes
 DisableDirPage=yes
 DisableReadyPage=yes
 DisableFinishedPage=no
-PrivilegesRequired=lowest
-PrivilegesRequiredOverridesAllowed=dialog
+PrivilegesRequired=admin
+PrivilegesRequiredOverridesAllowed=no
 ArchitecturesInstallIn64BitMode=x64compatible
 OutputDir=..\dist\installer
 OutputBaseFilename={#OutputFileName}
@@ -61,6 +61,7 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 Filename: "{cmd}"; Parameters: "/C ping 127.0.0.1 -n 2 >nul && start """" /D ""{app}"" ""{app}\{#MyAppExeName}"""; Description: "Mở {#MyAppName}"; Flags: nowait postinstall runhidden skipifsilent
 
 [UninstallRun]
+Filename: "{cmd}"; Parameters: "/C sc stop ""{#MyServiceName}"" >nul 2>&1 & sc delete ""{#MyServiceName}"" >nul 2>&1"; Flags: runhidden waituntilterminated; RunOnceId: "ScDeleteFocusGuardService"
 Filename: "{app}\{#MyServiceExeName}"; Parameters: "stop"; Flags: runhidden waituntilterminated skipifdoesntexist; RunOnceId: "StopFocusGuardService"; Check: CanManageServiceAtUninstall
 Filename: "{app}\{#MyServiceExeName}"; Parameters: "remove"; Flags: runhidden waituntilterminated skipifdoesntexist; RunOnceId: "RemoveFocusGuardService"; Check: CanManageServiceAtUninstall
 
@@ -752,9 +753,16 @@ begin
 end;
 
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+var
+  ResultCode: Integer;
 begin
+  if CurUninstallStep = usUninstall then
+  begin
+    Exec(ExpandConstant('{cmd}'), '/C sc stop "{#MyServiceName}" >nul 2>&1 & sc delete "{#MyServiceName}" >nul 2>&1', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  end;
   if CurUninstallStep = usPostUninstall then
   begin
+    Exec(ExpandConstant('{cmd}'), '/C sc delete "{#MyServiceName}" >nul 2>&1', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
     RegDeleteValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Run', 'CaiNghienFocusGuard');
     RegDeleteValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Policies\System', 'DisableTaskMgr');
     if IsAdmin() then

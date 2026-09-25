@@ -188,6 +188,12 @@ export const LofiPlayer: React.FC<LofiPlayerProps> = ({
         dropFilter.connect(dropGain);
         dropGain.connect(dest);
 
+        dropOsc.onended = () => {
+          dropOsc.disconnect();
+          dropFilter.disconnect();
+          dropGain.disconnect();
+        };
+
         dropOsc.start(ctx.currentTime);
         dropOsc.stop(ctx.currentTime + 0.07);
       } catch {

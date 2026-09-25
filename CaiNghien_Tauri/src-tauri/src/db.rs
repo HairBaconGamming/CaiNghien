@@ -601,10 +601,14 @@ pub fn record_focus_session(
 
     let now_ts = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
-        .unwrap()
+        .unwrap_or_default()
         .as_secs();
+    let now_nanos = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .subsec_nanos();
 
-    let session_id = format!("focus_{}", now_ts);
+    let session_id = format!("focus_{}_{}", now_ts, now_nanos);
     let xp_earned = duration_minutes.saturating_mul(4);
     let count_inc = (duration_minutes / 25).max(1);
     let today = Local::now().format("%Y-%m-%d").to_string();
@@ -726,10 +730,14 @@ pub fn save_typing_score(
 
     let now_ts = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
-        .unwrap()
+        .unwrap_or_default()
         .as_secs();
+    let now_nanos = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .subsec_nanos();
 
-    let score_id = format!("typing_{}", now_ts);
+    let score_id = format!("typing_{}_{}", now_ts, now_nanos);
     let accuracy_factor = (score.accuracy / 100.0).clamp(0.0, 1.0);
     let xp_earned = 50 + ((score.wpm as f64) * accuracy_factor) as u32;
 
