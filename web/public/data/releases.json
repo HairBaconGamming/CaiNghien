@@ -1,11 +1,49 @@
 {
-  "latest": "v1.3.2",
+  "latest": "1.3.3",
   "releases": [
+    {
+      "version": "1.3.3",
+      "tag": "v1.3.3",
+      "published_at": "2026-09-26",
+      "is_latest": true,
+      "title": "Bản phát hành tối ưu Logo v1.3.3",
+      "summary": "Thiết kế lại Logo Solid mới và tự động hóa cập nhật.",
+      "notes": [
+        "Thiết kế lại Logo theo phong cách Solid Gradient.",
+        "Loại bỏ viền trắng thừa để hiển thị sắc nét, tương phản trên mọi nền.",
+        "Sửa giao diện Cài đặt và thanh điều hướng Navbar tối giản hơn."
+      ],
+      "categorized_notes": {
+        "features": [
+          "Nâng cấp Logo Solid tối ưu cho Dark Mode/Light Mode.",
+          "Tái cấu trúc Sidebar Cài đặt."
+        ],
+        "fixes": [
+          "Sửa lỗi độ phân giải và viền padding trong suốt của App Icon.",
+          "Sửa lỗi tương phản màu sắc của Logo trên thanh Navbar."
+        ]
+      },
+      "files": {
+        "installer": {
+          "filename": "cainghien_tauri_1.3.3_x64-setup.exe",
+          "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.3/cainghien_tauri_1.3.3_x64-setup.exe",
+          "direct_url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.3/cainghien_tauri_1.3.3_x64-setup.exe",
+          "size_formatted": "50 MB",
+          "platform": "Windows 10 / 11 (64-bit)"
+        },
+        "msi": {
+          "filename": "cainghien_tauri_1.3.3_x64_en-US.msi",
+          "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.3/cainghien_tauri_1.3.3_x64_en-US.msi",
+          "size_formatted": "45 MB",
+          "platform": "Windows MSI Installer"
+        }
+      }
+    },
     {
       "version": "1.3.2",
       "tag": "v1.3.2",
       "published_at": "2026-09-26",
-      "is_latest": true,
+      "is_latest": false,
       "title": "Bản cập nhật Auto Update v1.3.2",
       "summary": "Hoàn thiện hệ thống Tự động cập nhật (Auto Updater) qua Github Releases, tự động tải và cài đặt bằng chữ ký số.",
       "notes": [
