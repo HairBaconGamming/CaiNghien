@@ -23,6 +23,7 @@ import { AccountScreen } from './components/AccountScreen';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<NavTabId>('dashboard');
+  const [settingsTab, setSettingsTab] = useState<'general' | 'account'>('general');
   const [showTypingModal, setShowTypingModal] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [appConfig, setAppConfig] = useState<AppConfig | null>(null);
@@ -277,12 +278,37 @@ export default function App() {
             )}
 
 
-            {activeTab === 'account' && (
-              <AccountScreen addToast={addToast} />
-            )}
+
 
             {activeTab === 'settings' && appConfig && (
-              <div className="w-full h-full flex flex-col p-6 overflow-y-auto">
+              <div className="w-full h-full flex overflow-hidden">
+                {/* Left Sidebar */}
+                <div className="w-64 border-r border-white/10 p-6 flex flex-col gap-2">
+                  <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 px-2">Cài đặt</div>
+                  
+                  <button 
+                    onClick={() => setSettingsTab('general')}
+                    className={`w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
+                      settingsTab === 'general' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.15)]' : 'text-slate-400 hover:text-slate-200 hover:bg-white/5 border border-transparent'
+                    }`}
+                  >
+                    Cài đặt chung
+                  </button>
+                  
+                  <button 
+                    onClick={() => setSettingsTab('account')}
+                    className={`w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
+                      settingsTab === 'account' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.15)]' : 'text-slate-400 hover:text-slate-200 hover:bg-white/5 border border-transparent'
+                    }`}
+                  >
+                    Tài khoản & Hồ sơ
+                  </button>
+                </div>
+                
+                {/* Main Content */}
+                <div className="flex-1 overflow-y-auto">
+                  {settingsTab === 'general' && (
+                    <div className="w-full h-full flex flex-col p-6 overflow-y-auto">
                 <div className="glass-panel rounded-2xl p-6 border border-white/10 mb-6 flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <SettingsIcon className="w-6 h-6 text-sky-400" />
@@ -562,6 +588,15 @@ export default function App() {
                       </div>
                     </div>
                   </div>
+                </div>
+              </div>
+                  )}
+                  
+                  {settingsTab === 'account' && (
+                    <div className="p-6">
+                      <AccountScreen addToast={addToast} />
+                    </div>
+                  )}
                 </div>
               </div>
             )}

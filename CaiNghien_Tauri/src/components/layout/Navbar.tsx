@@ -6,10 +6,10 @@ import {
   Settings,
   Bell,
   Sparkles,
-  User
+
 } from 'lucide-react';
 
-export type NavTabId = 'dashboard' | 'focus' | 'typing' | 'settings' | 'account';
+export type NavTabId = 'dashboard' | 'focus' | 'typing' | 'settings';
 
 import { getRankTitleForLevel } from '../../services/api';
 
@@ -60,7 +60,7 @@ export const Navbar: FC<NavbarProps> = ({
     { id: 'focus', label: 'Phòng tập trung', icon: Timer },
     { id: 'typing', label: 'Thử thách gõ phím', icon: Keyboard },
     { id: 'settings', label: 'Cài đặt', icon: Settings },
-    { id: 'account', label: 'Tài khoản', icon: User },
+    
   ];
 
   return (
