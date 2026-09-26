@@ -1,3 +1,4 @@
+use tauri_plugin_autostart::ManagerExt;
 use std::fs;
 use std::path::PathBuf;
 use tauri::{AppHandle, Manager};

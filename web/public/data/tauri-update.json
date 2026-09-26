@@ -1,11 +1,11 @@
 {
-  "version": "v1.3.1",
-  "notes": "Cập nhật v1.3.1: Menu Titlebar, Music Widget, Autostart fix.",
-  "pub_date": "2026-09-26T04:46:56.320390+00:00",
+  "version": "v1.3.2",
+  "notes": "Cập nhật tự động lên phiên bản v1.3.2.",
+  "pub_date": "2026-09-26T06:04:11.051382+00:00",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRd0Vocy9GemtualUzUEpxT0ZOeTJldDVmZFpyb2YxZkhVaTE3NkcwNFZGeEJUeFpRWVh3MGl4Tm9SaGg3M2JkTGUxZkwyc3lZWGtjOE9DUVVVbk0veWlDWGo3L2kxK3drPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg5NzM3MzQ0CWZpbGU6Y2FpbmdoaWVuX3RhdXJpXzEuMi4wX3g2NC1zZXR1cC5leGUKb3JGWE40cHd1aThzbEdDSHVLc2FtQWhNUHQvZGhQb2VwaFFHOW5razducnZseGNuM1RzYzZpTU95TFJGRkxCemUxUlM0MEVBYndUbXBubHcwZ2w4RHc9PQo=",
-      "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.1/cainghien_tauri_1.3.1_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRVFFLelpwN2szczl5YjY3ZXltU0dRdTdxMHNEbUVVRGc4ZnlrbzFSdzhubGJkOGVaeUU1dHdDeVZxVGIzNUFaZVhQMCs5ejkrbHdTdlRUaHVGUHRSbmh4QjZvNjk5Y1FVPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkwNDAyNjE4CWZpbGU6Y2FpbmdoaWVuX3RhdXJpXzEuMy4yX3g2NC1zZXR1cC5leGUKaElHQVhaQ2VPNVZVWTFMUG1rYzhUS3NFUjlLaytXbXgrbTdOd1YyT1ZpaXZRMFFzSlB0Z0tuVWZqMlNhcDJIcVk2V0JiMU5XVlFhczFDTUY2VVlGQUE9PQo=",
+      "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.2/cainghien_tauri_1.3.2_x64-setup.exe"
     }
   }
 }

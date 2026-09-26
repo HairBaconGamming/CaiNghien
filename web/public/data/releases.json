@@ -1,9 +1,42 @@
 {
-  "latest": "v1.3.1",
+  "latest": "v1.3.2",
   "releases": [
     {
-      "version": "1.3.1",
+      "version": "1.3.2",
+      "tag": "v1.3.2",
+      "published_at": "2026-09-26",
       "is_latest": true,
+      "title": "Bản cập nhật Auto Update v1.3.2",
+      "summary": "Hoàn thiện hệ thống Tự động cập nhật (Auto Updater) qua Github Releases, tự động tải và cài đặt bằng chữ ký số.",
+      "notes": [
+        "Tích hợp Private Key/Public Key Ed25519 cho Tauri Updater.",
+        "Hỗ trợ tự động kiểm tra và cài đặt bản cập nhật mới ngay trong app.",
+        "Bổ sung kịch bản Release Pipeline tự động hóa hoàn toàn quy trình phát hành."
+      ],
+      "categorized_notes": {
+        "features": [
+          "Hoàn thiện hệ thống Tự động cập nhật (Auto Updater)."
+        ]
+      },
+      "files": {
+        "installer": {
+          "filename": "cainghien_tauri_1.3.2_x64-setup.exe",
+          "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.2/cainghien_tauri_1.3.2_x64-setup.exe",
+          "direct_url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.2/cainghien_tauri_1.3.2_x64-setup.exe",
+          "size_formatted": "50 MB",
+          "platform": "Windows 10 / 11 (64-bit)"
+        },
+        "msi": {
+          "filename": "cainghien_tauri_1.3.2_x64_en-US.msi",
+          "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.2/cainghien_tauri_1.3.2_x64_en-US.msi",
+          "size_formatted": "45 MB",
+          "platform": "Windows MSI Installer"
+        }
+      }
+    },
+    {
+      "version": "1.3.1",
+      "is_latest": false,
       "notes": [
         "Cải thiện System Menu và Titlebar (Hỗ trợ menu Tệp, Xem, Cửa sổ tích hợp).",
         "Bổ sung Widget Âm nhạc đa năng trong Phòng tập trung (Hỗ trợ Lofi Local, Spotify, YouTube).",
