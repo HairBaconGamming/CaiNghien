@@ -16,7 +16,7 @@ import {
 
 import { TimerRing } from './TimerRing';
 import { MotivationalQuote } from './MotivationalQuote';
-import { LofiPlayer } from './LofiPlayer';
+import { MusicWidget } from './MusicWidget';
 import { StudyHarvestReportModal } from './StudyHarvestReportModal';
 import { api, AppConfig, StudyRewardResult } from '../../services/api';
 
@@ -553,7 +553,7 @@ export const FocusRoomScreen: React.FC<FocusRoomScreenProps> = ({
       <div className="relative z-10 w-full pb-8 px-8 flex items-center justify-between pointer-events-auto">
         {/* Left Control: AMBIENCE & Center: AUDIO PILLS */}
         <div className="flex-1">
-          <LofiPlayer />
+          <MusicWidget />
         </div>
 
         {/* Right Controls: Fullscreen Toggle & Exit Buttons */}

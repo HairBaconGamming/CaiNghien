@@ -13,6 +13,10 @@ import "./index.css";
 
 import ErrorBoundary from "./components/ErrorBoundary";
 
+if (true) {
+  document.addEventListener('contextmenu', e => e.preventDefault());
+}
+
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <ErrorBoundary>
