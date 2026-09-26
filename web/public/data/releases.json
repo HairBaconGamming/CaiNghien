@@ -1,11 +1,45 @@
 {
-  "latest": "1.3.4",
+  "latest": "1.3.5",
   "releases": [
+    {
+      "version": "1.3.5",
+      "tag": "v1.3.5",
+      "published_at": "2026-09-26",
+      "is_latest": true,
+      "title": "Bản vá sửa lỗi Chặn Website v1.3.5",
+      "summary": "Khắc phục lỗi không chặn mạng xã hội và web đen khi bị vướng quyền Administrator.",
+      "notes": [
+        "Sửa lỗi UAC (hộp thoại cấp quyền) chặn đứng vòng lặp kiểm tra trang web của hệ thống.",
+        "Khôi phục tính năng tự động đóng trình duyệt (Process Killer) khi phát hiện web đen hoặc mạng xã hội bị cấm.",
+        "Hệ thống tự động đồng bộ Hosts và DNS chạy ngầm mượt mà hơn, không gây đơ ứng dụng."
+      ],
+      "categorized_notes": {
+        "fixes": [
+          "Sửa lỗi không chặn được mạng xã hội và web 18+ do xung đột quyền Admin trên Windows.",
+          "Cải thiện hiệu năng xử lý đa luồng cho hệ thống bảo vệ."
+        ]
+      },
+      "files": {
+        "installer": {
+          "filename": "cainghien_tauri_1.3.5_x64-setup.exe",
+          "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.5/cainghien_tauri_1.3.5_x64-setup.exe",
+          "direct_url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.5/cainghien_tauri_1.3.5_x64-setup.exe",
+          "size_formatted": "50 MB",
+          "platform": "Windows 10 / 11 (64-bit)"
+        },
+        "msi": {
+          "filename": "cainghien_tauri_1.3.5_x64_en-US.msi",
+          "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.5/cainghien_tauri_1.3.5_x64_en-US.msi",
+          "size_formatted": "45 MB",
+          "platform": "Windows MSI Installer"
+        }
+      }
+    },
     {
       "version": "1.3.4",
       "tag": "v1.3.4",
       "published_at": "2026-09-26",
-      "is_latest": true,
+      "is_latest": false,
       "title": "Bản vá sửa lỗi Uninstall v1.3.4",
       "summary": "Khắc phục hoàn toàn lỗi Uninstaller không dọn sạch chương trình ngầm.",
       "notes": [
