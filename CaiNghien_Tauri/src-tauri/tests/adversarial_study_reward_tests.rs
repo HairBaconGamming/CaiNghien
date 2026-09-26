@@ -10,7 +10,11 @@ fn test_word_validation_empty_and_whitespace_only() {
     let empty_res = validate_study_report_text("");
     assert!(empty_res.is_err(), "Empty string must be rejected");
     let err_msg = empty_res.unwrap_err();
-    assert!(err_msg.contains("0 từ"), "Error should report 0 words, got: {}", err_msg);
+    assert!(
+        err_msg.contains("0 từ"),
+        "Error should report 0 words, got: {}",
+        err_msg
+    );
 
     // 2. Spaces only
     let spaces_res = validate_study_report_text("     ");
@@ -24,7 +28,10 @@ fn test_word_validation_empty_and_whitespace_only() {
 
     // 4. Newlines only
     let newlines_res = validate_study_report_text("\n\n\r\n\r\r\n");
-    assert!(newlines_res.is_err(), "Newlines-only string must be rejected");
+    assert!(
+        newlines_res.is_err(),
+        "Newlines-only string must be rejected"
+    );
     assert!(newlines_res.unwrap_err().contains("0 từ"));
 
     // 5. Mixed whitespace
@@ -36,7 +43,10 @@ fn test_word_validation_empty_and_whitespace_only() {
     // 6. Unicode whitespace characters (non-breaking space, em quad, ideographic space)
     let unicode_ws = "\u{00A0} \u{2000} \u{2003} \u{3000}";
     let unicode_res = validate_study_report_text(unicode_ws);
-    assert!(unicode_res.is_err(), "Unicode whitespace only must be rejected");
+    assert!(
+        unicode_res.is_err(),
+        "Unicode whitespace only must be rejected"
+    );
     assert!(unicode_res.unwrap_err().contains("0 từ"));
 }
 
@@ -48,7 +58,11 @@ fn test_word_validation_boundary_99_100_101_words() {
     let res_99 = validate_study_report_text(&text_99);
     assert!(res_99.is_err(), "99 words must be rejected (< 100)");
     let err_99 = res_99.unwrap_err();
-    assert!(err_99.contains("99 từ"), "Error message should say 99 words, got: {}", err_99);
+    assert!(
+        err_99.contains("99 từ"),
+        "Error message should say 99 words, got: {}",
+        err_99
+    );
 
     // Exactly 100 words
     let words_100: Vec<String> = (1..=100).map(|i| format!("word{}", i)).collect();
@@ -69,23 +83,116 @@ fn test_word_validation_boundary_99_100_101_words() {
 fn test_word_validation_vietnamese_text_and_irregular_spacing() {
     // 100 Vietnamese words with diacritics and varying punctuation
     let vi_words = vec![
-        "Hôm", "nay", "tôi", "đã", "hoàn", "thành", "buổi", "học", "rất", "hiệu",
-        "quả", "về", "kiến", "trúc", "hệ", "thống", "Rust", "và", "Tauri", "framework.",
-        "Tôi", "đã", "hiểu", "rõ", "cách", "thức", "hoạt", "động", "của", "State",
-        "management,", "Mutex,", "và", "tương", "tác", "cơ", "sở", "dữ", "liệu", "SQLite.",
-        "Việc", "tối", "ưu", "hóa", "hiệu", "năng", "và", "đảm", "bảo", "an",
-        "toàn", "bộ", "nhớ", "là", "điểm", "mạnh", "nổi", "bật", "của", "ngôn",
-        "ngữ", "này.", "Tôi", "sẽ", "tiếp", "tục", "thực", "hành", "các", "thuật",
-        "toán", "phức", "tạp", "hơn", "trong", "những", "ngày", "tới", "để", "nâng",
-        "cao", "kỹ", "năng", "lập", "trình", "chuyên", "nghiệp,", "xây", "dựng", "ứng",
-        "dụng", "desktop", "chất", "lượng", "cao", "cho", "người", "dùng", "Việt", "Nam."
+        "Hôm",
+        "nay",
+        "tôi",
+        "đã",
+        "hoàn",
+        "thành",
+        "buổi",
+        "học",
+        "rất",
+        "hiệu",
+        "quả",
+        "về",
+        "kiến",
+        "trúc",
+        "hệ",
+        "thống",
+        "Rust",
+        "và",
+        "Tauri",
+        "framework.",
+        "Tôi",
+        "đã",
+        "hiểu",
+        "rõ",
+        "cách",
+        "thức",
+        "hoạt",
+        "động",
+        "của",
+        "State",
+        "management,",
+        "Mutex,",
+        "và",
+        "tương",
+        "tác",
+        "cơ",
+        "sở",
+        "dữ",
+        "liệu",
+        "SQLite.",
+        "Việc",
+        "tối",
+        "ưu",
+        "hóa",
+        "hiệu",
+        "năng",
+        "và",
+        "đảm",
+        "bảo",
+        "an",
+        "toàn",
+        "bộ",
+        "nhớ",
+        "là",
+        "điểm",
+        "mạnh",
+        "nổi",
+        "bật",
+        "của",
+        "ngôn",
+        "ngữ",
+        "này.",
+        "Tôi",
+        "sẽ",
+        "tiếp",
+        "tục",
+        "thực",
+        "hành",
+        "các",
+        "thuật",
+        "toán",
+        "phức",
+        "tạp",
+        "hơn",
+        "trong",
+        "những",
+        "ngày",
+        "tới",
+        "để",
+        "nâng",
+        "cao",
+        "kỹ",
+        "năng",
+        "lập",
+        "trình",
+        "chuyên",
+        "nghiệp,",
+        "xây",
+        "dựng",
+        "ứng",
+        "dụng",
+        "desktop",
+        "chất",
+        "lượng",
+        "cao",
+        "cho",
+        "người",
+        "dùng",
+        "Việt",
+        "Nam.",
     ];
     assert_eq!(vi_words.len(), 100);
 
     // Joined by irregular spaces, newlines, and tabs
     let messy_text = vi_words.join("   \n\t  ");
     let res = validate_study_report_text(&messy_text);
-    assert!(res.is_ok(), "100 Vietnamese words with messy spacing should be valid");
+    assert!(
+        res.is_ok(),
+        "100 Vietnamese words with messy spacing should be valid"
+    );
     assert_eq!(res.unwrap(), 100);
 }
 
@@ -98,7 +205,6 @@ fn test_word_validation_large_payload() {
     assert!(res.is_ok(), "10,000 words should be handled gracefully");
     assert_eq!(res.unwrap(), 10_000);
 }
-
 
 // =========================================================================
 // SECTION 2: REWARD QUOTA CALCULATION ADVERSARIAL STRESS TESTS
@@ -175,7 +281,10 @@ fn test_reward_quota_large_numbers_and_overflow() {
     // In float math: (4.29e9 * 4.29e9) = 1.84e19.
     // Cast to u32 in Rust saturates to u32::MAX without panic.
     let r4 = calculate_study_reward_quota(max, 1, max);
-    assert_eq!(r4, max, "Float overflow must saturate to u32::MAX without panic");
+    assert_eq!(
+        r4, max,
+        "Float overflow must saturate to u32::MAX without panic"
+    );
 
     // 5. req = u32::MAX, study = 1, reward = u32::MAX -> exactly 1
     let r5 = calculate_study_reward_quota(1, max, max);
@@ -239,7 +348,10 @@ fn test_empirical_proof_of_floating_point_rounding_bug() {
     let expected_oracle_115 = calculate_study_reward_quota_oracle(115, 45, 45);
     assert_eq!(expected_oracle_115, 115);
     assert_eq!(actual_115, 114);
-    assert_ne!(actual_115, expected_oracle_115, "CONFIRMED BUG: 115 min study yields 114 min reward");
+    assert_ne!(
+        actual_115, expected_oracle_115,
+        "CONFIRMED BUG: 115 min study yields 114 min reward"
+    );
 
     // Case 3: Custom ratio req=90, reward=45, study=230 min.
     // Mathematically: 230 * 45 / 90 = 230 / 2 = 115.
@@ -248,7 +360,10 @@ fn test_empirical_proof_of_floating_point_rounding_bug() {
     let expected_oracle_230 = calculate_study_reward_quota_oracle(230, 90, 45);
     assert_eq!(expected_oracle_230, 115);
     assert_eq!(actual_230, 114);
-    assert_ne!(actual_230, expected_oracle_230, "CONFIRMED BUG: 230 min study yields 114 min reward instead of 115");
+    assert_ne!(
+        actual_230, expected_oracle_230,
+        "CONFIRMED BUG: 230 min study yields 114 min reward instead of 115"
+    );
 
     // Case 4: Custom ratio req=25, reward=45, study=35 min.
     // Mathematically: 35 * 45 / 25 = 1575 / 25 = 63.
@@ -257,7 +372,10 @@ fn test_empirical_proof_of_floating_point_rounding_bug() {
     let expected_oracle_35 = calculate_study_reward_quota_oracle(35, 25, 45);
     assert_eq!(expected_oracle_35, 63);
     assert_eq!(actual_35, 62);
-    assert_ne!(actual_35, expected_oracle_35, "CONFIRMED BUG: 35 min study yields 62 min reward instead of 63");
+    assert_ne!(
+        actual_35, expected_oracle_35,
+        "CONFIRMED BUG: 35 min study yields 62 min reward instead of 63"
+    );
 }
 
 #[test]

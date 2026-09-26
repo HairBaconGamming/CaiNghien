@@ -2,14 +2,13 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::thread;
 use std::time::Duration;
 use windows::core::w;
-use windows::Win32::Foundation::{LRESULT, WPARAM, LPARAM};
-use windows::Win32::UI::WindowsAndMessaging::{
-    CallNextHookEx, SetWindowsHookExW, UnhookWindowsHookEx,
-    GetMessageW, MSG, PostThreadMessageW, WM_QUIT,
-    FindWindowW, ShowWindow, SW_HIDE, SW_SHOW,
-    HHOOK, WH_KEYBOARD_LL, WH_MOUSE_LL, KBDLLHOOKSTRUCT,
-};
+use windows::Win32::Foundation::{LPARAM, LRESULT, WPARAM};
 use windows::Win32::System::LibraryLoader::GetModuleHandleW;
+use windows::Win32::UI::WindowsAndMessaging::{
+    CallNextHookEx, FindWindowW, GetMessageW, PostThreadMessageW, SetWindowsHookExW, ShowWindow,
+    UnhookWindowsHookEx, HHOOK, KBDLLHOOKSTRUCT, MSG, SW_HIDE, SW_SHOW, WH_KEYBOARD_LL,
+    WH_MOUSE_LL, WM_QUIT,
+};
 
 static IS_LOCKED: AtomicBool = AtomicBool::new(false);
 static HOOK_THREAD_ID: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);
@@ -45,7 +44,11 @@ unsafe extern "system" fn mouse_proc(code: i32, wparam: WPARAM, lparam: LPARAM) 
     CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam)
 }
 
-unsafe extern "system" fn kiosk_keyboard_proc(code: i32, wparam: WPARAM, lparam: LPARAM) -> LRESULT {
+unsafe extern "system" fn kiosk_keyboard_proc(
+    code: i32,
+    wparam: WPARAM,
+    lparam: LPARAM,
+) -> LRESULT {
     if code >= 0 && KIOSK_ACTIVE.load(Ordering::Relaxed) {
         let ptr = lparam.0 as *const KBDLLHOOKSTRUCT;
         if ptr.is_null() {
@@ -108,7 +111,13 @@ pub fn start_kiosk_hook() {
     thread::spawn(move || {
         let h_instance = unsafe { GetModuleHandleW(None).unwrap_or_default() };
         let k_hook = unsafe {
-            SetWindowsHookExW(WH_KEYBOARD_LL, Some(kiosk_keyboard_proc), Some(h_instance.into()), 0).ok()
+            SetWindowsHookExW(
+                WH_KEYBOARD_LL,
+                Some(kiosk_keyboard_proc),
+                Some(h_instance.into()),
+                0,
+            )
+            .ok()
         };
 
         unsafe {
@@ -166,25 +175,23 @@ pub fn stop_kiosk_hook() {
 #[tauri::command]
 pub fn lock_hardware_input() {
     let _guard = LOCK_MUTEX.lock().unwrap_or_else(|e| e.into_inner());
-    
+
     LOCK_EPOCH.fetch_add(1, Ordering::Relaxed);
-    
+
     if IS_LOCKED.swap(true, Ordering::Relaxed) {
         return;
     }
 
     // Safety 1: Detached safety thread that unhooks after 65 seconds of inactivity
-    thread::spawn(move || {
-        loop {
-            let current_epoch = LOCK_EPOCH.load(Ordering::Relaxed);
-            thread::sleep(Duration::from_secs(65));
-            if !IS_LOCKED.load(Ordering::Relaxed) {
-                break;
-            }
-            if LOCK_EPOCH.load(Ordering::Relaxed) == current_epoch {
-                unlock_hardware_input();
-                break;
-            }
+    thread::spawn(move || loop {
+        let current_epoch = LOCK_EPOCH.load(Ordering::Relaxed);
+        thread::sleep(Duration::from_secs(65));
+        if !IS_LOCKED.load(Ordering::Relaxed) {
+            break;
+        }
+        if LOCK_EPOCH.load(Ordering::Relaxed) == current_epoch {
+            unlock_hardware_input();
+            break;
         }
     });
 
@@ -192,18 +199,37 @@ pub fn lock_hardware_input() {
 
     thread::spawn(move || {
         let h_instance = unsafe { GetModuleHandleW(None).unwrap_or_default() };
-        
-        let k_hook = unsafe { SetWindowsHookExW(WH_KEYBOARD_LL, Some(keyboard_proc), Some(h_instance.into()), 0).unwrap() };
-        let m_hook = unsafe { SetWindowsHookExW(WH_MOUSE_LL, Some(mouse_proc), Some(h_instance.into()), 0).unwrap() };
-        
+
+        let k_hook = unsafe {
+            SetWindowsHookExW(
+                WH_KEYBOARD_LL,
+                Some(keyboard_proc),
+                Some(h_instance.into()),
+                0,
+            )
+            .unwrap()
+        };
+        let m_hook = unsafe {
+            SetWindowsHookExW(WH_MOUSE_LL, Some(mouse_proc), Some(h_instance.into()), 0).unwrap()
+        };
+
         unsafe {
             let mut msg = MSG::default();
-            let _ = windows::Win32::UI::WindowsAndMessaging::PeekMessageW(&mut msg, None, 0, 0, windows::Win32::UI::WindowsAndMessaging::PM_NOREMOVE);
-            HOOK_THREAD_ID.store(windows::Win32::System::Threading::GetCurrentThreadId(), Ordering::Relaxed);
+            let _ = windows::Win32::UI::WindowsAndMessaging::PeekMessageW(
+                &mut msg,
+                None,
+                0,
+                0,
+                windows::Win32::UI::WindowsAndMessaging::PM_NOREMOVE,
+            );
+            HOOK_THREAD_ID.store(
+                windows::Win32::System::Threading::GetCurrentThreadId(),
+                Ordering::Relaxed,
+            );
         }
-        
+
         let _ = tx.send(());
-        
+
         let mut msg = MSG::default();
         unsafe {
             loop {
@@ -221,7 +247,7 @@ pub fn lock_hardware_input() {
             let _ = UnhookWindowsHookEx(m_hook);
         }
     });
-    
+
     let _ = rx.recv();
 }
 

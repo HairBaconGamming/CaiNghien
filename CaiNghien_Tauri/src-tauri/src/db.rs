@@ -1,11 +1,11 @@
-use std::path::{Path, PathBuf};
-use std::sync::{Arc, Mutex};
 use chrono::{Duration, Local, NaiveDate};
 use rusqlite::{params, Connection, OptionalExtension};
+use std::path::{Path, PathBuf};
+use std::sync::{Arc, Mutex};
 
 use crate::models::{
-    DailyContribution, FocusSessionResult, HeatmapData, HeatmapDay,
-    TypingScore, TypingScoreInput, TypingScoreResult, UserProfile,
+    DailyContribution, FocusSessionResult, HeatmapData, HeatmapDay, TypingScore, TypingScoreInput,
+    TypingScoreResult, UserProfile,
 };
 
 #[derive(Clone)]
@@ -73,11 +73,9 @@ pub fn run_migrations(conn: &mut Connection) -> Result<(), rusqlite::Error> {
     )?;
 
     let current_version: Option<i64> = tx
-        .query_row(
-            "SELECT MAX(version) FROM schema_migrations;",
-            [],
-            |row| row.get(0),
-        )
+        .query_row("SELECT MAX(version) FROM schema_migrations;", [], |row| {
+            row.get(0)
+        })
         .optional()?
         .flatten();
 
@@ -308,11 +306,8 @@ pub fn seed_database_if_empty(
     let tx = conn.transaction()?;
 
     // 1. Seed user_profile if empty
-    let profile_count: i64 = tx.query_row(
-        "SELECT COUNT(*) FROM user_profile;",
-        [],
-        |r| r.get(0),
-    )?;
+    let profile_count: i64 =
+        tx.query_row("SELECT COUNT(*) FROM user_profile;", [], |r| r.get(0))?;
 
     if profile_count == 0 {
         let default_profile = if let Some(cfg) = config_import {
@@ -345,24 +340,20 @@ pub fn seed_database_if_empty(
     }
 
     // 2. Seed daily_contributions if empty
-    let contributions_count: i64 = tx.query_row(
-        "SELECT COUNT(*) FROM daily_contributions;",
-        [],
-        |r| r.get(0),
-    )?;
+    let contributions_count: i64 =
+        tx.query_row("SELECT COUNT(*) FROM daily_contributions;", [], |r| {
+            r.get(0)
+        })?;
 
     if contributions_count == 0 {
-        // No mock data generated per requirement. 
+        // No mock data generated per requirement.
         // Backend returns empty real data if empty.
     }
 
     // 3. Import focus sessions if table is empty and config has them
     if let Some(cfg) = config_import {
-        let sessions_count: i64 = tx.query_row(
-            "SELECT COUNT(*) FROM focus_sessions;",
-            [],
-            |r| r.get(0),
-        )?;
+        let sessions_count: i64 =
+            tx.query_row("SELECT COUNT(*) FROM focus_sessions;", [], |r| r.get(0))?;
         if sessions_count == 0 && !cfg.focus_sessions.is_empty() {
             let mut stmt = tx.prepare(
                 "INSERT INTO focus_sessions (
@@ -383,11 +374,8 @@ pub fn seed_database_if_empty(
         }
 
         // 4. Import typing scores if table is empty and config has them
-        let scores_count: i64 = tx.query_row(
-            "SELECT COUNT(*) FROM typing_scores;",
-            [],
-            |r| r.get(0),
-        )?;
+        let scores_count: i64 =
+            tx.query_row("SELECT COUNT(*) FROM typing_scores;", [], |r| r.get(0))?;
         if scores_count == 0 && !cfg.typing_scores.is_empty() {
             let mut stmt = tx.prepare(
                 "INSERT INTO typing_scores (
@@ -414,7 +402,10 @@ pub fn seed_database_if_empty(
 }
 
 /// Initializes database on disk, runs migrations, and seeds baseline if empty.
-pub fn init_db(path: &Path, config_import: Option<&crate::models::AppConfig>) -> Result<Connection, rusqlite::Error> {
+pub fn init_db(
+    path: &Path,
+    config_import: Option<&crate::models::AppConfig>,
+) -> Result<Connection, rusqlite::Error> {
     let mut conn = open_connection(path)?;
     run_migrations(&mut conn)?;
     seed_database_if_empty(&mut conn, config_import)?;
@@ -570,7 +561,9 @@ pub fn get_heatmap_data(conn: &Connection) -> Result<HeatmapData, String> {
     // Profile streak fallback
     if let Ok(profile) = get_user_profile(conn) {
         current_streak = current_streak.max(profile.streak);
-        longest_streak = longest_streak.max(profile.longest_streak).max(current_streak);
+        longest_streak = longest_streak
+            .max(profile.longest_streak)
+            .max(current_streak);
     }
 
     let activity_rate = if total_days > 0 {
@@ -993,10 +986,7 @@ pub fn record_discipline_minute(
 }
 
 /// Records a discipline violation from the enforcement background loop.
-pub fn record_discipline_violation(
-    conn: &mut Connection,
-    date_str: &str,
-) -> Result<(), String> {
+pub fn record_discipline_violation(conn: &mut Connection, date_str: &str) -> Result<(), String> {
     conn.execute(
         "INSERT INTO daily_contributions (
             date, count, focus_minutes, violations, is_clean, xp_earned, updated_at
@@ -1024,7 +1014,10 @@ mod tests {
         assert_eq!(seed.len(), 365, "Seed must cover exactly 365 days");
 
         let total_contributions: u32 = seed.iter().map(|d| d.count).sum();
-        assert_eq!(total_contributions, 4185, "Total contributions must equal 4,185");
+        assert_eq!(
+            total_contributions, 4185,
+            "Total contributions must equal 4,185"
+        );
 
         let active_days = seed.iter().filter(|d| d.count > 0).count();
         let rate = ((active_days as f64 / 365.0) * 100.0).round() as u32;
@@ -1039,7 +1032,10 @@ mod tests {
                 break;
             }
         }
-        assert_eq!(cur_streak, 128, "Current streak ending on today must be 128");
+        assert_eq!(
+            cur_streak, 128,
+            "Current streak ending on today must be 128"
+        );
 
         // Longest streak
         let mut max_streak = 0;
@@ -1120,13 +1116,15 @@ mod tests {
     }
 }
 
-
 pub fn reset_all_data(conn: &mut Connection) -> Result<(), String> {
     let tx = conn.transaction().map_err(|e| e.to_string())?;
 
-    tx.execute("DELETE FROM daily_contributions;", []).map_err(|e| e.to_string())?;
-    tx.execute("DELETE FROM focus_sessions;", []).map_err(|e| e.to_string())?;
-    tx.execute("DELETE FROM typing_scores;", []).map_err(|e| e.to_string())?;
+    tx.execute("DELETE FROM daily_contributions;", [])
+        .map_err(|e| e.to_string())?;
+    tx.execute("DELETE FROM focus_sessions;", [])
+        .map_err(|e| e.to_string())?;
+    tx.execute("DELETE FROM typing_scores;", [])
+        .map_err(|e| e.to_string())?;
 
     tx.execute(
         "UPDATE user_profile SET
@@ -1141,7 +1139,8 @@ pub fn reset_all_data(conn: &mut Connection) -> Result<(), String> {
             rank = 'Tân Binh'
          WHERE id = 1;",
         [],
-    ).map_err(|e| e.to_string())?;
+    )
+    .map_err(|e| e.to_string())?;
 
     tx.commit().map_err(|e| e.to_string())?;
     Ok(())

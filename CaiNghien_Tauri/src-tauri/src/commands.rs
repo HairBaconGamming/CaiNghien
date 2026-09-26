@@ -1,21 +1,21 @@
-use tauri::State;
-use chrono::{Datelike, Duration, Local, NaiveDate};
 use crate::db::DbState;
 use crate::models::{
-    FocusSessionResult, HeatmapData, HeatmapDay, StudyRewardResult, TypingChallenge,
-    TypingScore, TypingScoreInput, TypingScoreResult, UserProfile,
+    FocusSessionResult, HeatmapData, HeatmapDay, StudyRewardResult, TypingChallenge, TypingScore,
+    TypingScoreInput, TypingScoreResult, UserProfile,
 };
+use chrono::{Datelike, Duration, Local, NaiveDate};
+use tauri::State;
 
 /// Deterministic demo contribution generator for uninitialized/sparse historical days.
 pub fn calculate_seed_count(date: NaiveDate) -> u32 {
     let day_of_year = date.ordinal();
     let weekday = date.weekday().num_days_from_monday(); // 0..=6
-    
+
     // Seed formula with wave harmonics
     let base = if weekday < 5 { 10 } else { 4 };
     let wave = ((day_of_year as f64 * 0.1).sin() * 5.0 + 5.0) as u32;
     let cycle = (day_of_year * 17 + weekday * 7) % 8;
-    
+
     if cycle == 0 && weekday >= 5 {
         0 // Occasional rest weekend
     } else {
@@ -115,22 +115,28 @@ pub fn compute_heatmap_data_from_config(config: &crate::models::AppConfig) -> He
 
 #[tauri::command]
 pub fn get_heatmap_data(state: State<'_, DbState>) -> Result<HeatmapData, String> {
-    let conn = state.0.lock().map_err(|_| "Database lock poisoned".to_string())?;
+    let conn = state
+        .0
+        .lock()
+        .map_err(|_| "Database lock poisoned".to_string())?;
     crate::db::get_heatmap_data(&conn)
 }
 
 #[tauri::command]
 pub fn get_user_profile(state: State<'_, DbState>) -> Result<UserProfile, String> {
-    let conn = state.0.lock().map_err(|_| "Database lock poisoned".to_string())?;
+    let conn = state
+        .0
+        .lock()
+        .map_err(|_| "Database lock poisoned".to_string())?;
     crate::db::get_user_profile(&conn)
 }
 
 #[tauri::command]
-pub fn update_user_profile(
-    state: State<'_, DbState>,
-    profile: UserProfile,
-) -> Result<(), String> {
-    let conn = state.0.lock().map_err(|_| "Database lock poisoned".to_string())?;
+pub fn update_user_profile(state: State<'_, DbState>, profile: UserProfile) -> Result<(), String> {
+    let conn = state
+        .0
+        .lock()
+        .map_err(|_| "Database lock poisoned".to_string())?;
     crate::db::update_user_profile(&conn, &profile)
 }
 
@@ -140,7 +146,10 @@ pub fn record_focus_session(
     duration_minutes: u32,
     session_type: String,
 ) -> Result<FocusSessionResult, String> {
-    let mut conn = state.0.lock().map_err(|_| "Database lock poisoned".to_string())?;
+    let mut conn = state
+        .0
+        .lock()
+        .map_err(|_| "Database lock poisoned".to_string())?;
     crate::db::record_focus_session(&mut conn, duration_minutes, session_type)
 }
 
@@ -177,19 +186,28 @@ pub fn save_typing_score(
     state: State<'_, DbState>,
     score: TypingScoreInput,
 ) -> Result<TypingScoreResult, String> {
-    let mut conn = state.0.lock().map_err(|_| "Database lock poisoned".to_string())?;
+    let mut conn = state
+        .0
+        .lock()
+        .map_err(|_| "Database lock poisoned".to_string())?;
     crate::db::save_typing_score(&mut conn, score)
 }
 
 #[tauri::command]
 pub fn get_typing_scores(state: State<'_, DbState>) -> Result<Vec<TypingScore>, String> {
-    let conn = state.0.lock().map_err(|_| "Database lock poisoned".to_string())?;
+    let conn = state
+        .0
+        .lock()
+        .map_err(|_| "Database lock poisoned".to_string())?;
     crate::db::get_typing_scores(&conn)
 }
 
 #[tauri::command]
 pub fn reset_all_data(state: State<'_, DbState>) -> Result<(), String> {
-    let mut conn = state.0.lock().map_err(|_| "Database lock poisoned".to_string())?;
+    let mut conn = state
+        .0
+        .lock()
+        .map_err(|_| "Database lock poisoned".to_string())?;
     crate::db::reset_all_data(&mut conn)
 }
 
@@ -212,8 +230,16 @@ pub fn calculate_study_reward_quota(
     study_minutes_required: u32,
     reward_quota_minutes: u32,
 ) -> u32 {
-    let req = if study_minutes_required == 0 { 60 } else { study_minutes_required };
-    let reward_unit = if reward_quota_minutes == 0 { 15 } else { reward_quota_minutes };
+    let req = if study_minutes_required == 0 {
+        60
+    } else {
+        study_minutes_required
+    };
+    let reward_unit = if reward_quota_minutes == 0 {
+        15
+    } else {
+        reward_quota_minutes
+    };
     let quota = ((study_duration_minutes as u128) * (reward_unit as u128)) / (req as u128);
     quota.min(u32::MAX as u128) as u32
 }
@@ -231,7 +257,10 @@ pub fn submit_study_report(
 
     // 2. Lock config and calculate earned quota
     let (reward_quota, new_total_quota) = {
-        let mut config_data = state.0.lock().map_err(|_| "Config lock poisoned".to_string())?;
+        let mut config_data = state
+            .0
+            .lock()
+            .map_err(|_| "Config lock poisoned".to_string())?;
         let earned = calculate_study_reward_quota(
             study_duration_minutes,
             config_data.study_minutes_required,
@@ -245,8 +274,13 @@ pub fn submit_study_report(
 
     // 3. Record session in SQLite database (awards XP and updates heatmap)
     let xp_earned = if let Ok(mut conn) = db_state.0.lock() {
-        let res = crate::db::record_focus_session(&mut conn, study_duration_minutes, "study_to_earn".to_string());
-        res.map(|r| r.xp_earned).unwrap_or(study_duration_minutes.saturating_mul(4))
+        let res = crate::db::record_focus_session(
+            &mut conn,
+            study_duration_minutes,
+            "study_to_earn".to_string(),
+        );
+        res.map(|r| r.xp_earned)
+            .unwrap_or(study_duration_minutes.saturating_mul(4))
     } else {
         study_duration_minutes.saturating_mul(4)
     };
@@ -256,11 +290,12 @@ pub fn submit_study_report(
         added_quota_minutes: reward_quota,
         new_daily_quota_minutes: new_total_quota,
         xp_earned,
-        message: format!("Hoàn thành bài thu hoạch! Đã cộng {} phút vào Quota giải trí.", reward_quota),
+        message: format!(
+            "Hoàn thành bài thu hoạch! Đã cộng {} phút vào Quota giải trí.",
+            reward_quota
+        ),
     })
 }
-
-
 
 #[cfg(test)]
 mod tests {
@@ -325,7 +360,10 @@ mod tests {
         assert!(err.is_err());
         assert!(err.unwrap_err().contains("Yêu cầu tối thiểu 100 từ"));
 
-        let valid_text = (0..105).map(|i| format!("từ{}", i)).collect::<Vec<_>>().join(" ");
+        let valid_text = (0..105)
+            .map(|i| format!("từ{}", i))
+            .collect::<Vec<_>>()
+            .join(" ");
         let ok = validate_study_report_text(&valid_text);
         assert!(ok.is_ok());
         assert_eq!(ok.unwrap(), 105);

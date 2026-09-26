@@ -1,18 +1,21 @@
+use chrono::{Datelike, Timelike};
 use std::fs;
+use std::os::windows::process::CommandExt;
 use std::path::PathBuf;
 use std::process::Command;
-use std::os::windows::process::CommandExt;
-use std::time::Duration;
-use tauri::Manager;
 use std::thread;
+use std::time::Duration;
 use tauri::Emitter;
-use chrono::{Datelike, Timelike};
+use tauri::Manager;
 
 use crate::config::ConfigState;
 use crate::models::{DayDisciplineRecord, ScheduleConfig};
 use active_win_pos_rs::get_active_window;
 
-pub fn is_time_in_schedule(schedule: &ScheduleConfig, now: &chrono::DateTime<chrono::Local>) -> bool {
+pub fn is_time_in_schedule(
+    schedule: &ScheduleConfig,
+    now: &chrono::DateTime<chrono::Local>,
+) -> bool {
     if !schedule.enabled {
         return false;
     }
@@ -24,7 +27,10 @@ pub fn is_time_in_schedule(schedule: &ScheduleConfig, now: &chrono::DateTime<chr
     let weekday_1_to_7 = now.weekday().number_from_monday() as u8;
     let weekday_0_to_6 = now.weekday().num_days_from_sunday() as u8;
 
-    let day_matches = schedule.days_of_week.iter().any(|&d| d == weekday_1_to_7 || d == weekday_0_to_6);
+    let day_matches = schedule
+        .days_of_week
+        .iter()
+        .any(|&d| d == weekday_1_to_7 || d == weekday_0_to_6);
     if !day_matches {
         return false;
     }
@@ -73,6 +79,13 @@ pub fn unlock_hosts() {
     // No-op
 }
 
+pub fn enforce_window_lock(pid: u32) {
+    let _ = Command::new("taskkill")
+        .args(&["/F", "/PID", &pid.to_string()])
+        .creation_flags(CREATE_NO_WINDOW)
+        .output();
+}
+
 pub fn watchdog_loop(main_pid: u32) {
     let mut sys = sysinfo::System::new();
     let main_pid_obj = sysinfo::Pid::from_u32(main_pid);
@@ -94,10 +107,11 @@ fn get_hosts_path() -> PathBuf {
     PathBuf::from(r"C:\Windows\System32\drivers\etc\hosts")
 }
 
-
-
 pub fn apply_family_dns(enable: bool) {
-    let backup_file = std::env::temp_dir().join("cainghien_dns_backup.json").display().to_string();
+    let backup_file = std::env::temp_dir()
+        .join("cainghien_dns_backup.json")
+        .display()
+        .to_string();
     let inner_script = if enable {
         format!(
             "try {{ \
@@ -130,7 +144,10 @@ pub fn apply_family_dns(enable: bool) {
     };
 
     let system_root = std::env::var("SystemRoot").unwrap_or_else(|_| "C:\\Windows".to_string());
-    let ps_path = format!("{}\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", system_root);
+    let ps_path = format!(
+        "{}\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        system_root
+    );
 
     let script = format!(
         "Start-Process -FilePath \"{}\" -ArgumentList \"-NoProfile -Command `\"{}\"`\" -Verb RunAs -WindowStyle Hidden -Wait",
@@ -149,7 +166,7 @@ pub fn apply_hosts_block(domains: &[String]) -> Result<(), String> {
 
     let path = get_hosts_path();
     let content = fs::read_to_string(&path).unwrap_or_default();
-    
+
     let mut in_block = false;
     let mut new_content = String::new();
     for line in content.lines() {
@@ -173,7 +190,11 @@ pub fn apply_hosts_block(domains: &[String]) -> Result<(), String> {
     if !domains.is_empty() {
         let mut block_lines = vec![String::from(MARKER_START)];
         for domain in domains {
-            if !domain_regex.is_match(domain) || domain.contains('\r') || domain.contains('\n') || domain.contains(' ') {
+            if !domain_regex.is_match(domain)
+                || domain.contains('\r')
+                || domain.contains('\n')
+                || domain.contains(' ')
+            {
                 return Err("Invalid domain format".to_string());
             }
             let base_domain = if domain.starts_with("www.") {
@@ -194,16 +215,20 @@ pub fn apply_hosts_block(domains: &[String]) -> Result<(), String> {
         final_content.push('\n');
     }
 
-    let tmp_path = std::env::temp_dir().join(format!("cainghien_hosts_tmp_{}.txt", std::process::id()));
+    let tmp_path =
+        std::env::temp_dir().join(format!("cainghien_hosts_tmp_{}.txt", std::process::id()));
     let write_res = fs::write(&tmp_path, final_content);
-    
+
     if write_res.is_err() {
         return Err("Failed to write to temp file".to_string());
     }
 
     let system_root = std::env::var("SystemRoot").unwrap_or_else(|_| "C:\\Windows".to_string());
-    let ps_path = format!("{}\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", system_root);
-    
+    let ps_path = format!(
+        "{}\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        system_root
+    );
+
     // Backup and atomic write via elevated PS
     let script = format!(
         "try {{ Copy-Item -Path '{}' -Destination '{}\\hosts.cainghien.bak' -ErrorAction SilentlyContinue; Move-Item -Path '{}' -Destination '{}' -Force; ipconfig /flushdns; }} catch {{ exit 1 }}",
@@ -273,7 +298,7 @@ pub fn spawn_enforcement_loop(app: tauri::AppHandle) {
 
             if let Some(mut config) = config {
                 let mut quota_active = QUOTA_ACTIVE.load(Ordering::Relaxed);
-                
+
                 // Tick quota if active
                 if quota_active {
                     let max_seconds = config.daily_quota_minutes * 60;
@@ -310,31 +335,35 @@ pub fn spawn_enforcement_loop(app: tauri::AppHandle) {
                 let domains_changed = last_domains.as_ref() != Some(&domains);
 
                 let effective_hosts_protection = (is_protected || in_schedule) && !quota_active;
-                let should_apply_dns = ((is_protected && block_nsfw) || in_schedule) && !quota_active;
+                let should_apply_dns =
+                    ((is_protected && block_nsfw) || in_schedule) && !quota_active;
 
                 if effective_hosts_protection {
                     config.current_day_focus_seconds += 1;
                     if config.current_day_focus_seconds >= 60 {
                         let mins = config.current_day_focus_seconds / 60;
                         config.current_day_focus_seconds %= 60;
-                        
+
                         let today = chrono::Local::now().format("%Y-%m-%d").to_string();
                         let today_mins = {
                             let entry = config.daily_stats.entry(today.clone()).or_insert(0);
                             *entry += mins;
                             *entry
                         };
-                        
+
                         let total_mins: u32 = config.daily_stats.values().sum();
                         config.total_focus_hours = total_mins / 60;
 
                         // R1: Update daily_history for heatmap
-                        let hist = config.daily_history.entry(today.clone()).or_insert_with(|| DayDisciplineRecord {
-                            date: today.clone(),
-                            focus_minutes: 0,
-                            violations: 0,
-                            is_clean: true,
-                        });
+                        let hist = config
+                            .daily_history
+                            .entry(today.clone())
+                            .or_insert_with(|| DayDisciplineRecord {
+                                date: today.clone(),
+                                focus_minutes: 0,
+                                violations: 0,
+                                is_clean: true,
+                            });
                         hist.date = today.clone();
                         hist.focus_minutes = today_mins;
                         hist.is_clean = hist.violations == 0;
@@ -350,7 +379,8 @@ pub fn spawn_enforcement_loop(app: tauri::AppHandle) {
                         // Persist to SQLite
                         if let Some(db_state) = app.try_state::<crate::db::DbState>() {
                             if let Ok(mut conn) = db_state.0.lock() {
-                                let _ = crate::db::record_discipline_minute(&mut conn, &today, mins);
+                                let _ =
+                                    crate::db::record_discipline_minute(&mut conn, &today, mins);
                             }
                         }
                     } else if config.current_day_focus_seconds % 10 == 0 {
@@ -366,7 +396,10 @@ pub fn spawn_enforcement_loop(app: tauri::AppHandle) {
                     let pid = WATCHDOG_PID.load(Ordering::Relaxed);
                     if pid != 0 {
                         let target_pid = sysinfo::Pid::from_u32(pid);
-                        sys.refresh_processes(sysinfo::ProcessesToUpdate::Some(&[target_pid]), true);
+                        sys.refresh_processes(
+                            sysinfo::ProcessesToUpdate::Some(&[target_pid]),
+                            true,
+                        );
                         if sys.process(target_pid).is_none() {
                             needs_spawn = true;
                         }
@@ -380,7 +413,7 @@ pub fn spawn_enforcement_loop(app: tauri::AppHandle) {
                             .arg("--watchdog")
                             .arg(std::process::id().to_string())
                             .creation_flags(DETACHED_PROCESS)
-                            .spawn() 
+                            .spawn()
                         {
                             WATCHDOG_PID.store(child.id(), Ordering::Relaxed);
                         }
@@ -397,39 +430,39 @@ pub fn spawn_enforcement_loop(app: tauri::AppHandle) {
                 }
 
                 // Reset cooldown if user explicitly toggles protection or changes domains
-                if last_attempted_protection != Some(effective_hosts_protection) || domains_changed {
+                if last_attempted_protection != Some(effective_hosts_protection) || domains_changed
+                {
                     hosts_retry_cooldown = 0;
                     last_attempted_protection = Some(effective_hosts_protection);
                 }
 
                 // Sync hosts file (avoid infinite 1-second retry storm if permissions denied)
-                if (last_protection_state != Some(effective_hosts_protection) || (effective_hosts_protection && domains_changed)) && hosts_retry_cooldown == 0 {
-                    let result = if effective_hosts_protection {
-                        apply_hosts_block(&domains)
+                if (last_protection_state != Some(effective_hosts_protection)
+                    || (effective_hosts_protection && domains_changed))
+                    && hosts_retry_cooldown == 0
+                {
+                    let domains_clone = domains.clone();
+                    thread::spawn(move || {
+                        let _ = if effective_hosts_protection {
+                            apply_hosts_block(&domains_clone)
+                        } else {
+                            apply_hosts_block(&[])
+                        };
+                    });
+
+                    last_protection_state = Some(effective_hosts_protection);
+                    if effective_hosts_protection {
+                        last_domains = Some(domains.clone());
                     } else {
-                        apply_hosts_block(&[])
-                    };
-                    
-                    match result {
-                        Ok(_) => {
-                            last_protection_state = Some(effective_hosts_protection);
-                            if effective_hosts_protection {
-                                last_domains = Some(domains.clone());
-                            } else {
-                                last_domains = Some(vec![]);
-                            }
-                        }
-                        Err(e) => {
-                            eprintln!("Failed to apply hosts block (backing off 60s): {}", e);
-                            // Backoff 60 seconds instead of thrashing every 1 second
-                            hosts_retry_cooldown = 60;
-                        }
+                        last_domains = Some(vec![]);
                     }
                 }
 
                 // Sync DNS Family Filter
                 if last_nsfw_state != Some(should_apply_dns) {
-                    apply_family_dns(should_apply_dns);
+                    thread::spawn(move || {
+                        apply_family_dns(should_apply_dns);
+                    });
                     last_nsfw_state = Some(should_apply_dns);
                 }
 
@@ -438,16 +471,18 @@ pub fn spawn_enforcement_loop(app: tauri::AppHandle) {
                     if let Ok(window) = get_active_window() {
                         let title = window.title.to_lowercase();
                         let app_name = window.app_name.to_lowercase();
-                        
-                        let target_browsers = [
-                            "chrome", "msedge", "firefox", "brave", "opera", "coccoc"
-                        ];
+
+                        let target_browsers =
+                            ["chrome", "msedge", "firefox", "brave", "opera", "coccoc"];
 
                         if target_browsers.iter().any(|b| app_name.contains(b)) {
                             let mut should_lock = false;
 
                             if block_nsfw || in_schedule {
-                                let nsfw_regex = regex::Regex::new(r"\b(pornhub|xvideos|sex|jav|hentai|xnxx|xhamster|nhentai)\b").unwrap();
+                                let nsfw_regex = regex::Regex::new(
+                                    r"\b(pornhub|xvideos|sex|jav|hentai|xnxx|xhamster|nhentai)\b",
+                                )
+                                .unwrap();
                                 if nsfw_regex.is_match(&title) {
                                     should_lock = true;
                                 }
@@ -460,9 +495,13 @@ pub fn spawn_enforcement_loop(app: tauri::AppHandle) {
                                     } else {
                                         domain.as_str()
                                     };
-                                    let domain_no_tld = base_domain.split('.').next().unwrap_or(base_domain);
-                                    
-                                    if title.contains(base_domain) || (domain_no_tld.len() > 3 && title.contains(domain_no_tld)) {
+                                    let domain_no_tld =
+                                        base_domain.split('.').next().unwrap_or(base_domain);
+
+                                    if title.contains(base_domain)
+                                        || (domain_no_tld.len() > 3
+                                            && title.contains(domain_no_tld))
+                                    {
                                         should_lock = true;
                                         break;
                                     }
@@ -474,12 +513,15 @@ pub fn spawn_enforcement_loop(app: tauri::AppHandle) {
                                 if let Ok(mut guard) = app.state::<ConfigState>().0.lock() {
                                     guard.violations_count += 1;
                                     let today = chrono::Local::now().format("%Y-%m-%d").to_string();
-                                    let hist = guard.daily_history.entry(today.clone()).or_insert_with(|| DayDisciplineRecord {
-                                        date: today,
-                                        focus_minutes: 0,
-                                        violations: 0,
-                                        is_clean: true,
-                                    });
+                                    let hist = guard
+                                        .daily_history
+                                        .entry(today.clone())
+                                        .or_insert_with(|| DayDisciplineRecord {
+                                            date: today,
+                                            focus_minutes: 0,
+                                            violations: 0,
+                                            is_clean: true,
+                                        });
                                     hist.violations += 1;
                                     hist.is_clean = false;
                                     let _ = crate::config::save_config(&app, &guard);
@@ -487,12 +529,16 @@ pub fn spawn_enforcement_loop(app: tauri::AppHandle) {
 
                                 if let Some(db_state) = app.try_state::<crate::db::DbState>() {
                                     if let Ok(mut conn) = db_state.0.lock() {
-                                        let today = chrono::Local::now().format("%Y-%m-%d").to_string();
-                                        let _ = crate::db::record_discipline_violation(&mut conn, &today);
+                                        let today =
+                                            chrono::Local::now().format("%Y-%m-%d").to_string();
+                                        let _ = crate::db::record_discipline_violation(
+                                            &mut conn, &today,
+                                        );
                                     }
                                 }
-                                
+
                                 // TRIGGER LOCKSCREEN
+                                enforce_window_lock(window.process_id as u32);
                                 let _ = app.emit("trigger-lockscreen", ());
                             }
                         }
@@ -508,7 +554,7 @@ pub fn spawn_enforcement_loop(app: tauri::AppHandle) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use chrono::{TimeZone, Local};
+    use chrono::{Local, TimeZone};
 
     #[test]
     fn test_schedule_disabled_returns_false() {

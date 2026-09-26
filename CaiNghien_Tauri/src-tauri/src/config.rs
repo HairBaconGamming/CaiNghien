@@ -1,8 +1,8 @@
-use tauri_plugin_autostart::ManagerExt;
 use std::fs;
 use std::path::PathBuf;
-use tauri::{AppHandle, Manager};
 use std::sync::Mutex;
+use tauri::{AppHandle, Manager};
+use tauri_plugin_autostart::ManagerExt;
 
 use crate::models::AppConfig;
 
@@ -57,14 +57,14 @@ pub fn load_config_from_path(path: &std::path::Path) -> AppConfig {
 pub fn load_config(app: &AppHandle) -> AppConfig {
     let path = get_config_path(app);
     let mut config = load_config_from_path(&path);
-    
+
     let today = chrono::Local::now().format("%Y-%m-%d").to_string();
     if config.quota_last_reset_date != today {
         config.quota_last_reset_date = today;
         config.quota_used_seconds = 0;
         let _ = save_config(app, &config);
     }
-    
+
     config
 }
 
@@ -103,12 +103,15 @@ pub fn apply_penalty_core(config: &mut AppConfig) {
     config.daily_stats.clear();
 
     let today = chrono::Local::now().format("%Y-%m-%d").to_string();
-    let entry = config.daily_history.entry(today.clone()).or_insert_with(|| crate::models::DayDisciplineRecord {
-        date: today,
-        focus_minutes: 0,
-        violations: 0,
-        is_clean: false,
-    });
+    let entry = config
+        .daily_history
+        .entry(today.clone())
+        .or_insert_with(|| crate::models::DayDisciplineRecord {
+            date: today,
+            focus_minutes: 0,
+            violations: 0,
+            is_clean: false,
+        });
     entry.violations += 1;
     entry.is_clean = false;
 }
@@ -129,8 +132,11 @@ pub fn save_app_config(
     mut new_config: AppConfig,
 ) -> Result<(), String> {
     let mut config = state.0.lock().map_err(|_| "Mutex poisoned".to_string())?;
-    
-    let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap_or_default().as_secs();
+
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs();
 
     if let Some(current_hardcore) = config.hardcore_until {
         if (now as i64) < current_hardcore {
@@ -144,13 +150,13 @@ pub fn save_app_config(
     if config.protection_enabled && !new_config.protection_enabled {
         if config.password_hash.is_some() {
             let mut can_disable = false;
-            
+
             if let Some(until) = config.temporary_unlock_until {
                 if now <= until {
                     can_disable = true;
                 }
             }
-            
+
             if !can_disable {
                 if let Some(req_at) = config.unlock_requested_at {
                     if now >= req_at + 7 * 24 * 60 * 60 {
@@ -158,9 +164,11 @@ pub fn save_app_config(
                     }
                 }
             }
-            
+
             if !can_disable {
-                return Err("Cannot disable protection: password required or cooldown active.".into());
+                return Err(
+                    "Cannot disable protection: password required or cooldown active.".into(),
+                );
             }
         }
         new_config.protection_started_at = None;
@@ -169,9 +177,11 @@ pub fn save_app_config(
     } else {
         new_config.protection_started_at = config.protection_started_at;
     }
-    
+
     new_config.violations_count = config.violations_count; // Preserve violations count
-    new_config.daily_quota_minutes = config.daily_quota_minutes.max(new_config.daily_quota_minutes);
+    new_config.daily_quota_minutes = config
+        .daily_quota_minutes
+        .max(new_config.daily_quota_minutes);
     new_config.temporary_unlock_until = config.temporary_unlock_until;
     new_config.quota_used_seconds = config.quota_used_seconds;
     new_config.quota_last_reset_date = config.quota_last_reset_date.clone();
@@ -232,7 +242,10 @@ mod tests {
         assert!(config.daily_stats.is_empty());
 
         let today = chrono::Local::now().format("%Y-%m-%d").to_string();
-        let hist = config.daily_history.get(&today).expect("Must have today's record");
+        let hist = config
+            .daily_history
+            .get(&today)
+            .expect("Must have today's record");
         assert_eq!(hist.violations, 1);
         assert!(!hist.is_clean);
     }

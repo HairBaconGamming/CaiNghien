@@ -149,7 +149,6 @@ pub struct StudyRewardResult {
     pub message: String,
 }
 
-
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct TypingChallenge {
     pub id: String,
@@ -206,11 +205,11 @@ pub struct AppConfig {
     pub daily_quota_minutes: u32,
     pub quota_used_seconds: u32,
     pub quota_last_reset_date: String,
-    
+
     // Study-to-Earn Conversion Settings
     pub study_minutes_required: u32,
     pub reward_quota_minutes: u32,
-    
+
     // R1: Hardcore Mode
     pub hardcore_until: Option<i64>,
 
@@ -318,7 +317,8 @@ mod tests {
             "blocked_domains": ["youtube.com"],
             "violations_count": 3
         }"#;
-        let config: AppConfig = serde_json::from_str(old_json).expect("Should deserialize old config");
+        let config: AppConfig =
+            serde_json::from_str(old_json).expect("Should deserialize old config");
         assert_eq!(config.level, 1);
         assert_eq!(config.xp, 0);
         assert_eq!(config.streak, 0);
@@ -339,12 +339,15 @@ mod tests {
         config.xp = 350;
         config.streak = 14;
         config.schedule.enabled = true;
-        config.daily_history.insert("2026-09-16".to_string(), DayDisciplineRecord {
-            date: "2026-09-16".to_string(),
-            focus_minutes: 120,
-            violations: 0,
-            is_clean: true,
-        });
+        config.daily_history.insert(
+            "2026-09-16".to_string(),
+            DayDisciplineRecord {
+                date: "2026-09-16".to_string(),
+                focus_minutes: 120,
+                violations: 0,
+                is_clean: true,
+            },
+        );
 
         let serialized = serde_json::to_string(&config).expect("Must serialize");
         let deserialized: AppConfig = serde_json::from_str(&serialized).expect("Must deserialize");
@@ -411,11 +414,11 @@ mod tests {
             message: "Hoàn thành bài thu hoạch!".to_string(),
         };
         let res_json = serde_json::to_string(&reward_res).expect("Must serialize result");
-        let res_deserialized: StudyRewardResult = serde_json::from_str(&res_json).expect("Must deserialize result");
+        let res_deserialized: StudyRewardResult =
+            serde_json::from_str(&res_json).expect("Must deserialize result");
         assert!(res_deserialized.success);
         assert_eq!(res_deserialized.added_quota_minutes, 20);
         assert_eq!(res_deserialized.new_daily_quota_minutes, 80);
         assert_eq!(res_deserialized.xp_earned, 360);
     }
 }
-

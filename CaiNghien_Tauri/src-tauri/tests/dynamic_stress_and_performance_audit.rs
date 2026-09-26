@@ -5,15 +5,10 @@ use std::path::PathBuf;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::{Duration, Instant, SystemTime};
 
-use cainghien_tauri_lib::commands::{
-    calculate_study_reward_quota, validate_study_report_text,
-};
-use cainghien_tauri_lib::config::{
-    atomic_save_to_path, load_config_from_path,
-};
+use cainghien_tauri_lib::commands::{calculate_study_reward_quota, validate_study_report_text};
+use cainghien_tauri_lib::config::{atomic_save_to_path, load_config_from_path};
 use cainghien_tauri_lib::db::{
-    get_heatmap_data, init_db, open_connection, record_focus_session,
-    save_typing_score,
+    get_heatmap_data, init_db, open_connection, record_focus_session, save_typing_score,
 };
 use cainghien_tauri_lib::models::{AppConfig, TypingScoreInput};
 
@@ -48,7 +43,11 @@ fn test_benchmark_sqlite_transaction_throughput_and_disk_io() {
         .query_row("PRAGMA journal_mode;", [], |row| row.get(0))
         .expect("PRAGMA journal_mode query failed");
     println!("  SQLite Journal Mode: {}", journal_mode);
-    assert_eq!(journal_mode.to_lowercase(), "wal", "SQLite should be configured in WAL mode");
+    assert_eq!(
+        journal_mode.to_lowercase(),
+        "wal",
+        "SQLite should be configured in WAL mode"
+    );
 
     // 2. Measure Focus Session Insert Latency & Catch Primary Key Collision Bug
     let res_first = record_focus_session(&mut conn, 25, "focus_tag_1".into());
@@ -101,7 +100,8 @@ fn test_benchmark_sqlite_transaction_throughput_and_disk_io() {
         assert_eq!(heatmap.days.len(), 365);
     }
     let duration_heatmap = start_heatmap.elapsed();
-    let heatmap_latency_avg_ms = (duration_heatmap.as_secs_f64() * 1000.0) / (heatmap_query_count as f64);
+    let heatmap_latency_avg_ms =
+        (duration_heatmap.as_secs_f64() * 1000.0) / (heatmap_query_count as f64);
     println!(
         "  [Heatmap Query (365-day)] Iterations: {}, Elapsed: {:.2?}, Avg Latency: {:.3} ms/query",
         heatmap_query_count, duration_heatmap, heatmap_latency_avg_ms
@@ -141,7 +141,9 @@ fn test_benchmark_config_atomic_write_vs_direct_write() {
             "reddit.com".into(),
             "instagram.com".into(),
         ],
-        password_hash: Some("5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8".into()),
+        password_hash: Some(
+            "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8".into(),
+        ),
         level: 25,
         xp: 12000,
         streak: 14,
@@ -263,7 +265,9 @@ fn test_stress_oversized_payload_on_word_validation_and_study_report() {
     let words_1mb = res_1mb.unwrap();
     println!(
         "  [1 MB Payload] Size: {} bytes, Word Count: {}, Time: {:.2?} (No panic, validated ok)",
-        payload_1mb.len(), words_1mb, dur_1mb
+        payload_1mb.len(),
+        words_1mb,
+        dur_1mb
     );
 
     // Generate 5MB payload
@@ -275,7 +279,9 @@ fn test_stress_oversized_payload_on_word_validation_and_study_report() {
     assert!(res_5mb.is_ok());
     println!(
         "  [5 MB Payload] Size: {} bytes, Word Count: {}, Time: {:.2?} (Completed without OOM)",
-        payload_5mb.len(), res_5mb.unwrap(), dur_5mb
+        payload_5mb.len(),
+        res_5mb.unwrap(),
+        dur_5mb
     );
 
     // Generate 10MB payload
@@ -287,10 +293,15 @@ fn test_stress_oversized_payload_on_word_validation_and_study_report() {
     assert!(res_10mb.is_ok());
     println!(
         "  [10 MB Payload] Size: {} bytes, Word Count: {}, Time: {:.2?} (Completed without OOM)",
-        payload_10mb.len(), res_10mb.unwrap(), dur_10mb
+        payload_10mb.len(),
+        res_10mb.unwrap(),
+        dur_10mb
     );
 
-    assert!(dur_10mb.as_secs_f64() < 5.0, "10MB text validation took too long (> 5s)");
+    assert!(
+        dur_10mb.as_secs_f64() < 5.0,
+        "10MB text validation took too long (> 5s)"
+    );
 }
 
 #[test]
@@ -302,7 +313,8 @@ fn test_stress_corrupted_and_locked_sqlite_database_behavior() {
     let corrupt_db_path = temp_dir.join("corrupted.db");
     {
         let mut f = File::create(&corrupt_db_path).unwrap();
-        f.write_all(b"NOT_A_SQLITE_DATABASE_CORRUPT_BYTES_XYZ_1234567890").unwrap();
+        f.write_all(b"NOT_A_SQLITE_DATABASE_CORRUPT_BYTES_XYZ_1234567890")
+            .unwrap();
         f.flush().unwrap();
     }
 
@@ -310,7 +322,10 @@ fn test_stress_corrupted_and_locked_sqlite_database_behavior() {
     let init_corrupted_res = init_db(&corrupt_db_path, None);
     println!(
         "  [Corrupted DB] init_db result on raw garbage file: {:?}",
-        init_corrupted_res.as_ref().map(|_| "Ok").map_err(|e| e.to_string())
+        init_corrupted_res
+            .as_ref()
+            .map(|_| "Ok")
+            .map_err(|e| e.to_string())
     );
     // SQLite detects "file is not a database" and init_db fails!
     assert!(
@@ -350,7 +365,10 @@ fn test_stress_corrupted_and_locked_sqlite_database_behavior() {
     let open_locked_res = open_connection(&locked_db_path);
     println!(
         "  [Locked DB] open_connection on exclusively locked file: {:?}",
-        open_locked_res.as_ref().map(|_| "Ok").map_err(|e| e.to_string())
+        open_locked_res
+            .as_ref()
+            .map(|_| "Ok")
+            .map_err(|e| e.to_string())
     );
     assert!(
         open_locked_res.is_err(),
@@ -377,7 +395,11 @@ fn test_stress_corrupted_config_json_fallback_behavior() {
 
     // Scenario B: Truncated JSON syntax error
     let truncated_cfg_path = temp_dir.join("truncated_config.json");
-    fs::write(&truncated_cfg_path, br#"{"protection_enabled": true, "blocked_domains": ["#).unwrap();
+    fs::write(
+        &truncated_cfg_path,
+        br#"{"protection_enabled": true, "blocked_domains": ["#,
+    )
+    .unwrap();
     let loaded_truncated = load_config_from_path(&truncated_cfg_path);
     assert_eq!(
         loaded_truncated.protection_enabled, false,
@@ -411,7 +433,10 @@ fn test_stress_system_clock_skew_panic_vector_verification() {
 
     // When calculating duration_since with an earlier anchor in the future:
     let backwards_res = now.duration_since(future_time);
-    assert!(backwards_res.is_err(), "duration_since with time in the future must return Err");
+    assert!(
+        backwards_res.is_err(),
+        "duration_since with time in the future must return Err"
+    );
 
     // Demonstrate the exact panic vector when unwrap is called on backwards jump:
     let panic_res = std::panic::catch_unwind(|| {
@@ -420,7 +445,10 @@ fn test_stress_system_clock_skew_panic_vector_verification() {
         // This simulates a clock moving backwards before an anchor or before UNIX_EPOCH:
         later.duration_since(earlier).unwrap()
     });
-    assert!(panic_res.is_err(), "Calling .unwrap() on backwards clock skew must panic");
+    assert!(
+        panic_res.is_err(),
+        "Calling .unwrap() on backwards clock skew must panic"
+    );
     println!(
         "  [CONFIRMED PANIC VECTOR] .duration_since(anchor).unwrap() panics on negative clock adjustment"
     );
@@ -433,11 +461,7 @@ fn test_stress_hosts_file_crlf_injection_and_sharing_violation() {
     let mock_hosts_path = temp_dir.join("mock_hosts");
 
     // Initial hosts file content
-    fs::write(
-        &mock_hosts_path,
-        "127.0.0.1 localhost\r\n::1 localhost\r\n",
-    )
-    .unwrap();
+    fs::write(&mock_hosts_path, "127.0.0.1 localhost\r\n::1 localhost\r\n").unwrap();
 
     // 1. CRLF Injection Test on apply_hosts_block logic:
     let malicious_domain = "clean.com\r\n192.168.1.100 injected-bank.com\r\n#";
@@ -465,7 +489,11 @@ fn test_stress_hosts_file_crlf_injection_and_sharing_violation() {
     let write_res = fs::write(&mock_hosts_path, "Overwritten content");
     println!(
         "  [Sharing Violation DoS] Write attempt on read-locked file: {:?}",
-        write_res.as_ref().map(|_| "Ok").map_err(|e| format!("OS error {}: {}", e.raw_os_error().unwrap_or(0), e))
+        write_res.as_ref().map(|_| "Ok").map_err(|e| format!(
+            "OS error {}: {}",
+            e.raw_os_error().unwrap_or(0),
+            e
+        ))
     );
     assert!(
         write_res.is_err(),
@@ -491,7 +519,10 @@ fn test_stress_gamification_extreme_inputs_and_quota_math() {
     assert_eq!(res_zero, 0);
 
     let res_max_u32 = calculate_study_reward_quota(u32::MAX, 60, 15);
-    println!("  Quota for u32::MAX study duration: {} minutes", res_max_u32);
+    println!(
+        "  Quota for u32::MAX study duration: {} minutes",
+        res_max_u32
+    );
     assert_eq!(res_max_u32, u32::MAX / 4);
 
     let res_zero_config = calculate_study_reward_quota(120, 0, 0);
@@ -510,13 +541,19 @@ fn test_stress_gamification_extreme_inputs_and_quota_math() {
         difficulty: Some("quantum".into()),
     };
     let save_res = save_typing_score(&mut conn, extreme_score);
-    assert!(save_res.is_ok(), "Database should accept large valid integer fields");
+    assert!(
+        save_res.is_ok(),
+        "Database should accept large valid integer fields"
+    );
     let result_obj = save_res.unwrap();
     println!(
         "  Extreme Score Result: saved={}, rank='{}', xp_earned={}",
         result_obj.saved, result_obj.rank, result_obj.xp_earned
     );
-    assert!(result_obj.xp_earned > 1_000_000, "XP earned inflated to > 2 million");
+    assert!(
+        result_obj.xp_earned > 1_000_000,
+        "XP earned inflated to > 2 million"
+    );
     println!("  [CONFIRMED FINDING FE-VULN-04 / SEC-BACK-09] Extreme WPM grants millions of XP without validation");
 
     let _ = fs::remove_dir_all(&temp_dir);

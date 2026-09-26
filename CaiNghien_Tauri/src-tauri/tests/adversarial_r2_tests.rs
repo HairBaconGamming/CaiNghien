@@ -1,6 +1,6 @@
-use cainghien_tauri_lib::models::ScheduleConfig;
 use cainghien_tauri_lib::enforcement::is_time_in_schedule;
-use chrono::{TimeZone, Local};
+use cainghien_tauri_lib::models::ScheduleConfig;
+use chrono::{Local, TimeZone};
 
 #[test]
 fn adversarial_test_schedule_overnight_all_minutes() {
@@ -92,7 +92,10 @@ fn adversarial_test_schedule_0_indexed_vs_1_indexed() {
         end_time: "17:00".to_string(),
         days_of_week: vec![0],
     };
-    assert!(is_time_in_schedule(&sched_0, &sunday), "0-indexed Sunday must match");
+    assert!(
+        is_time_in_schedule(&sched_0, &sunday),
+        "0-indexed Sunday must match"
+    );
 
     // With 7 (ISO Sunday)
     let sched_7 = ScheduleConfig {
@@ -101,7 +104,10 @@ fn adversarial_test_schedule_0_indexed_vs_1_indexed() {
         end_time: "17:00".to_string(),
         days_of_week: vec![7],
     };
-    assert!(is_time_in_schedule(&sched_7, &sunday), "1-indexed (ISO 7) Sunday must match");
+    assert!(
+        is_time_in_schedule(&sched_7, &sunday),
+        "1-indexed (ISO 7) Sunday must match"
+    );
 
     // Saturday 2026-09-19
     let saturday = Local.with_ymd_and_hms(2026, 9, 19, 10, 0, 0).unwrap();
@@ -111,7 +117,10 @@ fn adversarial_test_schedule_0_indexed_vs_1_indexed() {
         end_time: "17:00".to_string(),
         days_of_week: vec![6],
     };
-    assert!(is_time_in_schedule(&sched_sat, &saturday), "Saturday 6 must match");
+    assert!(
+        is_time_in_schedule(&sched_sat, &saturday),
+        "Saturday 6 must match"
+    );
 
     // Monday 2026-09-14
     let monday = Local.with_ymd_and_hms(2026, 9, 14, 10, 0, 0).unwrap();
@@ -121,7 +130,10 @@ fn adversarial_test_schedule_0_indexed_vs_1_indexed() {
         end_time: "17:00".to_string(),
         days_of_week: vec![1],
     };
-    assert!(is_time_in_schedule(&sched_mon, &monday), "Monday 1 must match");
+    assert!(
+        is_time_in_schedule(&sched_mon, &monday),
+        "Monday 1 must match"
+    );
 }
 
 #[test]
@@ -144,7 +156,10 @@ fn adversarial_test_schedule_malformed_and_edge_inputs() {
         days_of_week: vec![0, 1, 2, 3, 4, 5, 6, 7],
     };
     let midday = Local.with_ymd_and_hms(2026, 9, 16, 12, 0, 0).unwrap();
-    assert!(is_time_in_schedule(&sched_spaces, &midday), "Whitespace should be trimmed gracefully");
+    assert!(
+        is_time_in_schedule(&sched_spaces, &midday),
+        "Whitespace should be trimmed gracefully"
+    );
 
     // Zero-duration window (start == end)
     let sched_zero = ScheduleConfig {
@@ -153,5 +168,8 @@ fn adversarial_test_schedule_malformed_and_edge_inputs() {
         end_time: "12:00".to_string(),
         days_of_week: vec![0, 1, 2, 3, 4, 5, 6, 7],
     };
-    assert!(!is_time_in_schedule(&sched_zero, &midday), "Zero duration window should be inactive");
+    assert!(
+        !is_time_in_schedule(&sched_zero, &midday),
+        "Zero duration window should be inactive"
+    );
 }
