@@ -1,11 +1,43 @@
 {
-  "latest": "1.3.3",
+  "latest": "1.3.4",
   "releases": [
+    {
+      "version": "1.3.4",
+      "tag": "v1.3.4",
+      "published_at": "2026-09-26",
+      "is_latest": true,
+      "title": "Bản vá sửa lỗi Uninstall v1.3.4",
+      "summary": "Khắc phục hoàn toàn lỗi Uninstaller không dọn sạch chương trình ngầm.",
+      "notes": [
+        "Bổ sung Hook PREUNINSTALL và PREINSTALL cho NSIS.",
+        "Sử dụng lệnh Taskkill ép buộc tắt hoàn toàn tiến trình cainghien_tauri.exe và các tệp liên quan trước khi cập nhật hoặc gỡ cài đặt."
+      ],
+      "categorized_notes": {
+        "fixes": [
+          "Sửa lỗi bộ cài đặt (Uninstaller) không dọn sạch các chương trình đang chạy ngầm khi gỡ cài đặt hoặc cập nhật phiên bản mới."
+        ]
+      },
+      "files": {
+        "installer": {
+          "filename": "cainghien_tauri_1.3.4_x64-setup.exe",
+          "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.4/cainghien_tauri_1.3.4_x64-setup.exe",
+          "direct_url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.4/cainghien_tauri_1.3.4_x64-setup.exe",
+          "size_formatted": "50 MB",
+          "platform": "Windows 10 / 11 (64-bit)"
+        },
+        "msi": {
+          "filename": "cainghien_tauri_1.3.4_x64_en-US.msi",
+          "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.4/cainghien_tauri_1.3.4_x64_en-US.msi",
+          "size_formatted": "45 MB",
+          "platform": "Windows MSI Installer"
+        }
+      }
+    },
     {
       "version": "1.3.3",
       "tag": "v1.3.3",
       "published_at": "2026-09-26",
-      "is_latest": true,
+      "is_latest": false,
       "title": "Bản phát hành tối ưu Logo v1.3.3",
       "summary": "Thiết kế lại Logo Solid mới và tự động hóa cập nhật.",
       "notes": [
