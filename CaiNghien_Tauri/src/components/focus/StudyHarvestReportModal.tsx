@@ -9,6 +9,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { api, StudyRewardResult } from '../../services/api';
+import { TelexTextarea } from '../shared/TelexInput';
 
 export interface StudyHarvestReportModalProps {
   isOpen: boolean;
@@ -93,8 +94,6 @@ export const StudyHarvestReportModal: React.FC<StudyHarvestReportModalProps> = (
   const [warningMessage, setWarningMessage] = useState('');
 
   const lastTextLengthRef = useRef(0);
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-  const isComposingRef = useRef(false);
 
   // Calculate projected reward quota
   const earnedQuota = useMemo(() => {
@@ -133,15 +132,6 @@ export const StudyHarvestReportModal: React.FC<StudyHarvestReportModalProps> = (
     };
   }, [isOpen]);
 
-  // Focus textarea on modal open
-  useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => {
-        textareaRef.current?.focus();
-      }, 100);
-    }
-  }, [isOpen]);
-
   if (!isOpen) return null;
 
   // 1. Paste event handler
@@ -152,11 +142,8 @@ export const StudyHarvestReportModal: React.FC<StudyHarvestReportModalProps> = (
     setShowPasteToast(true);
   };
 
-  // 2. Keyboard shortcuts interceptor (Ctrl+V, Cmd+V, Shift+Insert, Escape)
+  // 2. Keyboard shortcuts interceptor for anti-paste (used as onKeyDownExtra for TelexTextarea)
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    // Skip interception during IME composition (Vietnamese Telex/VNI)
-    if (e.nativeEvent.isComposing || isComposingRef.current) return;
-
     // Intercept Ctrl+V or Cmd+V
     if ((e.ctrlKey || e.metaKey) && (e.key === 'v' || e.key === 'V')) {
       e.preventDefault();
@@ -203,18 +190,8 @@ export const StudyHarvestReportModal: React.FC<StudyHarvestReportModalProps> = (
     setShowPasteToast(true);
   };
 
-  // 5. Input change handler with Keystroke Burst Velocity Guard
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newText = e.target.value;
-    const delta = newText.length - lastTextLengthRef.current;
-
-    // Skip burst guard during IME composition (Vietnamese Telex/VNI via Unikey)
-    if (!isComposingRef.current && delta > 10) {
-      setWarningMessage('Phát hiện văn bản nhập quá nhanh! Nghi vấn dán văn bản tự động.');
-      setShowPasteToast(true);
-      return;
-    }
-
+  // 5. Text change handler from TelexTextarea
+  const handleTextChange = (newText: string) => {
     lastTextLengthRef.current = newText.length;
     setText(newText);
   };
@@ -295,28 +272,17 @@ export const StudyHarvestReportModal: React.FC<StudyHarvestReportModalProps> = (
 
         {/* Textarea Input with Strict Anti-Paste Event Listeners */}
         <div className="relative flex-1 flex flex-col min-h-[180px] mb-4">
-          <textarea
-            ref={textareaRef}
+          <TelexTextarea
             value={text}
-            onChange={handleInputChange}
-            onCompositionStart={() => { isComposingRef.current = true; }}
-            onCompositionEnd={(e) => {
-              isComposingRef.current = false;
-              // Sync final composed value
-              const val = (e.target as HTMLTextAreaElement).value;
-              lastTextLengthRef.current = val.length;
-              setText(val);
-            }}
+            onChange={handleTextChange}
+            onKeyDownExtra={handleKeyDown}
             onPaste={handlePaste}
-            onKeyDown={handleKeyDown}
             onContextMenu={handleContextMenu}
             onDragOver={handleDragOver}
             onDrop={handleDrop}
+            autoFocus={true}
             placeholder="Viết tóm tắt nội dung bạn đã học được trong phiên vừa qua... (Tối thiểu 100 từ có nghĩa, không lặp lại từ đơn điệu)"
             className="w-full h-44 sm:h-52 p-4 rounded-2xl bg-slate-950/80 border border-white/15 text-white placeholder-slate-500 font-sans text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40 resize-none transition-all leading-relaxed"
-            autoComplete="off"
-            autoCorrect="off"
-            spellCheck="false"
           />
 
           {/* Word Count Live Status Bar */}

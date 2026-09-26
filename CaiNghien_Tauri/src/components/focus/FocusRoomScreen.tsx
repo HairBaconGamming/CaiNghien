@@ -18,6 +18,7 @@ import { TimerRing } from './TimerRing';
 import { MotivationalQuote } from './MotivationalQuote';
 import { MusicWidget } from './MusicWidget';
 import { StudyHarvestReportModal } from './StudyHarvestReportModal';
+import { TelexInput } from '../shared/TelexInput';
 import { api, AppConfig, StudyRewardResult } from '../../services/api';
 
 export interface FocusSessionResult {
@@ -88,7 +89,6 @@ export const FocusRoomScreen: React.FC<FocusRoomScreenProps> = ({
   const [showExitModal, setShowExitModal] = useState(false);
   const [exitPledgeInput, setExitPledgeInput] = useState('');
   const [exitCooldown, setExitCooldown] = useState(15);
-  const exitComposingRef = useRef(false);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -697,15 +697,9 @@ export const FocusRoomScreen: React.FC<FocusRoomScreenProps> = ({
               <div className="text-xs font-mono font-bold text-slate-200 bg-white/5 p-2 rounded-lg mb-2.5 select-none">
                 "{EXIT_PLEDGE_TEXT}"
               </div>
-              <input
-                type="text"
+              <TelexInput
                 value={exitPledgeInput}
-                onChange={(e) => setExitPledgeInput(e.target.value)}
-                onCompositionStart={() => { exitComposingRef.current = true; }}
-                onCompositionEnd={(e) => {
-                  exitComposingRef.current = false;
-                  setExitPledgeInput((e.target as HTMLInputElement).value);
-                }}
+                onChange={(val) => setExitPledgeInput(val)}
                 placeholder="Nhập lại câu trên để xác nhận..."
                 className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-white/15 text-white font-mono text-xs focus:outline-none focus:border-rose-400"
                 autoComplete="off"
