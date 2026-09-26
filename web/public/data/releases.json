@@ -1,11 +1,43 @@
 {
-  "latest": "1.3.6",
+  "latest": "1.3.7",
   "releases": [
+    {
+      "version": "1.3.7",
+      "tag": "v1.3.7",
+      "published_at": "2026-09-27",
+      "is_latest": true,
+      "title": "Bản vá sửa lỗi gõ tiếng Việt",
+      "summary": "Tích hợp bộ gõ Telex nội bộ vào tất cả các ô nhập liệu.",
+      "notes": [
+        "Hỗ trợ gõ tiếng Việt mượt mà ở ô cam kết và bài thu hoạch mà không cần bật Unikey/EVKey.",
+        "Vượt qua hệ thống chống gian lận Copy-Paste thành công khi dùng Telex."
+      ],
+      "categorized_notes": {
+        "features": [
+          "Sử dụng TelexInput/TelexTextarea nội bộ cho toàn bộ Focus Room."
+        ]
+      },
+      "files": {
+        "installer": {
+          "filename": "cainghien_tauri_1.3.7_x64-setup.exe",
+          "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.7/cainghien_tauri_1.3.7_x64-setup.exe",
+          "direct_url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.7/cainghien_tauri_1.3.7_x64-setup.exe",
+          "size_formatted": "50 MB",
+          "platform": "Windows 10 / 11 (64-bit)"
+        },
+        "msi": {
+          "filename": "cainghien_tauri_1.3.7_x64_en-US.msi",
+          "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.7/cainghien_tauri_1.3.7_x64_en-US.msi",
+          "size_formatted": "45 MB",
+          "platform": "Windows MSI Installer"
+        }
+      }
+    },
     {
       "version": "1.3.6",
       "tag": "v1.3.6",
       "published_at": "2026-09-26",
-      "is_latest": true,
+      "is_latest": false,
       "title": "Bản vá thêm Nút Tắt và Cập nhật",
       "summary": "Bổ sung nút Tắt ứng dụng hoàn toàn và sửa lỗi hiển thị Kiểm tra cập nhật.",
       "notes": [

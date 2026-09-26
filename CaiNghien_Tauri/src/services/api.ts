@@ -247,6 +247,62 @@ export async function resetAllData(): Promise<void> {
   return safeInvoke<void>('reset_all_data', {});
 }
 
+// ----------------------------------------
+// Rescue & Control Tool API
+// ----------------------------------------
+export interface SystemDiagnostics {
+  app_running: boolean;
+  app_pid: number | null;
+  watchdog_running: boolean;
+  watchdog_pid: number | null;
+  hosts_blocked: boolean;
+  hosts_block_count: number;
+  dns_servers: string[];
+  protection_enabled: boolean;
+  hardcore_active: boolean;
+  hardcore_remaining: string | null;
+  config_path: string;
+  has_password: boolean;
+}
+
+export interface EmergencyResult {
+  processes_killed: number;
+  hosts_cleaned: boolean;
+  dns_reset: boolean;
+  protection_disabled: boolean;
+  message: string;
+}
+
+export interface HostsToggleResult {
+  is_blocked: boolean;
+  domains_count: number;
+  message: string;
+}
+
+export async function getSystemDiagnostics(): Promise<SystemDiagnostics> {
+  return safeInvoke<SystemDiagnostics>('get_system_diagnostics', {});
+}
+
+export async function emergencyKillAndRestore(): Promise<EmergencyResult> {
+  return safeInvoke<EmergencyResult>('emergency_kill_and_restore', {});
+}
+
+export async function toggleHostsBlock(): Promise<HostsToggleResult> {
+  return safeInvoke<HostsToggleResult>('toggle_hosts_block', {});
+}
+
+export async function resetPasswordAndHardcore(): Promise<string> {
+  return safeInvoke<string>('reset_password_and_hardcore', {});
+}
+
+export async function backupConfig(): Promise<string> {
+  return safeInvoke<string>('backup_config', {});
+}
+
+export async function restoreConfig(): Promise<string> {
+  return safeInvoke<string>('restore_config', {});
+}
+
 export const api = {
   getHeatmapData,
   getUserProfile,
@@ -265,6 +321,12 @@ export const api = {
   pauseQuota,
   getQuotaStatus,
   resetAllData,
+  getSystemDiagnostics,
+  emergencyKillAndRestore,
+  toggleHostsBlock,
+  resetPasswordAndHardcore,
+  backupConfig,
+  restoreConfig,
   isTauriEnvironment,
   onTelemetryUpdate,
   notifyTelemetryUpdate,

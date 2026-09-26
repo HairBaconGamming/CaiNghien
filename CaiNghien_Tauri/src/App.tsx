@@ -12,11 +12,18 @@ import {
   Sparkles,
   RefreshCw,
   Lock,
-  GraduationCap
-, Power } from 'lucide-react';
+  GraduationCap,
+  Power,
+  Wrench,
+  Activity,
+  Database,
+  AlertTriangle,
+  HardDrive,
+  RotateCcw
+} from 'lucide-react';
 import { check } from '@tauri-apps/plugin-updater';
 import { relaunch } from '@tauri-apps/plugin-process';
-import { api, UserProfile, onTelemetryUpdate, notifyTelemetryUpdate, AppConfig } from './services/api';
+import { api, UserProfile, onTelemetryUpdate, notifyTelemetryUpdate, AppConfig, SystemDiagnostics } from './services/api';
 import { Toast, ToastType } from './components/Toast';
 import { ConfirmModal } from './components/ConfirmModal';
 import { AccountScreen } from './components/AccountScreen';
@@ -24,7 +31,7 @@ import { AccountScreen } from './components/AccountScreen';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<NavTabId>('dashboard');
-  const [settingsTab, setSettingsTab] = useState<'general' | 'account'>('general');
+  const [settingsTab, setSettingsTab] = useState<'general' | 'account' | 'tools'>('general');
   const [showTypingModal, setShowTypingModal] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [appConfig, setAppConfig] = useState<AppConfig | null>(null);
@@ -33,6 +40,10 @@ export default function App() {
   const [rewardQuotaInput, setRewardQuotaInput] = useState<number | string>(15);
   const [toasts, setToasts] = useState<{id: string, type: ToastType, message: string}[]>([]);
   const [confirmDialog, setConfirmDialog] = useState<{title: string, message: string, onConfirm: () => void} | null>(null);
+  // Rescue tool state
+  const [diagnostics, setDiagnostics] = useState<SystemDiagnostics | null>(null);
+  const [diagLoading, setDiagLoading] = useState(false);
+  const [rescueLoading, setRescueLoading] = useState<string | null>(null);
 
   const isRatioValid = useMemo(() => {
     const req = Number(studyMinutesInput);
@@ -303,6 +314,23 @@ export default function App() {
                     }`}
                   >
                     Tài khoản & Hồ sơ
+                  </button>
+                  
+                  <button 
+                    onClick={() => {
+                      setSettingsTab('tools');
+                      // Auto-load diagnostics when switching to tools tab
+                      setDiagLoading(true);
+                      api.getSystemDiagnostics().then(d => {
+                        setDiagnostics(d);
+                        setDiagLoading(false);
+                      }).catch(() => setDiagLoading(false));
+                    }}
+                    className={`w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
+                      settingsTab === 'tools' ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20 shadow-[0_0_15px_rgba(249,115,22,0.15)]' : 'text-slate-400 hover:text-slate-200 hover:bg-white/5 border border-transparent'
+                    }`}
+                  >
+                    <span className="flex items-center gap-2"><Wrench className="w-4 h-4" /> Công cụ cứu hộ</span>
                   </button>
                 </div>
                 
@@ -624,6 +652,263 @@ export default function App() {
                   {settingsTab === 'account' && (
                     <div className="p-6">
                       <AccountScreen addToast={addToast} />
+                    </div>
+                  )}
+
+                  {settingsTab === 'tools' && (
+                    <div className="w-full h-full flex flex-col p-6 overflow-y-auto">
+                      {/* Header */}
+                      <div className="glass-panel rounded-2xl p-6 border border-orange-500/20 mb-6 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Wrench className="w-6 h-6 text-orange-400" />
+                          <div>
+                            <h2 className="text-xl font-bold text-white">Công cụ Cứu hộ & Kiểm soát</h2>
+                            <p className="text-xs text-slate-400 mt-1">
+                              Chẩn đoán hệ thống, khôi phục khẩn cấp, sao lưu cấu hình.
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => {
+                            setDiagLoading(true);
+                            api.getSystemDiagnostics().then(d => {
+                              setDiagnostics(d);
+                              setDiagLoading(false);
+                            }).catch(() => setDiagLoading(false));
+                          }}
+                          disabled={diagLoading}
+                          className="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider text-orange-300 border border-orange-500/30 hover:bg-orange-500/10 transition-colors disabled:opacity-50 cursor-pointer flex items-center gap-2"
+                        >
+                          <RefreshCw className={`w-3.5 h-3.5 ${diagLoading ? 'animate-spin' : ''}`} />
+                          {diagLoading ? 'Đang quét...' : 'Làm mới'}
+                        </button>
+                      </div>
+
+                      {/* Diagnostics Dashboard */}
+                      {diagnostics && (
+                        <div className="glass-panel rounded-2xl p-6 border border-white/10 mb-6">
+                          <div className="flex items-center gap-2 mb-4">
+                            <Activity className="w-5 h-5 text-emerald-400" />
+                            <h3 className="text-base font-bold text-white">Trạng thái hệ thống</h3>
+                          </div>
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            <div className="bg-slate-900/50 rounded-xl p-3 border border-white/5">
+                              <p className="text-xs text-slate-400 mb-1">App chính</p>
+                              <p className={`text-sm font-bold ${diagnostics.app_running ? 'text-emerald-400' : 'text-slate-500'}`}>
+                                {diagnostics.app_running ? `🟢 PID ${diagnostics.app_pid}` : '⚫ Không chạy'}
+                              </p>
+                            </div>
+                            <div className="bg-slate-900/50 rounded-xl p-3 border border-white/5">
+                              <p className="text-xs text-slate-400 mb-1">Watchdog</p>
+                              <p className={`text-sm font-bold ${diagnostics.watchdog_running ? 'text-emerald-400' : 'text-slate-500'}`}>
+                                {diagnostics.watchdog_running ? `🟢 PID ${diagnostics.watchdog_pid}` : '⚫ Không chạy'}
+                              </p>
+                            </div>
+                            <div className="bg-slate-900/50 rounded-xl p-3 border border-white/5">
+                              <p className="text-xs text-slate-400 mb-1">Hosts Block</p>
+                              <p className={`text-sm font-bold ${diagnostics.hosts_blocked ? 'text-orange-400' : 'text-slate-500'}`}>
+                                {diagnostics.hosts_blocked ? `🔒 ${diagnostics.hosts_block_count} domain` : '🔓 Không chặn'}
+                              </p>
+                            </div>
+                            <div className="bg-slate-900/50 rounded-xl p-3 border border-white/5">
+                              <p className="text-xs text-slate-400 mb-1">Bảo vệ</p>
+                              <p className={`text-sm font-bold ${diagnostics.protection_enabled ? 'text-cyan-400' : 'text-slate-500'}`}>
+                                {diagnostics.protection_enabled ? '🛡️ Đang bật' : '⚫ Đã tắt'}
+                              </p>
+                            </div>
+                            <div className="bg-slate-900/50 rounded-xl p-3 border border-white/5">
+                              <p className="text-xs text-slate-400 mb-1">Hardcore</p>
+                              <p className={`text-sm font-bold ${diagnostics.hardcore_active ? 'text-red-400' : 'text-slate-500'}`}>
+                                {diagnostics.hardcore_active ? `🔥 ${diagnostics.hardcore_remaining}` : '⚫ Không kích hoạt'}
+                              </p>
+                            </div>
+                            <div className="bg-slate-900/50 rounded-xl p-3 border border-white/5">
+                              <p className="text-xs text-slate-400 mb-1">Mật khẩu</p>
+                              <p className={`text-sm font-bold ${diagnostics.has_password ? 'text-fuchsia-400' : 'text-slate-500'}`}>
+                                {diagnostics.has_password ? '🔐 Đã đặt' : '⚫ Chưa đặt'}
+                              </p>
+                            </div>
+                          </div>
+                          {diagnostics.dns_servers.length > 0 && (
+                            <div className="mt-3 p-2 rounded-lg bg-slate-900/30 border border-white/5">
+                              <p className="text-xs text-slate-400">DNS: <span className="text-slate-300 font-mono">{diagnostics.dns_servers.join(', ')}</span></p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Emergency Kill */}
+                        <div className="glass-panel rounded-2xl p-6 border border-red-500/30">
+                          <div className="flex items-center gap-2 mb-4">
+                            <AlertTriangle className="w-5 h-5 text-red-400" />
+                            <h3 className="text-base font-bold text-white">Khôi phục khẩn cấp</h3>
+                          </div>
+                          <p className="text-xs text-slate-400 mb-4">
+                            Dừng mọi tiến trình, xóa hosts block, reset DNS, tắt bảo vệ. Sử dụng khi bị chặn hoàn toàn.
+                          </p>
+                          <button
+                            onClick={() => {
+                              setConfirmDialog({
+                                title: 'Khôi phục khẩn cấp',
+                                message: 'Thao tác này sẽ tắt bảo vệ, xóa chặn hosts, reset DNS và dừng watchdog. Bạn có chắc chắn?',
+                                onConfirm: async () => {
+                                  setRescueLoading('emergency');
+                                  setConfirmDialog(null);
+                                  try {
+                                    const result = await api.emergencyKillAndRestore();
+                                    addToast('success', result.message);
+                                    refreshConfig();
+                                    // Refresh diagnostics
+                                    const d = await api.getSystemDiagnostics();
+                                    setDiagnostics(d);
+                                  } catch (e) {
+                                    addToast('error', 'Lỗi: ' + e);
+                                  }
+                                  setRescueLoading(null);
+                                }
+                              });
+                            }}
+                            disabled={rescueLoading === 'emergency'}
+                            className="w-full py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-white bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 transition-all disabled:opacity-50 cursor-pointer shadow-[0_0_15px_rgba(239,68,68,0.2)] flex items-center justify-center gap-2"
+                          >
+                            <Power className="w-4 h-4" />
+                            {rescueLoading === 'emergency' ? 'Đang khôi phục...' : 'Khôi phục khẩn cấp'}
+                          </button>
+                        </div>
+
+                        {/* Toggle Hosts */}
+                        <div className="glass-panel rounded-2xl p-6 border border-white/10">
+                          <div className="flex items-center gap-2 mb-4">
+                            <Shield className="w-5 h-5 text-cyan-400" />
+                            <h3 className="text-base font-bold text-white">Hosts Block</h3>
+                          </div>
+                          <p className="text-xs text-slate-400 mb-4">
+                            Bật/tắt chặn tên miền trong file hosts. {diagnostics?.hosts_blocked ? 'Hiện đang chặn.' : 'Hiện không chặn.'}
+                          </p>
+                          <button
+                            onClick={async () => {
+                              setRescueLoading('hosts');
+                              try {
+                                const result = await api.toggleHostsBlock();
+                                addToast('success', result.message);
+                                const d = await api.getSystemDiagnostics();
+                                setDiagnostics(d);
+                              } catch (e) {
+                                addToast('error', 'Lỗi: ' + e);
+                              }
+                              setRescueLoading(null);
+                            }}
+                            disabled={rescueLoading === 'hosts'}
+                            className="w-full py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-white bg-cyan-600/80 hover:bg-cyan-500 transition-colors disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
+                          >
+                            <RotateCcw className="w-4 h-4" />
+                            {rescueLoading === 'hosts' ? 'Đang xử lý...' : (diagnostics?.hosts_blocked ? 'Gỡ chặn Hosts' : 'Áp dụng chặn Hosts')}
+                          </button>
+                        </div>
+
+                        {/* Reset Password & Hardcore */}
+                        <div className="glass-panel rounded-2xl p-6 border border-fuchsia-500/30">
+                          <div className="flex items-center gap-2 mb-4">
+                            <Lock className="w-5 h-5 text-fuchsia-400" />
+                            <h3 className="text-base font-bold text-white">Reset Mật khẩu & Hardcore</h3>
+                          </div>
+                          <p className="text-xs text-slate-400 mb-4">
+                            Xóa mật khẩu, tắt chế độ Hardcore, tắt bảo vệ. Sử dụng khi quên mật khẩu.
+                          </p>
+                          <button
+                            onClick={() => {
+                              setConfirmDialog({
+                                title: 'Reset mật khẩu & Hardcore',
+                                message: 'Thao tác này sẽ xóa mật khẩu, tắt Hardcore và tắt bảo vệ. Không thể hoàn tác!',
+                                onConfirm: async () => {
+                                  setRescueLoading('reset');
+                                  setConfirmDialog(null);
+                                  try {
+                                    const msg = await api.resetPasswordAndHardcore();
+                                    addToast('success', msg);
+                                    refreshConfig();
+                                    const d = await api.getSystemDiagnostics();
+                                    setDiagnostics(d);
+                                  } catch (e) {
+                                    addToast('error', 'Lỗi: ' + e);
+                                  }
+                                  setRescueLoading(null);
+                                }
+                              });
+                            }}
+                            disabled={rescueLoading === 'reset'}
+                            className="w-full py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-fuchsia-300 border border-fuchsia-500/30 hover:bg-fuchsia-500/10 transition-colors disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
+                          >
+                            <Lock className="w-4 h-4" />
+                            {rescueLoading === 'reset' ? 'Đang reset...' : 'Reset mật khẩu & Hardcore'}
+                          </button>
+                        </div>
+
+                        {/* Backup & Restore Config */}
+                        <div className="glass-panel rounded-2xl p-6 border border-white/10">
+                          <div className="flex items-center gap-2 mb-4">
+                            <Database className="w-5 h-5 text-emerald-400" />
+                            <h3 className="text-base font-bold text-white">Sao lưu & Khôi phục</h3>
+                          </div>
+                          <p className="text-xs text-slate-400 mb-4">
+                            Sao lưu hoặc khôi phục file cấu hình ứng dụng.
+                          </p>
+                          <div className="flex gap-3">
+                            <button
+                              onClick={async () => {
+                                setRescueLoading('backup');
+                                try {
+                                  const msg = await api.backupConfig();
+                                  addToast('success', msg);
+                                } catch (e) {
+                                  addToast('error', 'Lỗi: ' + e);
+                                }
+                                setRescueLoading(null);
+                              }}
+                              disabled={rescueLoading === 'backup'}
+                              className="flex-1 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/10 transition-colors disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
+                            >
+                              <HardDrive className="w-4 h-4" />
+                              {rescueLoading === 'backup' ? 'Đang lưu...' : 'Sao lưu'}
+                            </button>
+                            <button
+                              onClick={() => {
+                                setConfirmDialog({
+                                  title: 'Khôi phục cấu hình',
+                                  message: 'Khôi phục cấu hình từ file sao lưu? Cấu hình hiện tại sẽ bị ghi đè.',
+                                  onConfirm: async () => {
+                                    setRescueLoading('restore');
+                                    setConfirmDialog(null);
+                                    try {
+                                      const msg = await api.restoreConfig();
+                                      addToast('success', msg);
+                                      refreshConfig();
+                                    } catch (e) {
+                                      addToast('error', 'Lỗi: ' + e);
+                                    }
+                                    setRescueLoading(null);
+                                  }
+                                });
+                              }}
+                              disabled={rescueLoading === 'restore'}
+                              className="flex-1 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-amber-300 border border-amber-500/30 hover:bg-amber-500/10 transition-colors disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
+                            >
+                              <RotateCcw className="w-4 h-4" />
+                              {rescueLoading === 'restore' ? 'Đang khôi phục...' : 'Khôi phục'}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Config Path Info */}
+                      {diagnostics && (
+                        <div className="mt-6 p-3 rounded-xl bg-slate-900/30 border border-white/5">
+                          <p className="text-xs text-slate-500">
+                            📁 Config: <span className="text-slate-400 font-mono text-[10px]">{diagnostics.config_path}</span>
+                          </p>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

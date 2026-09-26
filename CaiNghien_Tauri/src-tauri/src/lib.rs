@@ -4,6 +4,7 @@ pub mod db;
 pub mod enforcement;
 pub mod hooks;
 pub mod models;
+pub mod rescue;
 
 use sha2::{Digest, Sha256};
 use std::os::windows::process::CommandExt;
@@ -450,7 +451,13 @@ pub fn run() {
             commands::save_typing_score,
             commands::get_typing_scores,
             commands::reset_all_data,
-            commands::submit_study_report
+            commands::submit_study_report,
+            rescue::get_system_diagnostics,
+            rescue::emergency_kill_and_restore,
+            rescue::toggle_hosts_block,
+            rescue::reset_password_and_hardcore,
+            rescue::backup_config,
+            rescue::restore_config
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
