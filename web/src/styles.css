@@ -199,12 +199,12 @@ img {
   width: 40px;
   height: 40px;
   border-radius: var(--radius-md);
-  background: linear-gradient(135deg, var(--brand-500) 0%, var(--brand-700) 100%);
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #ffffff;
-  box-shadow: 0 0 16px rgba(139, 92, 246, 0.5);
+  box-shadow: none;
 }
 
 .brand-title-text {

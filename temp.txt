@@ -1,11 +1,47 @@
-<LofiPlayer />
-        </div>
+activeTab === 'settings' && appConfig && (
+              <div className="w-full h-full flex flex-col p-6 overflow-y-auto">
+                <div className="glass-panel rounded-2xl p-6 border border-white/10 mb-6 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <SettingsIcon className="w-6 h-6 text-sky-400" />
+                    <div>
+                      <h2 className="text-xl font-bold text-white">Cài đặt Focus Guard & Cosmos</h2>
+                      <p className="text-xs text-slate-400 mt-1">
+                        Định cấu hình kỷ luật, mật khẩu bảo vệ và giao diện.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 bg-slate-900/50 p-2 rounded-xl border border-white/10">
+                    <span className="text-sm font-bold text-white">Bảo vệ chính</span>
+                    <input 
+                      type="checkbox" 
+                      checked={appConfig.protection_enabled} 
+                      onChange={(e) => updateConfig({ protection_enabled: e.target.checked })}
+                      className="toggle-checkbox accent-cyan-400 w-6 h-6 cursor-pointer" 
+                      disabled={settingsLocked} 
+                    />
+                  </div>
+                </div>
 
-        {/* Right Controls: Fullscreen Toggle & Exit Buttons */}
-        <div className="flex items-center gap-3 ml-4">
-          {/* Fullscreen Toggle */}
-          <button
-            type="button"
-            onClick={handleToggleFullscreen}
-            title={isFullscreen ? 'Thu nhỏ cửa sổ' : 'Toàn màn hình'}
-            className="w-10 h-10 rounded-full flex ite
+                <div className="relative grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {settingsLocked && (
+                    <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[#030712]/80 backdrop-blur-sm rounded-2xl border border-white/10">
+                      <Shield className="w-12 h-12 text-cyan-400 mb-4 animate-pulse" />
+                      <h3 className="text-white font-bold text-xl mb-2">Đã bật bảo vệ</h3>
+                      <p className="text-slate-300 text-sm mb-6 text-center max-w-sm">
+                        Focus Guard đang hoạt động. Cài đặt và mật khẩu đã bị khóa. Hoàn thành thử thách để mở khóa.
+                      </p>
+                      <button
+                        onClick={() => setShowUnlockModal(true)}
+                        className="px-6 py-2.5 rounded-xl font-bold text-sm tracking-wider uppercase text-white flex items-center gap-2 bg-gradient-to-r from-cyan-500/40 to-sky-500/30 border border-cyan-400 shadow-[0_0_18px_rgba(0,240,255,0.45)] hover:shadow-[0_0_25px_rgba(0,240,255,0.7)] transition-all cursor-pointer"
+                      >
+                        <Shield className="w-4 h-4 text-cyan-300" />
+                        <span>Gõ để mở khóa</span>
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Password Protection Box */}
+                  <div className="glass-panel rounded-2xl p-6 border border-white/10">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Lock className="w-5 h-5 text-fuchsia-400" />
+                      <h3

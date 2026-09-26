@@ -1,11 +1,11 @@
 {
-  "version": "v1.3.2",
-  "notes": "Cập nhật tự động lên phiên bản v1.3.2.",
-  "pub_date": "2026-09-26T06:04:11.051382+00:00",
+  "version": "v1.3.3",
+  "notes": "Cập nhật tự động lên phiên bản v1.3.3.",
+  "pub_date": "2026-09-26T07:01:18.241101+00:00",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRVFFLelpwN2szczl5YjY3ZXltU0dRdTdxMHNEbUVVRGc4ZnlrbzFSdzhubGJkOGVaeUU1dHdDeVZxVGIzNUFaZVhQMCs5ejkrbHdTdlRUaHVGUHRSbmh4QjZvNjk5Y1FVPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkwNDAyNjE4CWZpbGU6Y2FpbmdoaWVuX3RhdXJpXzEuMy4yX3g2NC1zZXR1cC5leGUKaElHQVhaQ2VPNVZVWTFMUG1rYzhUS3NFUjlLaytXbXgrbTdOd1YyT1ZpaXZRMFFzSlB0Z0tuVWZqMlNhcDJIcVk2V0JiMU5XVlFhczFDTUY2VVlGQUE9PQo=",
-      "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.2/cainghien_tauri_1.3.2_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRVFFLelpwN2szczhWY3RrUEw5Sk5WWDhSTHFxVExDV21RM3RCK1NLR2h1YmRldFhNb0hYSmxzY09wVGQxNkk0Q2draTdhLzlxYUpLcFRzRVc5UVUzemQ3NW5vd0o3Q2dZPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkwNDA2MDc4CWZpbGU6Y2FpbmdoaWVuX3RhdXJpXzEuMy4zX3g2NC1zZXR1cC5leGUKQ1Y2QWFDWGNxYVU5MHVXZ3Q2VnpDRlB1elJWRVh3dWJvcjZDcStVZ0FYMWN2aG9WblFLeHJZTHpCbzdkS1FRMUFmc2ZUZjh1dllNRUhDcUVIRnFRQmc9PQo=",
+      "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.3/cainghien_tauri_1.3.3_x64-setup.exe"
     }
   }
 }

@@ -31,7 +31,7 @@ def main():
     run_cmd(['npm.cmd', 'run', 'tauri', 'build'], cwd='CaiNghien_Tauri', env=env)
 
     # 3. Read Signature
-    sig_path = f'CaiNghien_Tauri/src-tauri/target/release/bundle/nsis/cainghien_tauri_{version}_x64-setup.nsis.zip.sig'
+    sig_path = f'CaiNghien_Tauri/src-tauri/target/release/bundle/nsis/cainghien_tauri_{version}_x64-setup.exe.sig'
     if not os.path.exists(sig_path):
         print(f"Error: Signature file not found at {sig_path}")
         sys.exit(1)
@@ -50,7 +50,7 @@ def main():
     update_data['notes'] = f"Cập nhật tự động lên phiên bản v{version}."
     update_data['pub_date'] = datetime.datetime.now(datetime.timezone.utc).isoformat()
     
-    zip_url = f"https://github.com/HairBaconGamming/CaiNghien/releases/download/v{version}/cainghien_tauri_{version}_x64-setup.nsis.zip"
+    zip_url = f"https://github.com/HairBaconGamming/CaiNghien/releases/download/v{version}/cainghien_tauri_{version}_x64-setup.exe"
     
     update_data['platforms']['windows-x86_64']['url'] = zip_url
     update_data['platforms']['windows-x86_64']['signature'] = signature
@@ -73,7 +73,7 @@ def main():
     # 7. Create GitHub Release
     exe_path = f"CaiNghien_Tauri/src-tauri/target/release/bundle/nsis/cainghien_tauri_{version}_x64-setup.exe"
     msi_path = f"CaiNghien_Tauri/src-tauri/target/release/bundle/msi/cainghien_tauri_{version}_x64_en-US.msi"
-    zip_path = f"CaiNghien_Tauri/src-tauri/target/release/bundle/nsis/cainghien_tauri_{version}_x64-setup.nsis.zip"
+    zip_path = f"CaiNghien_Tauri/src-tauri/target/release/bundle/nsis/cainghien_tauri_{version}_x64-setup.exe"
     
     gh_cmd = [
         'gh', 'release', 'create', f"v{version}", 
