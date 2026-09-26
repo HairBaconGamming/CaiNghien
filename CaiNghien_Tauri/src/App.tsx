@@ -136,6 +136,19 @@ export default function App() {
   const [updateObj, setUpdateObj] = useState<any>(null);
   const [isCheckingUpdate, setIsCheckingUpdate] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [notifications, setNotifications] = useState<import('./components/layout/Navbar').Notification[]>([
+    {
+      id: 'welcome',
+      title: 'Chào mừng trở lại',
+      message: 'Hệ thống đã sẵn sàng bảo vệ sự tập trung của bạn.',
+      read: false,
+      timestamp: 'Vừa xong'
+    }
+  ]);
+  
+  const handleMarkNotificationsRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+  };
   
   // Settings Protection
   const [settingsLocked, setSettingsLocked] = useState(true);
@@ -231,8 +244,8 @@ export default function App() {
           activeTab={activeTab}
           onSelectTab={handleSelectTab}
           userLevel={userProfile?.level}
-          userTitle={userProfile?.title}
-          hasNotifications={true}
+          notifications={notifications}
+          onMarkNotificationsRead={handleMarkNotificationsRead}
         />
 
         {/* Active Workspace Viewport */}

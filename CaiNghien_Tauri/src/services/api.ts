@@ -272,3 +272,12 @@ export const api = {
 
 export default api;
 
+
+export function getRankTitleForLevel(lvl: number): string {
+  if (lvl >= 50) return 'Bậc Thầy Vũ Trụ';
+  if (lvl >= 35) return 'Stellar Captain';
+  if (lvl >= 25) return 'Lữ Khách Tinh Tú';
+  if (lvl >= 15) return 'Nhà Thám Hiểm';
+  if (lvl >= 5) return 'Người Ngắm Sao';
+  return 'Cosmic Tân binh';
+}
