@@ -94,6 +94,7 @@ export const StudyHarvestReportModal: React.FC<StudyHarvestReportModalProps> = (
 
   const lastTextLengthRef = useRef(0);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const isComposingRef = useRef(false);
 
   // Calculate projected reward quota
   const earnedQuota = useMemo(() => {
@@ -153,6 +154,9 @@ export const StudyHarvestReportModal: React.FC<StudyHarvestReportModalProps> = (
 
   // 2. Keyboard shortcuts interceptor (Ctrl+V, Cmd+V, Shift+Insert, Escape)
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // Skip interception during IME composition (Vietnamese Telex/VNI)
+    if (e.nativeEvent.isComposing || isComposingRef.current) return;
+
     // Intercept Ctrl+V or Cmd+V
     if ((e.ctrlKey || e.metaKey) && (e.key === 'v' || e.key === 'V')) {
       e.preventDefault();
@@ -204,8 +208,8 @@ export const StudyHarvestReportModal: React.FC<StudyHarvestReportModalProps> = (
     const newText = e.target.value;
     const delta = newText.length - lastTextLengthRef.current;
 
-    // Burst Guard: if input length jumps suddenly by > 10 chars, reject simulated paste
-    if (delta > 10) {
+    // Skip burst guard during IME composition (Vietnamese Telex/VNI via Unikey)
+    if (!isComposingRef.current && delta > 10) {
       setWarningMessage('Phát hiện văn bản nhập quá nhanh! Nghi vấn dán văn bản tự động.');
       setShowPasteToast(true);
       return;
@@ -295,6 +299,14 @@ export const StudyHarvestReportModal: React.FC<StudyHarvestReportModalProps> = (
             ref={textareaRef}
             value={text}
             onChange={handleInputChange}
+            onCompositionStart={() => { isComposingRef.current = true; }}
+            onCompositionEnd={(e) => {
+              isComposingRef.current = false;
+              // Sync final composed value
+              const val = (e.target as HTMLTextAreaElement).value;
+              lastTextLengthRef.current = val.length;
+              setText(val);
+            }}
             onPaste={handlePaste}
             onKeyDown={handleKeyDown}
             onContextMenu={handleContextMenu}
