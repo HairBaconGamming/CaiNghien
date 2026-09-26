@@ -6,7 +6,7 @@ pub mod commands;
 pub mod db;
 
 use tauri::{Emitter, Manager, menu::{Menu, MenuItem}, tray::TrayIconBuilder};
-use tauri_plugin_autostart::MacosLauncher;
+use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
 use sha2::{Sha256, Digest};
 use std::time::{SystemTime, UNIX_EPOCH};
 use std::os::windows::process::CommandExt;
@@ -262,6 +262,14 @@ pub fn run() {
         })
         .setup(|app| {
             let config_data = config::load_config(app.handle());
+            
+            // Sync autostart
+            let autostart_manager = app.autolaunch();
+            if config_data.start_with_windows {
+                let _ = autostart_manager.enable();
+            } else {
+                let _ = autostart_manager.disable();
+            }
             let db_path = db::get_database_path();
             let db_conn = match db::init_db(&db_path, Some(&config_data)) {
                 Ok(c) => c,

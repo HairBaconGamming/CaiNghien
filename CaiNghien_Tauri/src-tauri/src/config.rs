@@ -194,6 +194,14 @@ pub fn save_app_config(
     }
     *config = new_config.clone();
     save_config(&app, &config)?;
+
+    // Handle autostart logic
+    if config.start_with_windows {
+        let _ = app.autolaunch().enable();
+    } else {
+        let _ = app.autolaunch().disable();
+    }
+
     Ok(())
 }
 
