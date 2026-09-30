@@ -1,8 +1,8 @@
 use cainghien_tauri_lib::commands::{calculate_study_reward_quota, validate_study_report_text};
 
-// =========================================================================
+// ----------------------------------------------------------------------===
 // SECTION 1: WORD VALIDATION HELPER ADVERSARIAL STRESS TESTS
-// =========================================================================
+// ----------------------------------------------------------------------===
 
 #[test]
 fn test_word_validation_empty_and_whitespace_only() {
@@ -206,9 +206,9 @@ fn test_word_validation_large_payload() {
     assert_eq!(res.unwrap(), 10_000);
 }
 
-// =========================================================================
+// ----------------------------------------------------------------------===
 // SECTION 2: REWARD QUOTA CALCULATION ADVERSARIAL STRESS TESTS
-// =========================================================================
+// ----------------------------------------------------------------------===
 
 #[test]
 fn test_reward_quota_zero_values_and_fallbacks() {
@@ -310,9 +310,9 @@ fn test_reward_quota_fractions_under_micro_steps() {
     }
 }
 
-// =========================================================================
+// ----------------------------------------------------------------------===
 // SECTION 3: EMPIRICAL PROOF OF FLOATING POINT PRECISION DEFICIT BUG
-// =========================================================================
+// ----------------------------------------------------------------------===
 
 /// Oracle function using exact 128-bit integer arithmetic.
 fn calculate_study_reward_quota_oracle(study: u32, req: u32, reward: u32) -> u32 {

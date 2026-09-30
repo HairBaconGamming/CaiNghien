@@ -1,5 +1,5 @@
 import { exit } from '@tauri-apps/plugin-process';
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { Titlebar } from './components/layout/Titlebar';
 import { Navbar, NavTabId } from './components/layout/Navbar';
 import { DashboardScreen } from './components/dashboard/DashboardScreen';
@@ -164,15 +164,36 @@ export default function App() {
   };
   
   // Settings Protection
-  const [settingsLocked, setSettingsLocked] = useState(true);
+  const [settingsLocked, setSettingsLocked] = useState(false);
   const [showUnlockModal, setShowUnlockModal] = useState(false);
+  const [disablingProtection, setDisablingProtection] = useState(false);
+  const [disableProgress, setDisableProgress] = useState(0);
+  const disableIntervalRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (activeTab !== 'settings') {
-      setSettingsLocked(true);
+      if (disableIntervalRef.current) {
+        clearInterval(disableIntervalRef.current);
+        disableIntervalRef.current = null;
+      }
       setShowUnlockModal(false);
+      setDisablingProtection(false);
+      setDisableProgress(0);
+      if (appConfig?.protection_enabled) {
+        setSettingsLocked(true);
+      }
     }
-  }, [activeTab]);
+  }, [activeTab, appConfig?.protection_enabled]);
+
+  useEffect(() => {
+    if (appConfig) {
+      if (!appConfig.protection_enabled) {
+        setSettingsLocked(false);
+      } else if (activeTab !== 'settings') {
+        setSettingsLocked(true);
+      }
+    }
+  }, [appConfig?.protection_enabled]);
 
   useEffect(() => {
     check().then((update) => {
@@ -182,11 +203,33 @@ export default function App() {
     }).catch(console.error);
   }, []);
 
-
   const handleSaveDomains = () => {
     const domains = blockedDomainsInput.split('\n').map(d => d.trim()).filter(d => d.length > 0);
     updateConfig({ blocked_domains: domains });
     addToast('success', 'Đã lưu cài đặt website!');
+  };
+
+  const handleToggleProtection = (checked: boolean) => {
+    if (!checked && appConfig?.change_delay_enabled) {
+      if (disableIntervalRef.current) return;
+      setDisablingProtection(true);
+      setDisableProgress(0);
+      let progress = 0;
+      disableIntervalRef.current = window.setInterval(() => {
+        progress += 2; // 5 seconds total (50 steps of 100ms)
+        setDisableProgress(progress);
+        if (progress >= 100) {
+          if (disableIntervalRef.current) {
+            clearInterval(disableIntervalRef.current);
+            disableIntervalRef.current = null;
+          }
+          setDisablingProtection(false);
+          updateConfig({ protection_enabled: false });
+        }
+      }, 100);
+      return;
+    }
+    updateConfig({ protection_enabled: checked });
   };
 
   const handleManualCheck = async () => {
@@ -348,20 +391,23 @@ export default function App() {
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 bg-slate-900/50 p-2 rounded-xl border border-white/10">
+                  <div className="flex items-center gap-3 bg-slate-900/50 p-2 rounded-xl border border-white/10 relative">
                     <span className="text-sm font-bold text-white">Bảo vệ chính</span>
                     <input 
                       type="checkbox" 
                       checked={appConfig.protection_enabled} 
-                      onChange={(e) => updateConfig({ protection_enabled: e.target.checked })}
+                      onChange={(e) => handleToggleProtection(e.target.checked)}
                       className="toggle-checkbox accent-cyan-400 w-6 h-6 cursor-pointer" 
-                      disabled={settingsLocked} 
+                      disabled={settingsLocked || disablingProtection} 
                     />
+                    {disablingProtection && (
+                      <div className="absolute -bottom-1 left-0 h-1 bg-cyan-500 transition-all duration-100" style={{ width: `${disableProgress}%` }} />
+                    )}
                   </div>
                 </div>
 
                 <div className="relative grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {settingsLocked && (
+                  {settingsLocked && appConfig.protection_enabled && (
                     <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[#030712]/80 backdrop-blur-sm rounded-2xl border border-white/10">
                       <Shield className="w-12 h-12 text-cyan-400 mb-4 animate-pulse" />
                       <h3 className="text-white font-bold text-xl mb-2">Đã bật bảo vệ</h3>

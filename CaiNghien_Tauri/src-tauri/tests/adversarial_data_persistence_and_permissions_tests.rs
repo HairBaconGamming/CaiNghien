@@ -21,9 +21,9 @@ fn get_unique_temp_dir(test_name: &str) -> PathBuf {
     dir
 }
 
-// =========================================================================
+// ----------------------------------------------------------------------===
 // SECTION 1: PERMISSIONS & CAPABILITY ADVERSARIAL VERIFICATION
-// =========================================================================
+// ----------------------------------------------------------------------===
 
 #[test]
 fn test_capabilities_and_acl_manifest_allow_study_commands() {
@@ -90,9 +90,9 @@ fn test_capabilities_and_acl_manifest_allow_study_commands() {
         .any(|c| c.as_str() == Some("add_study_reward_quota")));
 }
 
-// =========================================================================
+// ----------------------------------------------------------------------===
 // SECTION 2: LEGACY CONFIG.JSON DESERIALIZATION ADVERSARIAL STRESS TESTS
-// =========================================================================
+// ----------------------------------------------------------------------===
 
 #[test]
 fn test_serde_direct_deserialization_legacy_v1_config() {
@@ -281,9 +281,9 @@ fn test_deserialization_corrupted_or_empty_config_safe_fallback() {
     let _ = fs::remove_dir_all(&temp_dir);
 }
 
-// =========================================================================
+// ----------------------------------------------------------------------===
 // SECTION 3: MUTATION SAFETY & ATOMIC PERSISTENCE ADVERSARIAL STRESS TESTS
-// =========================================================================
+// ----------------------------------------------------------------------===
 
 #[test]
 fn test_atomic_save_roundtrip_integrity() {
