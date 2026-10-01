@@ -1,11 +1,45 @@
 {
-  "latest": "1.3.7",
+  "latest": "1.3.8",
   "releases": [
+    {
+      "version": "1.3.8",
+      "tag": "v1.3.8",
+      "published_at": "2026-10-01",
+      "is_latest": true,
+      "title": "Fix cai dat chung hoat dong that su",
+      "summary": "Su co logic toggle bao ve va on dinh cai dat chung.",
+      "notes": [
+        "Sua loi interval leak khi tat che do bao ve - neu chuyen tab trong khi dem nguoc, bao ve giu nguyen.",
+        "Cai dat chung da duoc ket noi day du voi SQLite backend.",
+        "On dinh UI lock/unlock cai dat khi protection_enabled thay doi."
+      ],
+      "categorized_notes": {
+        "fixes": [
+          "Sua loi interval leak khi tat Bao ve chinh.",
+          "Logic lock cai dat on dinh hon khi chuyen tab."
+        ]
+      },
+      "files": {
+        "installer": {
+          "filename": "cainghien_tauri_1.3.8_x64-setup.exe",
+          "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.8/cainghien_tauri_1.3.8_x64-setup.exe",
+          "direct_url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.8/cainghien_tauri_1.3.8_x64-setup.exe",
+          "size_formatted": "50 MB",
+          "platform": "Windows 10 / 11 (64-bit)"
+        },
+        "msi": {
+          "filename": "cainghien_tauri_1.3.8_x64_en-US.msi",
+          "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.8/cainghien_tauri_1.3.8_x64_en-US.msi",
+          "size_formatted": "45 MB",
+          "platform": "Windows MSI Installer"
+        }
+      }
+    },
     {
       "version": "1.3.7",
       "tag": "v1.3.7",
       "published_at": "2026-09-27",
-      "is_latest": true,
+      "is_latest": false,
       "title": "Bản vá sửa lỗi gõ tiếng Việt",
       "summary": "Tích hợp bộ gõ Telex nội bộ vào tất cả các ô nhập liệu.",
       "notes": [
