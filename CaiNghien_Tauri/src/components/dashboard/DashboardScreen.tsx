@@ -8,6 +8,8 @@ import { LevelProgress } from './LevelProgress';
 import { ActivityHeatmap } from './ActivityHeatmap';
 import { StatsCardsGrid } from './StatsCard';
 
+import { QuotaWidget } from './QuotaWidget';
+
 export interface DashboardScreenProps {
   refreshTrigger?: number;
 }
@@ -100,6 +102,9 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
         profile={userProfile || defaultProfile}
         isLoading={isLoading && !userProfile}
       />
+
+      {/* Quota Widget */}
+      <QuotaWidget />
 
       {/* Stats Cards Grid */}
       <StatsCardsGrid
