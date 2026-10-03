@@ -1,11 +1,47 @@
 {
-  "latest": "1.3.8",
+  "latest": "1.3.9",
   "releases": [
+    {
+      "version": "1.3.9",
+      "tag": "v1.3.9",
+      "published_at": "2026-10-03",
+      "is_latest": true,
+      "title": "Them tinh nang Quota - Thoi gian giai tri",
+      "summary": "Hoan thien bo dem thoi gian giai tri (Quota) kem giao dien moi trong Dashboard.",
+      "notes": [
+        "Them Quota Widget vao Dashboard (man hinh Tong quan).",
+        "Cho phep Bat dau / Tam dung quota thoi gian ranh truc tiep tu UI.",
+        "Hien thi thoi gian con lai chuan xac va dong bo 100% voi backend Rust.",
+        "Viet hoa hoan toan cac thanh phan thoi gian, ngan chan loi lay-out shift khi dem nguoc.",
+        "Cap nhat vao thu vien test, Backend vuot qua 68/68 kiem thu."
+      ],
+      "categorized_notes": {
+        "features": [
+          "Them Quota Widget de quan ly Thoi gian giai tri.",
+          "Dong bo realtime UI voi backend."
+        ]
+      },
+      "files": {
+        "installer": {
+          "filename": "cainghien_tauri_1.3.9_x64-setup.exe",
+          "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.9/cainghien_tauri_1.3.9_x64-setup.exe",
+          "direct_url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.9/cainghien_tauri_1.3.9_x64-setup.exe",
+          "size_formatted": "50 MB",
+          "platform": "Windows 10 / 11 (64-bit)"
+        },
+        "msi": {
+          "filename": "cainghien_tauri_1.3.9_x64_en-US.msi",
+          "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.9/cainghien_tauri_1.3.9_x64_en-US.msi",
+          "size_formatted": "45 MB",
+          "platform": "Windows MSI Installer"
+        }
+      }
+    },
     {
       "version": "1.3.8",
       "tag": "v1.3.8",
       "published_at": "2026-10-01",
-      "is_latest": true,
+      "is_latest": false,
       "title": "Fix cai dat chung hoat dong that su",
       "summary": "Su co logic toggle bao ve va on dinh cai dat chung.",
       "notes": [

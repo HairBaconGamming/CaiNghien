@@ -324,57 +324,53 @@ fn calculate_study_reward_quota_oracle(study: u32, req: u32, reward: u32) -> u32
 }
 
 #[test]
-fn test_empirical_proof_of_floating_point_rounding_bug() {
+fn test_empirical_proof_of_floating_point_rounding_bug_now_fixed() {
     // Case 1: 1:1 ratio with req=60, reward=60, study=245 min.
     // Mathematically: 245 * 60 / 60 = 245.
-    // Float evaluation: (245.0 / 60.0) * 60.0 = 244.99999999999997 -> floor() gives 244!
     let actual_245 = calculate_study_reward_quota(245, 60, 60);
     let expected_oracle_245 = calculate_study_reward_quota_oracle(245, 60, 60);
     assert_eq!(expected_oracle_245, 245);
-    // Empirically verify that the current implementation suffers from an off-by-one undercount:
+    // Verified that the implementation is fixed and correctly returns 245
     assert_eq!(
-        actual_245, 244,
-        "Current implementation must return 244 due to float rounding loss"
+        actual_245, 245,
+        "Implementation should correctly return 245 without rounding loss"
     );
-    assert_ne!(
+    assert_eq!(
         actual_245, expected_oracle_245,
-        "CONFIRMED BUG: (245.0 / 60.0) * 60.0 floors to 244 instead of 245!"
+        "Fixed bug: (245.0 / 60.0) * 60.0 correctly calculates to 245"
     );
 
     // Case 2: Custom ratio req=45, reward=45, study=115 min.
     // Mathematically: 115 * 45 / 45 = 115.
-    // Float evaluation: (115.0 / 45.0) * 45.0 = 114.99999999999999 -> floor() gives 114!
     let actual_115 = calculate_study_reward_quota(115, 45, 45);
     let expected_oracle_115 = calculate_study_reward_quota_oracle(115, 45, 45);
     assert_eq!(expected_oracle_115, 115);
-    assert_eq!(actual_115, 114);
-    assert_ne!(
+    assert_eq!(actual_115, 115);
+    assert_eq!(
         actual_115, expected_oracle_115,
-        "CONFIRMED BUG: 115 min study yields 114 min reward"
+        "Fixed bug: 115 min study yields 115 min reward"
     );
 
     // Case 3: Custom ratio req=90, reward=45, study=230 min.
     // Mathematically: 230 * 45 / 90 = 230 / 2 = 115.
-    // Float evaluation: (230.0 / 90.0) * 45.0 = 114.99999999999998 -> floor() gives 114!
     let actual_230 = calculate_study_reward_quota(230, 90, 45);
     let expected_oracle_230 = calculate_study_reward_quota_oracle(230, 90, 45);
     assert_eq!(expected_oracle_230, 115);
-    assert_eq!(actual_230, 114);
-    assert_ne!(
+    assert_eq!(actual_230, 115);
+    assert_eq!(
         actual_230, expected_oracle_230,
-        "CONFIRMED BUG: 230 min study yields 114 min reward instead of 115"
+        "Fixed bug: 230 min study yields 115 min reward instead of 114"
     );
 
     // Case 4: Custom ratio req=25, reward=45, study=35 min.
     // Mathematically: 35 * 45 / 25 = 1575 / 25 = 63.
-    // Float evaluation: (35.0 / 25.0) * 45.0 = 62.99999999999999 -> floor() gives 62!
     let actual_35 = calculate_study_reward_quota(35, 25, 45);
     let expected_oracle_35 = calculate_study_reward_quota_oracle(35, 25, 45);
     assert_eq!(expected_oracle_35, 63);
-    assert_eq!(actual_35, 62);
-    assert_ne!(
+    assert_eq!(actual_35, 63);
+    assert_eq!(
         actual_35, expected_oracle_35,
-        "CONFIRMED BUG: 35 min study yields 62 min reward instead of 63"
+        "Fixed bug: 35 min study yields 63 min reward instead of 62"
     );
 }
 
