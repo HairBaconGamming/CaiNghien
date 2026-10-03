@@ -67,7 +67,7 @@ export const QuotaWidget: React.FC = () => {
 
   if (isLoading && !quotaStatus) {
     return (
-      <div className="bg-[#1C1C1E] border border-white/5 rounded-2xl p-6 flex justify-center items-center">
+      <div className="shrink-0 bg-[#1C1C1E] border border-white/5 rounded-2xl p-6 flex justify-center items-center">
         <span className="text-white/50">Đang tải Quota...</span>
       </div>
     );
@@ -86,7 +86,7 @@ export const QuotaWidget: React.FC = () => {
   const percentUsed = max_seconds > 0 ? Math.min(100, (used_seconds / max_seconds) * 100) : 100;
 
   return (
-    <div className="bg-[#1C1C1E] border border-white/5 rounded-2xl p-6 flex flex-col gap-4 shadow-lg relative overflow-hidden">
+    <div className="shrink-0 bg-[#1C1C1E] border border-white/5 rounded-2xl p-6 flex flex-col gap-4 shadow-lg relative overflow-hidden">
       {/* Background active indicator glow */}
       {active && (
         <div className="absolute inset-0 bg-indigo-500/5 pointer-events-none" />
