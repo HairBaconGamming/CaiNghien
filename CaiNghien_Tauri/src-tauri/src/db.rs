@@ -170,6 +170,58 @@ pub fn run_migrations(conn: &mut Connection) -> Result<(), rusqlite::Error> {
         )?;
     }
 
+    if current_version.unwrap_or(0) < 2 {
+        tx.execute(
+            "CREATE TABLE IF NOT EXISTS ielts_topics (
+                id INTEGER PRIMARY KEY,
+                name TEXT NOT NULL,
+                description TEXT NOT NULL,
+                icon TEXT DEFAULT '📚'
+            );",
+            [],
+        )?;
+
+        tx.execute(
+            "CREATE TABLE IF NOT EXISTS ielts_words (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                topic_id INTEGER NOT NULL REFERENCES ielts_topics(id),
+                word TEXT NOT NULL,
+                UNIQUE(topic_id, word)
+            );",
+            [],
+        )?;
+
+        tx.execute(
+            "CREATE TABLE IF NOT EXISTS cambridge_cache (
+                word TEXT PRIMARY KEY,
+                pos TEXT,
+                ipa_uk TEXT,
+                ipa_us TEXT,
+                audio_url_uk TEXT,
+                audio_url_us TEXT,
+                definition TEXT,
+                examples TEXT,
+                updated_at TEXT NOT NULL
+            );",
+            [],
+        )?;
+
+        tx.execute(
+            "CREATE TABLE IF NOT EXISTS user_vocab_progress (
+                word_id INTEGER PRIMARY KEY REFERENCES ielts_words(id),
+                status TEXT NOT NULL DEFAULT 'new',
+                correct_streak INTEGER NOT NULL DEFAULT 0,
+                last_tested_at TEXT
+            );",
+            [],
+        )?;
+
+        tx.execute(
+            "INSERT INTO schema_migrations (version, description) VALUES (2, 'Add IELTS tables');",
+            [],
+        )?;
+    }
+
     tx.commit()?;
     Ok(())
 }
@@ -298,6 +350,31 @@ pub fn generate_dynamic_365_seed(today: NaiveDate) -> Vec<DailyContribution> {
     result
 }
 
+fn seed_ielts_data(tx: &rusqlite::Transaction) -> Result<(), rusqlite::Error> {
+    let topics = vec![
+        ("Technology", "Words related to modern technology and computing", "💻", vec!["algorithm", "artificial", "bandwidth", "cybersecurity", "database", "digital", "encryption", "firmware", "hardware", "innovation", "interface", "malware", "network", "optimize", "processor", "quantum", "software", "virtual", "wireless"]),
+        ("Environment", "Words related to nature, climate, and conservation", "🌿", vec!["biodiversity", "carbon", "climate", "conservation", "deforestation", "ecosystem", "emission", "endangered", "erosion", "fossil", "greenhouse", "habitat", "pollution", "recycle", "renewable", "sustainable", "toxic", "urbanization", "waste", "wildlife"]),
+        ("Education", "Academic and learning related vocabulary", "🎓", vec!["academic", "assessment", "curriculum", "diploma", "enrollment", "faculty", "graduation", "illiteracy", "knowledge", "lecture", "mentor", "pedagogy", "qualification", "research", "scholarship", "semester", "thesis", "tuition", "undergraduate", "vocational"]),
+        ("Health", "Medical, wellness, and fitness vocabulary", "🏥", vec!["addiction", "antibiotic", "chronic", "diagnosis", "epidemic", "fitness", "hygiene", "immunity", "nutrition", "obesity", "pandemic", "pharmaceutical", "prescription", "rehabilitation", "symptom", "therapy", "vaccination", "wellness", "disorder", "metabolism"]),
+        ("Economy", "Business, finance, and trade terms", "💰", vec!["budget", "commodity", "currency", "deficit", "entrepreneur", "export", "globalization", "inflation", "investment", "labor", "monopoly", "profit", "recession", "revenue", "subsidy", "tariff", "trade", "unemployment", "venture", "wealth"]),
+        ("Society", "Social issues, culture, and community", "🤝", vec!["community", "culture", "democracy", "discrimination", "diversity", "equality", "ethnicity", "generation", "immigration", "justice", "legislation", "minority", "population", "poverty", "privilege", "reform", "tradition", "urbanization", "volunteer", "welfare"]),
+        ("Science", "Scientific concepts and discoveries", "🔬", vec!["asteroid", "biology", "catalyst", "chromosome", "compound", "electron", "evolution", "gravity", "hypothesis", "laboratory", "molecule", "neutron", "organism", "photosynthesis", "radiation", "spectrum", "telescope", "theory", "variable", "velocity"]),
+        ("Media", "Journalism, broadcasting, and publishing", "📰", vec!["advertisement", "audience", "broadcast", "censorship", "circulation", "correspondent", "editorial", "headline", "journalism", "mainstream", "narrative", "objectivity", "propaganda", "publication", "reporter", "satellite", "sensationalism", "subscription", "tabloid", "viral"])
+    ];
+
+    let mut topic_stmt = tx.prepare("INSERT INTO ielts_topics (name, description, icon) VALUES (?1, ?2, ?3)")?;
+    let mut word_stmt = tx.prepare("INSERT INTO ielts_words (topic_id, word) VALUES (?1, ?2)")?;
+
+    for (name, desc, icon, words) in topics {
+        topic_stmt.execute(params![name, desc, icon])?;
+        let topic_id = tx.last_insert_rowid();
+        for word in words {
+            word_stmt.execute(params![topic_id, word])?;
+        }
+    }
+    Ok(())
+}
+
 /// Seeds default profile and 365-day baseline if tables are empty.
 pub fn seed_database_if_empty(
     conn: &mut Connection,
@@ -350,7 +427,14 @@ pub fn seed_database_if_empty(
         // Backend returns empty real data if empty.
     }
 
-    // 3. Import focus sessions if table is empty and config has them
+    // 3. Seed IELTS Data
+    let ielts_count: i64 =
+        tx.query_row("SELECT COUNT(*) FROM ielts_topics;", [], |r| r.get(0))?;
+    if ielts_count == 0 {
+        seed_ielts_data(&tx)?;
+    }
+
+    // 4. Import focus sessions if table is empty and config has them
     if let Some(cfg) = config_import {
         let sessions_count: i64 =
             tx.query_row("SELECT COUNT(*) FROM focus_sessions;", [], |r| r.get(0))?;

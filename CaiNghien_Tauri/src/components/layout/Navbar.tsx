@@ -2,11 +2,10 @@ import type { FC, ComponentType } from 'react';
 import {
   LayoutDashboard,
   Timer,
-  Keyboard,
+  BookOpen,
   Settings,
   Bell,
   Sparkles,
-
 } from 'lucide-react';
 
 export type NavTabId = 'dashboard' | 'focus' | 'typing' | 'settings';
@@ -58,7 +57,7 @@ export const Navbar: FC<NavbarProps> = ({
   const navItems: { id: NavTabId; label: string; icon: ComponentType<{ className?: string }> }[] = [
     { id: 'dashboard', label: 'Tổng quan', icon: LayoutDashboard },
     { id: 'focus', label: 'Phòng tập trung', icon: Timer },
-    { id: 'typing', label: 'Thử thách gõ phím', icon: Keyboard },
+    { id: 'typing', label: 'Học tập', icon: BookOpen },
     { id: 'settings', label: 'Cài đặt', icon: Settings },
     
   ];

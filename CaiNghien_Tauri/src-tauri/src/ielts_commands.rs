@@ -1,0 +1,186 @@
+use crate::db::DbState;
+use crate::config::ConfigState;
+use crate::config;
+use crate::cambridge::{fetch_word_data, CambridgeEntry};
+use serde::{Deserialize, Serialize};
+use tauri::{State, AppHandle};
+use rusqlite::params;
+use std::time::{SystemTime, UNIX_EPOCH};
+
+#[derive(Serialize)]
+pub struct IeltsTopic {
+    pub id: i64,
+    pub name: String,
+    pub description: String,
+    pub icon: String,
+}
+
+#[derive(Serialize)]
+pub struct IeltsWord {
+    pub id: i64,
+    pub topic_id: i64,
+    pub word: String,
+}
+
+#[derive(Serialize)]
+pub struct VocabProgress {
+    pub word_id: i64,
+    pub status: String,
+    pub correct_streak: i64,
+}
+
+#[derive(Serialize)]
+pub struct IeltsTestResult {
+    pub success: bool,
+    pub quota_added: u32,
+    pub message: String,
+}
+
+#[tauri::command]
+pub async fn get_ielts_topics(db: State<'_, DbState>) -> Result<Vec<IeltsTopic>, String> {
+    let conn = db.0.lock().map_err(|_| "Mutex poisoned".to_string())?;
+    let mut stmt = conn.prepare("SELECT id, name, description, icon FROM ielts_topics").map_err(|e| e.to_string())?;
+    let topics = stmt.query_map([], |row| {
+        Ok(IeltsTopic {
+            id: row.get(0)?,
+            name: row.get(1)?,
+            description: row.get(2)?,
+            icon: row.get(3)?,
+        })
+    }).map_err(|e| e.to_string())?.filter_map(Result::ok).collect();
+    Ok(topics)
+}
+
+#[tauri::command]
+pub async fn get_topic_words(db: State<'_, DbState>, topic_id: i64) -> Result<Vec<IeltsWord>, String> {
+    let conn = db.0.lock().map_err(|_| "Mutex poisoned".to_string())?;
+    let mut stmt = conn.prepare("SELECT id, topic_id, word FROM ielts_words WHERE topic_id = ?1").map_err(|e| e.to_string())?;
+    let words = stmt.query_map([topic_id], |row| {
+        Ok(IeltsWord {
+            id: row.get(0)?,
+            topic_id: row.get(1)?,
+            word: row.get(2)?,
+        })
+    }).map_err(|e| e.to_string())?.filter_map(Result::ok).collect();
+    Ok(words)
+}
+
+#[tauri::command]
+pub async fn fetch_cambridge(db: State<'_, DbState>, word: String) -> Result<CambridgeEntry, String> {
+    {
+        let conn = db.0.lock().map_err(|_| "Mutex poisoned".to_string())?;
+        let cached: Option<CambridgeEntry> = conn.query_row(
+            "SELECT pos, ipa_uk, ipa_us, audio_url_uk, audio_url_us, definition, examples FROM cambridge_cache WHERE word = ?1",
+            [&word],
+            |row| {
+                let examples_json: String = row.get(6).unwrap_or_default();
+                let examples: Vec<String> = serde_json::from_str(&examples_json).unwrap_or_default();
+                Ok(CambridgeEntry {
+                    pos: row.get(0).unwrap_or_default(),
+                    ipa_uk: row.get(1).unwrap_or_default(),
+                    ipa_us: row.get(2).unwrap_or_default(),
+                    audio_url_uk: row.get(3).unwrap_or_default(),
+                    audio_url_us: row.get(4).unwrap_or_default(),
+                    definition: row.get(5).unwrap_or_default(),
+                    examples,
+                })
+            }
+        ).ok();
+        if let Some(entry) = cached {
+            return Ok(entry);
+        }
+    }
+    
+    let entry = fetch_word_data(&word).await?;
+    
+    {
+        let conn = db.0.lock().map_err(|_| "Mutex poisoned".to_string())?;
+        let examples_json = serde_json::to_string(&entry.examples).unwrap_or_default();
+        let _ = conn.execute(
+            "INSERT OR REPLACE INTO cambridge_cache (word, pos, ipa_uk, ipa_us, audio_url_uk, audio_url_us, definition, examples, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, datetime('now'))",
+            params![word, entry.pos, entry.ipa_uk, entry.ipa_us, entry.audio_url_uk, entry.audio_url_us, entry.definition, examples_json]
+        );
+    }
+    
+    Ok(entry)
+}
+
+#[tauri::command]
+pub async fn update_vocab_progress(db: State<'_, DbState>, word_id: i64, correct: bool) -> Result<(), String> {
+    let conn = db.0.lock().map_err(|_| "Mutex poisoned".to_string())?;
+    
+    let current_streak: i64 = conn.query_row("SELECT correct_streak FROM user_vocab_progress WHERE word_id = ?1", [word_id], |row| row.get(0)).unwrap_or(0);
+    
+    let new_streak = if correct { current_streak + 1 } else { 0 };
+    let status = if new_streak >= 3 { "mastered" } else { "learning" };
+    
+    conn.execute(
+        "INSERT INTO user_vocab_progress (word_id, status, correct_streak, last_tested_at) VALUES (?1, ?2, ?3, datetime('now'))
+         ON CONFLICT(word_id) DO UPDATE SET status = ?2, correct_streak = ?3, last_tested_at = datetime('now')",
+        params![word_id, status, new_streak]
+    ).map_err(|e| e.to_string())?;
+    
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn get_vocab_progress(db: State<'_, DbState>, topic_id: i64) -> Result<Vec<VocabProgress>, String> {
+    let conn = db.0.lock().map_err(|_| "Mutex poisoned".to_string())?;
+    let mut stmt = conn.prepare("SELECT p.word_id, p.status, p.correct_streak FROM user_vocab_progress p JOIN ielts_words w ON p.word_id = w.id WHERE w.topic_id = ?1").map_err(|e| e.to_string())?;
+    let progress = stmt.query_map([topic_id], |row| {
+        Ok(VocabProgress {
+            word_id: row.get(0)?,
+            status: row.get(1)?,
+            correct_streak: row.get(2)?,
+        })
+    }).map_err(|e| e.to_string())?.filter_map(Result::ok).collect();
+    Ok(progress)
+}
+
+#[tauri::command]
+pub async fn submit_ielts_test(
+    app: AppHandle,
+    state: State<'_, ConfigState>,
+    score: u32,
+    total: u32,
+    mode: String
+) -> Result<IeltsTestResult, String> {
+    if score != total || total == 0 {
+        return Ok(IeltsTestResult {
+            success: false,
+            quota_added: 0,
+            message: "Bạn phải đạt 100% để nhận thưởng.".to_string()
+        });
+    }
+
+    let mut config_data = state.0.lock().map_err(|_| "Mutex poisoned".to_string())?;
+
+    if mode == "quota" {
+        let reward = crate::commands::calculate_study_reward_quota(
+            total,
+            config_data.study_minutes_required,
+            config_data.reward_quota_minutes,
+        );
+        config_data.daily_quota_minutes = config_data.daily_quota_minutes.saturating_add(reward);
+        let _ = config::save_config(&app, &config_data);
+        Ok(IeltsTestResult {
+            success: true,
+            quota_added: reward,
+            message: format!("Đã cộng {} phút vào Quota.", reward)
+        })
+    } else if mode == "unlock" {
+        let now = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_secs();
+        config_data.temporary_unlock_until = Some(now + 300);
+        let _ = config::save_config(&app, &config_data);
+        Ok(IeltsTestResult {
+            success: true,
+            quota_added: 0,
+            message: "Đã mở khóa cài đặt trong 5 phút.".to_string()
+        })
+    } else {
+        Err("Invalid mode".to_string())
+    }
+}

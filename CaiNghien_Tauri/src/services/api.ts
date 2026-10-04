@@ -303,6 +303,12 @@ export async function restoreConfig(): Promise<string> {
   return safeInvoke<string>('restore_config', {});
 }
 
+export interface IeltsTopic { id: number; name: string; description: string; icon: string; }
+export interface IeltsWord { id: number; topic_id: number; word: string; }
+export interface CambridgeEntry { pos: string; ipa_uk: string; ipa_us: string; audio_url_uk: string; audio_url_us: string; definition: string; examples: string[]; }
+export interface VocabProgress { word_id: number; status: string; correct_streak: number; }
+export interface IeltsTestResult { success: boolean; quota_added: number; message: string; }
+
 export const api = {
   getHeatmapData,
   getUserProfile,
@@ -330,6 +336,24 @@ export const api = {
   isTauriEnvironment,
   onTelemetryUpdate,
   notifyTelemetryUpdate,
+  getIeltsTopics: async (): Promise<IeltsTopic[]> => {
+    return await safeInvoke<IeltsTopic[]>('get_ielts_topics', {});
+  },
+  getTopicWords: async (topicId: number): Promise<IeltsWord[]> => {
+    return await safeInvoke<IeltsWord[]>('get_topic_words', { topicId });
+  },
+  fetchCambridge: async (word: string): Promise<CambridgeEntry> => {
+    return await safeInvoke<CambridgeEntry>('fetch_cambridge', { word });
+  },
+  updateVocabProgress: async (wordId: number, correct: boolean): Promise<void> => {
+    await safeInvoke<void>('update_vocab_progress', { wordId, correct });
+  },
+  getVocabProgress: async (topicId: number): Promise<VocabProgress[]> => {
+    return await safeInvoke<VocabProgress[]>('get_vocab_progress', { topicId });
+  },
+  submitIeltsTest: async (score: number, total: number, mode: string): Promise<IeltsTestResult> => {
+    return await safeInvoke<IeltsTestResult>('submit_ielts_test', { score, total, mode });
+  }
 };
 
 export default api;

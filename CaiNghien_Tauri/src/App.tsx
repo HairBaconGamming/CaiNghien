@@ -4,7 +4,7 @@ import { Titlebar } from './components/layout/Titlebar';
 import { Navbar, NavTabId } from './components/layout/Navbar';
 import { DashboardScreen } from './components/dashboard/DashboardScreen';
 import { FocusRoomScreen } from './components/focus/FocusRoomScreen';
-import { TypingChallengeScreen } from './components/typing/TypingChallengeScreen';
+import { IeltsChallengeScreen } from './components/ielts/IeltsChallengeScreen';
 import {
   Settings as SettingsIcon,
   Shield,
@@ -322,7 +322,7 @@ export default function App() {
             )}
 
             {activeTab === 'typing' && (
-              <TypingChallengeScreen
+              <IeltsChallengeScreen
                 onClose={() => handleSelectTab('dashboard')}
                 onComplete={() => {
                   refreshProfile();
@@ -967,9 +967,9 @@ export default function App() {
       {/* Floating Modal Overlay for Typing Challenge (when invoked outside direct tab) */}
       {showTypingModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
-          <div className="relative w-full max-w-2xl">
-            <TypingChallengeScreen
-              asModal
+          <div className="relative w-full max-w-4xl h-[80vh] bg-[#030712] rounded-3xl overflow-hidden border border-cyan-500/30">
+            <IeltsChallengeScreen
+              mode="quota"
               onClose={() => setShowTypingModal(false)}
               onComplete={() => {
                 setShowTypingModal(false);
@@ -984,10 +984,9 @@ export default function App() {
       {/* Unlock Settings Modal */}
       {showUnlockModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
-          <div className="relative w-full max-w-2xl">
-            <TypingChallengeScreen
-              asModal
-              customText="Tôi cam kết chịu trách nhiệm với bản thân, kỷ luật để vượt qua cám dỗ. Việc gỡ bỏ rào cản lúc này có thể phá hủy mọi nỗ lực. Tôi chọn sự tự do thực sự chứ không phải khoái cảm nhất thời."
+          <div className="relative w-full max-w-4xl h-[80vh] bg-[#030712] rounded-3xl overflow-hidden border border-cyan-500/30">
+            <IeltsChallengeScreen
+              mode="unlock"
               onClose={() => setShowUnlockModal(false)}
               onComplete={() => {
                 setSettingsLocked(false);
