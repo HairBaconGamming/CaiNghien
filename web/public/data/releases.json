@@ -1,11 +1,32 @@
 {
-  "latest": "1.3.9",
+  "latest": "v1.4.0",
   "releases": [
+    {
+      "version": "v1.4.0",
+      "date": "2026-10-04",
+      "tag_name": "v1.4.0",
+      "is_latest": true,
+      "notes": "🚀 Cập nhật v1.4.0 (Big Update):\n- Bổ sung hệ thống 4000 từ vựng nâng cao chia thành 20 chủ đề (IELTS 6.5 - 7.5).\n- Tích hợp tính năng Đấu trường IELTS League (Mở đè webview, tự động bắt sự kiện +30 phút Quota).\n- Tích hợp âm thanh, phiên âm, định nghĩa chuẩn từ Cambridge Dictionary.",
+      "files": {
+        "installer": {
+          "name": "cainghien_tauri_1.4.0_x64-setup.exe",
+          "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.4.0/cainghien_tauri_1.4.0_x64-setup.exe",
+          "size": "Khoảng 65 MB",
+          "type": "Installer (NSIS)"
+        },
+        "msi": {
+          "name": "cainghien_tauri_1.4.0_x64_en-US.msi",
+          "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.4.0/cainghien_tauri_1.4.0_x64_en-US.msi",
+          "size": "Khoảng 60 MB",
+          "type": "MSI Package"
+        }
+      }
+    },
     {
       "version": "1.3.9",
       "tag": "v1.3.9",
       "published_at": "2026-10-03",
-      "is_latest": true,
+      "is_latest": false,
       "title": "Them tinh nang Quota - Thoi gian giai tri",
       "summary": "Hoan thien bo dem thoi gian giai tri (Quota) kem giao dien moi trong Dashboard.",
       "notes": [

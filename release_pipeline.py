@@ -61,7 +61,7 @@ def main():
     print("Updated tauri-update.json")
 
     # 5. Build Web App
-    run_cmd(['npm.cmd', 'run', 'build'], cwd='web')
+    run_cmd(['npm.cmd', 'run', 'build', '--', '--emptyOutDir=false'], cwd='web')
     
     # 6. Git Commit & Tag
     run_cmd(['git', 'add', '.'])
