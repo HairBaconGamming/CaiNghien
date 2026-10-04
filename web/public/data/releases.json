@@ -6,7 +6,12 @@
       "date": "2026-10-04",
       "tag_name": "v1.4.0",
       "is_latest": true,
-      "notes": "🚀 Cập nhật v1.4.0 (Big Update):\n- Bổ sung hệ thống 4000 từ vựng nâng cao chia thành 20 chủ đề (IELTS 6.5 - 7.5).\n- Tích hợp tính năng Đấu trường IELTS League (Mở đè webview, tự động bắt sự kiện +30 phút Quota).\n- Tích hợp âm thanh, phiên âm, định nghĩa chuẩn từ Cambridge Dictionary.",
+      "notes": [
+        "🚀 Cập nhật v1.4.0 (Big Update):",
+        "- Bổ sung hệ thống 4000 từ vựng nâng cao chia thành 20 chủ đề (IELTS 6.5 - 7.5).",
+        "- Tích hợp tính năng Đấu trường IELTS League (Mở đè webview, tự động bắt sự kiện +30 phút Quota).",
+        "- Tích hợp âm thanh, phiên âm, định nghĩa chuẩn từ Cambridge Dictionary."
+      ],
       "files": {
         "installer": {
           "name": "cainghien_tauri_1.4.0_x64-setup.exe",
