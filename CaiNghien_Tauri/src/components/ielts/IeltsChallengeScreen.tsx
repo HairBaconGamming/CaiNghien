@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { api } from '../../services/api';
-import { Volume2, ArrowRight, ArrowLeft, CheckCircle, XCircle } from 'lucide-react';
+import { invoke } from '@tauri-apps/api/core';
+import { listen } from '@tauri-apps/api/event';
+import { Volume2, ArrowRight, ArrowLeft, CheckCircle, XCircle, Trophy } from 'lucide-react';
 
 interface IeltsTopic {
   id: number;
@@ -49,10 +51,32 @@ export const IeltsChallengeScreen: React.FC<{
   const [testComplete, setTestComplete] = useState(false);
   const [feedback, setFeedback] = useState<'none' | 'correct' | 'incorrect'>('none');
   const inputRef = useRef<HTMLInputElement>(null);
+  
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   useEffect(() => {
     loadTopics();
+    
+    let unlisten: () => void;
+    const setupListener = async () => {
+      unlisten = await listen('battle_success', () => {
+        setToastMessage('🎉 Chúc mừng! Bạn đã nhận 30 phút Quota từ IELTS League!');
+        setTimeout(() => setToastMessage(null), 5000);
+      });
+    };
+    setupListener();
+    return () => {
+      if (unlisten) unlisten();
+    };
   }, []);
+
+  const openIeltsBattle = async () => {
+    try {
+      await invoke('open_ielts_battle');
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const loadTopics = async () => {
     try {
@@ -191,6 +215,15 @@ export const IeltsChallengeScreen: React.FC<{
               Học Từ Vựng IELTS
             </h1>
             <p className="text-slate-400">Chọn một chủ đề để bắt đầu rèn luyện</p>
+          </div>
+          <div className="flex justify-center mb-8">
+            <button
+              onClick={openIeltsBattle}
+              className="flex items-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 shadow-[0_0_20px_rgba(245,158,11,0.4)] hover:shadow-[0_0_30px_rgba(245,158,11,0.6)] hover:scale-105 transition-all text-white font-black text-lg border-2 border-amber-300/30 group"
+            >
+              <Trophy className="w-6 h-6 text-yellow-200 group-hover:rotate-12 transition-transform" />
+              Đấu trường IELTS League (Nhận 30 phút Quota)
+            </button>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -416,6 +449,12 @@ export const IeltsChallengeScreen: React.FC<{
               Thử lại bài này
             </button>
           </div>
+        </div>
+      )}
+      {toastMessage && (
+        <div className="fixed bottom-8 right-8 z-50 bg-emerald-500/90 text-white px-6 py-4 rounded-2xl shadow-[0_0_20px_rgba(16,185,129,0.5)] border border-emerald-400 font-bold animate-fade-in-up flex items-center gap-3">
+          <Trophy className="w-5 h-5 text-yellow-300" />
+          {toastMessage}
         </div>
       )}
     </div>

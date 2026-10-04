@@ -23,6 +23,6 @@
     "updater:default",
     "process:default",
     "autostart:default",
-    "default"
+    "core:window:allow-create"
   ]
 }

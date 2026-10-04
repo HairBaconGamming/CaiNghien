@@ -350,26 +350,26 @@ pub fn generate_dynamic_365_seed(today: NaiveDate) -> Vec<DailyContribution> {
     result
 }
 
+#[derive(serde::Deserialize)]
+struct SeedTopic {
+    name: String,
+    description: String,
+    icon: String,
+    words: Vec<String>,
+}
+
 fn seed_ielts_data(tx: &rusqlite::Transaction) -> Result<(), rusqlite::Error> {
-    let topics = vec![
-        ("Technology", "Words related to modern technology and computing", "💻", vec!["algorithm", "artificial", "bandwidth", "cybersecurity", "database", "digital", "encryption", "firmware", "hardware", "innovation", "interface", "malware", "network", "optimize", "processor", "quantum", "software", "virtual", "wireless"]),
-        ("Environment", "Words related to nature, climate, and conservation", "🌿", vec!["biodiversity", "carbon", "climate", "conservation", "deforestation", "ecosystem", "emission", "endangered", "erosion", "fossil", "greenhouse", "habitat", "pollution", "recycle", "renewable", "sustainable", "toxic", "urbanization", "waste", "wildlife"]),
-        ("Education", "Academic and learning related vocabulary", "🎓", vec!["academic", "assessment", "curriculum", "diploma", "enrollment", "faculty", "graduation", "illiteracy", "knowledge", "lecture", "mentor", "pedagogy", "qualification", "research", "scholarship", "semester", "thesis", "tuition", "undergraduate", "vocational"]),
-        ("Health", "Medical, wellness, and fitness vocabulary", "🏥", vec!["addiction", "antibiotic", "chronic", "diagnosis", "epidemic", "fitness", "hygiene", "immunity", "nutrition", "obesity", "pandemic", "pharmaceutical", "prescription", "rehabilitation", "symptom", "therapy", "vaccination", "wellness", "disorder", "metabolism"]),
-        ("Economy", "Business, finance, and trade terms", "💰", vec!["budget", "commodity", "currency", "deficit", "entrepreneur", "export", "globalization", "inflation", "investment", "labor", "monopoly", "profit", "recession", "revenue", "subsidy", "tariff", "trade", "unemployment", "venture", "wealth"]),
-        ("Society", "Social issues, culture, and community", "🤝", vec!["community", "culture", "democracy", "discrimination", "diversity", "equality", "ethnicity", "generation", "immigration", "justice", "legislation", "minority", "population", "poverty", "privilege", "reform", "tradition", "urbanization", "volunteer", "welfare"]),
-        ("Science", "Scientific concepts and discoveries", "🔬", vec!["asteroid", "biology", "catalyst", "chromosome", "compound", "electron", "evolution", "gravity", "hypothesis", "laboratory", "molecule", "neutron", "organism", "photosynthesis", "radiation", "spectrum", "telescope", "theory", "variable", "velocity"]),
-        ("Media", "Journalism, broadcasting, and publishing", "📰", vec!["advertisement", "audience", "broadcast", "censorship", "circulation", "correspondent", "editorial", "headline", "journalism", "mainstream", "narrative", "objectivity", "propaganda", "publication", "reporter", "satellite", "sensationalism", "subscription", "tabloid", "viral"])
-    ];
+    let json_data = include_str!("../assets/ielts_vocab.json");
+    let topics: Vec<SeedTopic> = serde_json::from_str(json_data).unwrap_or_else(|_| vec![]);
 
     let mut topic_stmt = tx.prepare("INSERT INTO ielts_topics (name, description, icon) VALUES (?1, ?2, ?3)")?;
     let mut word_stmt = tx.prepare("INSERT INTO ielts_words (topic_id, word) VALUES (?1, ?2)")?;
 
-    for (name, desc, icon, words) in topics {
-        topic_stmt.execute(params![name, desc, icon])?;
+    for topic in topics {
+        topic_stmt.execute(rusqlite::params![topic.name, topic.description, topic.icon])?;
         let topic_id = tx.last_insert_rowid();
-        for word in words {
-            word_stmt.execute(params![topic_id, word])?;
+        for word in topic.words {
+            word_stmt.execute(rusqlite::params![topic_id, word])?;
         }
     }
     Ok(())

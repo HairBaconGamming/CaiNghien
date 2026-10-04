@@ -459,7 +459,7 @@ pub fn run() {
             ielts_commands::fetch_cambridge,
             ielts_commands::update_vocab_progress,
             ielts_commands::get_vocab_progress,
-            ielts_commands::submit_ielts_test,
+            ielts_commands::submit_ielts_test, ielts_commands::open_ielts_battle, ielts_commands::ielts_battle_success,
             rescue::get_system_diagnostics,
             rescue::emergency_kill_and_restore,
             rescue::toggle_hosts_block,
@@ -470,3 +470,4 @@ pub fn run() {
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
+

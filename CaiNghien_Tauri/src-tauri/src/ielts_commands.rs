@@ -184,3 +184,70 @@ pub async fn submit_ielts_test(
         Err("Invalid mode".to_string())
     }
 }
+
+
+#[tauri::command]
+pub async fn open_ielts_battle(app: AppHandle) -> Result<(), String> {
+    use tauri::Manager;
+    let main_window = app.get_webview_window("main").ok_or("No main window")?;
+    let outer_pos = main_window.outer_position().map_err(|e| e.to_string())?;
+    let inner_size = main_window.inner_size().map_err(|e| e.to_string())?;
+
+    let init_script = r#"
+        setInterval(() => {
+            if (window.location.href.includes('/profile')) {
+                try {
+                    let match = document.body.innerText.match(/Total battles\s+(\d+)|Total battles.*?\n(\d+)/);
+                    if (match) {
+                        let battles = parseInt(match[1] || match[2], 10);
+                        let initial = sessionStorage.getItem('__ielts_initial_battles');
+                        if (initial === null) {
+                            sessionStorage.setItem('__ielts_initial_battles', battles.toString());
+                        } else if (battles > parseInt(initial, 10)) {
+                            if (!sessionStorage.getItem('__ielts_success_sent')) {
+                                sessionStorage.setItem('__ielts_success_sent', 'true');
+                                window.__TAURI__.core.invoke('ielts_battle_success', {}).catch(console.error);
+                            }
+                        }
+                    }
+                } catch (e) {
+                    // Ignore errors to not spam
+                }
+            }
+        }, 2000);
+    "#;
+
+    let _webview = tauri::WebviewWindowBuilder::new(
+        &app,
+        "ielts_battle",
+        tauri::WebviewUrl::External("https://ieltsleague.app".parse().unwrap())
+    )
+    .title("IELTS League")
+    .decorations(false)
+    .focused(true)
+    .inner_size(inner_size.width as f64, (inner_size.height.saturating_sub(80)) as f64)
+    .position(outer_pos.x as f64, (outer_pos.y + 80) as f64)
+    .initialization_script(init_script)
+    .build()
+    .map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn ielts_battle_success(
+    app: AppHandle,
+    state: State<'_, ConfigState>
+) -> Result<(), String> {
+    use tauri::{Manager, Emitter};
+    if let Some(window) = app.get_webview_window("ielts_battle") {
+        let _ = window.close();
+    }
+    
+    let mut config_data = state.0.lock().map_err(|_| "Mutex poisoned".to_string())?;
+    config_data.daily_quota_minutes = config_data.daily_quota_minutes.saturating_add(30);
+    let _ = crate::config::save_config(&app, &config_data);
+    
+    let _ = app.emit("battle_success", ());
+    Ok(())
+}
