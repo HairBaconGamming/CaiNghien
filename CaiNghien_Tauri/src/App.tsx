@@ -70,7 +70,7 @@ export default function App() {
         setRewardQuotaInput(c.reward_quota_minutes ?? 15);
       }
     } catch (e) {
-      console.warn('Failed to load app config:', e);
+      console.warn('Failed to load app config:', e); alert('Loi getAppConfig: ' + e);
     }
   }, []);
 
@@ -335,7 +335,7 @@ export default function App() {
 
 
 
-            {activeTab === 'settings' && appConfig && (
+            {activeTab === 'settings' && !appConfig && (<div className="text-white z-50 p-10">Loading config or failed to load. appConfig is null.</div>)} {activeTab === 'settings' && appConfig && (
               <div className="w-full h-full flex overflow-hidden">
                 {/* Left Sidebar */}
                 <div className="w-64 border-r border-white/10 p-6 flex flex-col gap-2">
@@ -1064,3 +1064,5 @@ export default function App() {
     </div>
   );
 }
+
+
