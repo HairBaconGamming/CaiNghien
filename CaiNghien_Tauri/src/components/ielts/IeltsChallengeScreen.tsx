@@ -74,7 +74,7 @@ export const IeltsChallengeScreen: React.FC<{
     try {
       await invoke('open_ielts_battle');
     } catch (e) {
-      console.error(e);
+      console.error("Loi:", e); alert("Loi: " + e);
     }
   };
 
@@ -83,7 +83,7 @@ export const IeltsChallengeScreen: React.FC<{
       const ts = await api.getIeltsTopics();
       setTopics(ts);
     } catch (e) {
-      console.error(e);
+      console.error("Loi:", e); alert("Loi: " + e);
     }
   };
 
@@ -99,7 +99,7 @@ export const IeltsChallengeScreen: React.FC<{
         loadCambridge(ws[0].word);
       }
     } catch(e) {
-      console.error(e);
+      console.error("Loi:", e); alert("Loi: " + e);
     }
   };
 
@@ -110,7 +110,7 @@ export const IeltsChallengeScreen: React.FC<{
       const data = await api.fetchCambridge(word);
       setCambridgeData(prev => ({ ...prev, [word]: data }));
     } catch (e) {
-      console.error(e);
+      console.error("Loi:", e); alert("Loi: " + e);
     }
     setLoadingWord(false);
   };
@@ -187,7 +187,7 @@ export const IeltsChallengeScreen: React.FC<{
         const res = await api.submitIeltsTest(finalScore, testWords.length, mode);
         alert(res.message);
       } catch (e) {
-        console.error(e);
+        console.error("Loi:", e); alert("Loi: " + e);
       }
       if (onComplete) onComplete();
     }
@@ -460,3 +460,4 @@ export const IeltsChallengeScreen: React.FC<{
     </div>
   );
 };
+
