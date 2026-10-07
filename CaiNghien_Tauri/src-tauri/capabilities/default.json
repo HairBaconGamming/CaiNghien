@@ -24,14 +24,6 @@
     "process:default",
     "autostart:default",
     "core:window:allow-create",
-    "default",
-    "allow-get-ielts-topics",
-    "allow-get-topic-words",
-    "allow-fetch-cambridge",
-    "allow-update-vocab-progress",
-    "allow-get-vocab-progress",
-    "allow-submit-ielts-test",
-    "allow-open-ielts-battle",
-    "allow-ielts-battle-success"
+    "default"
   ]
 }
