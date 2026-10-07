@@ -66,7 +66,7 @@ export default function App() {
       const c = await api.getAppConfig();
       if (c) {
         setAppConfig(c);
-        setBlockedDomainsInput(c.blocked_domains.join('\n'));
+        setBlockedDomainsInput((c.blocked_domains || []).map(d => d.replace(/\\\\n/g, '\\n')).join('\\n'));
         setStudyMinutesInput(c.study_minutes_required ?? 60);
         setRewardQuotaInput(c.reward_quota_minutes ?? 15);
       }
@@ -339,8 +339,8 @@ export default function App() {
             {activeTab === 'settings' && !appConfig && (<div className="text-white z-50 p-10">Loading config or failed to load. appConfig is null.</div>)}             {activeTab === 'settings' && !appConfig && (
               <div className="w-full h-full flex flex-col items-center justify-center bg-[#030712]">
                 <Loader2 className="w-12 h-12 text-cyan-400 animate-spin mb-4" />
-                <h2 className="text-xl font-bold text-white mb-2">Ðang t?i cài d?t...</h2>
-                <p className="text-slate-400">Vui lòng d?i trong giây lát</p>
+                <h2 className="text-xl font-bold text-white mb-2">ï¿½ang t?i cï¿½i d?t...</h2>
+                <p className="text-slate-400">Vui lï¿½ng d?i trong giï¿½y lï¿½t</p>
               </div>
             )}
             {activeTab === 'settings' && appConfig && (

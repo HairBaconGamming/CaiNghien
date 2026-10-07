@@ -4,9 +4,7 @@ pub mod db;
 pub mod enforcement;
 pub mod hooks;
 pub mod models;
-pub mod rescue;
 pub mod cambridge;
-pub mod ielts_commands;
 
 use sha2::{Digest, Sha256};
 use std::os::windows::process::CommandExt;
@@ -454,20 +452,20 @@ pub fn run() {
             commands::get_typing_scores,
             commands::reset_all_data,
             commands::submit_study_report,
-            rescue::get_system_diagnostics,
-            rescue::emergency_kill_and_restore,
-            rescue::toggle_hosts_block,
-            rescue::reset_password_and_hardcore,
-            rescue::backup_config,
-            rescue::restore_config,
-            ielts_commands::get_ielts_topics,
-            ielts_commands::get_topic_words,
-            ielts_commands::fetch_cambridge,
-            ielts_commands::update_vocab_progress,
-            ielts_commands::get_vocab_progress,
-            ielts_commands::submit_ielts_test, 
-            ielts_commands::open_ielts_battle, 
-            ielts_commands::ielts_battle_success
+            commands::get_system_diagnostics,
+            commands::emergency_kill_and_restore,
+            commands::toggle_hosts_block,
+            commands::reset_password_and_hardcore,
+            commands::backup_config,
+            commands::restore_config,
+            commands::get_ielts_topics,
+            commands::get_topic_words,
+            commands::fetch_cambridge,
+            commands::update_vocab_progress,
+            commands::get_vocab_progress,
+            commands::submit_ielts_test, 
+            commands::open_ielts_battle, 
+            commands::ielts_battle_success
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
