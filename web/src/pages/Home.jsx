@@ -455,7 +455,7 @@ export default function Home() {
             <div className="release-notes-container">
               <h4 className="release-notes-title">Điểm nổi bật trong bản phát hành {releaseInfo.version}:</h4>
               <ul className="release-notes-list">
-                {releaseInfo.notes.map((note, index) => (
+                {(Array.isArray(releaseInfo.notes) ? releaseInfo.notes : []).map((note, index) => (
                   <li key={index} className="release-note-item">{note}</li>
                 ))}
               </ul>

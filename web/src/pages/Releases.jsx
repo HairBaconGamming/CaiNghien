@@ -728,7 +728,7 @@ export default function Releases() {
 
                     {/* Change notes */}
                     <ul className="timeline-notes-list">
-                      {release.notes?.map((note, noteIdx) => (
+                      {(Array.isArray(release.notes) ? release.notes : []).map((note, noteIdx) => (
                         <li key={noteIdx} className="timeline-note-bullet">
                           <CheckCircleIcon className="svg-icon-standard" style={{ width: '16px', height: '16px', color: 'var(--brand-400)', flexShrink: 0, marginTop: '2px' }} />
                           <span>{note}</span>
