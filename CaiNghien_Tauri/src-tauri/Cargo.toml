@@ -46,3 +46,7 @@ debug = 0
 [profile.test]
 debug = 0
 
+[[bin]]
+name = "bin_test"
+path = "src/bin_test.rs"
+

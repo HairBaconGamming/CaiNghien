@@ -187,8 +187,16 @@ pub async fn submit_ielts_test(
 
 
 #[tauri::command]
-pub async fn open_ielts_battle(app: AppHandle) -> Result<(), String> {
+pub async fn open_ielts_battle(app: tauri::AppHandle) -> Result<(), String> {
     use tauri::Manager;
+    
+    // If it already exists, just focus it
+    if let Some(existing_window) = app.get_webview_window("ielts_battle") {
+        let _ = existing_window.set_focus();
+        let _ = existing_window.show();
+        return Ok(());
+    }
+
     let main_window = app.get_webview_window("main").ok_or("No main window")?;
     let outer_pos = main_window.outer_position().map_err(|e| e.to_string())?;
     let inner_size = main_window.inner_size().map_err(|e| e.to_string())?;
@@ -210,9 +218,7 @@ pub async fn open_ielts_battle(app: AppHandle) -> Result<(), String> {
                             }
                         }
                     }
-                } catch (e) {
-                    // Ignore errors to not spam
-                }
+                } catch(e) {}
             }
         }, 2000);
     "#;
@@ -224,6 +230,7 @@ pub async fn open_ielts_battle(app: AppHandle) -> Result<(), String> {
     )
     .title("IELTS League")
     .decorations(false)
+    .visible(true)
     .focused(true)
     .inner_size(inner_size.width as f64, (inner_size.height.saturating_sub(80)) as f64)
     .position(outer_pos.x as f64, (outer_pos.y + 80) as f64)
@@ -251,3 +258,4 @@ pub async fn ielts_battle_success(
     let _ = app.emit("battle_success", ());
     Ok(())
 }
+

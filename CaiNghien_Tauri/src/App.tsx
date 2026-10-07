@@ -7,6 +7,7 @@ import { FocusRoomScreen } from './components/focus/FocusRoomScreen';
 import { IeltsChallengeScreen } from './components/ielts/IeltsChallengeScreen';
 import {
   Settings as SettingsIcon,
+  Loader2,
   Shield,
   Cpu,
   Sparkles,
@@ -335,7 +336,14 @@ export default function App() {
 
 
 
-            {activeTab === 'settings' && !appConfig && (<div className="text-white z-50 p-10">Loading config or failed to load. appConfig is null.</div>)} {activeTab === 'settings' && appConfig && (
+            {activeTab === 'settings' && !appConfig && (<div className="text-white z-50 p-10">Loading config or failed to load. appConfig is null.</div>)}             {activeTab === 'settings' && !appConfig && (
+              <div className="w-full h-full flex flex-col items-center justify-center bg-[#030712]">
+                <Loader2 className="w-12 h-12 text-cyan-400 animate-spin mb-4" />
+                <h2 className="text-xl font-bold text-white mb-2">Ðang t?i cài d?t...</h2>
+                <p className="text-slate-400">Vui lòng d?i trong giây lát</p>
+              </div>
+            )}
+            {activeTab === 'settings' && appConfig && (
               <div className="w-full h-full flex overflow-hidden">
                 {/* Left Sidebar */}
                 <div className="w-64 border-r border-white/10 p-6 flex flex-col gap-2">
@@ -1064,5 +1072,8 @@ export default function App() {
     </div>
   );
 }
+
+
+
 
 
