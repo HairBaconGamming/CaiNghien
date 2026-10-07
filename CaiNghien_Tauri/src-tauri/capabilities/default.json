@@ -1,6 +1,14 @@
 {
-  "": "../gen/schemas/desktop-schema.json",
+  "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
+    "allow-get-ielts-topics",
+    "allow-get-topic-words",
+    "allow-fetch-cambridge",
+    "allow-update-vocab-progress",
+    "allow-get-vocab-progress",
+    "allow-submit-ielts-test",
+    "allow-open-ielts-battle",
+    "allow-ielts-battle-success",
   "description": "Capability for the main window",
   "windows": [
     "main",
@@ -38,3 +46,5 @@
     "allow-ielts-battle-success"
   ]
 }
+
+
