@@ -39,7 +39,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           projectPath: "CaiNghien_Tauri"
-          tagName: app-v__VERSION__
+          tagName: v__VERSION__
           releaseName: "CaiNghien Focus Guard v__VERSION__"
           releaseBody: "Bản Build Tự động bằng GitHub Actions"
           releaseDraft: false
