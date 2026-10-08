@@ -1,4 +1,4 @@
-use crate::db::DbState;
+﻿use crate::db::DbState;
 use crate::config::ConfigState;
 use crate::config;
 use crate::cambridge::{fetch_word_data, CambridgeEntry};
@@ -149,7 +149,7 @@ pub async fn submit_ielts_test(
         return Ok(IeltsTestResult {
             success: false,
             quota_added: 0,
-            message: "Bạn phải đạt 100% để nhận thưởng.".to_string()
+            message: "Báº¡n pháº£i Ä‘áº¡t 100% Ä‘á»ƒ nháº­n thÆ°á»Ÿng.".to_string()
         });
     }
 
@@ -166,7 +166,7 @@ pub async fn submit_ielts_test(
         Ok(IeltsTestResult {
             success: true,
             quota_added: reward,
-            message: format!("Đã cộng {} phút vào Quota.", reward)
+            message: format!("ÄÃ£ cá»™ng {} phÃºt vÃ o Quota.", reward)
         })
     } else if mode == "unlock" {
         let now = SystemTime::now()
@@ -178,7 +178,7 @@ pub async fn submit_ielts_test(
         Ok(IeltsTestResult {
             success: true,
             quota_added: 0,
-            message: "Đã mở khóa cài đặt trong 5 phút.".to_string()
+            message: "ÄÃ£ má»Ÿ khÃ³a cÃ i Ä‘áº·t trong 5 phÃºt.".to_string()
         })
     } else {
         Err("Invalid mode".to_string())
@@ -203,24 +203,36 @@ pub async fn open_ielts_battle(app: tauri::AppHandle) -> Result<(), String> {
 
     let init_script = r#"
         setInterval(() => {
-            if (window.location.href.includes('/profile')) {
+            try {
+                let text = document.body.innerText.toLowerCase();
+                // Detected end of match screen
+                if (text.includes('match result') || text.includes('victory') || text.includes('defeat') || window.location.href.includes('/result')) {
+                    if (!sessionStorage.getItem('__ielts_success_sent_match')) {
+                        sessionStorage.setItem('__ielts_success_sent_match', 'true');
+                        window.__TAURI__.core.invoke('ielts_battle_success', {}).catch(console.error);
+                    }
+                } else if (!window.location.href.includes('/result')) {
+                    sessionStorage.removeItem('__ielts_success_sent_match');
+                }
+            } catch(e) {}
+
+            if (window.location.href.includes('/profile') || window.location.href.includes('/user')) {
                 try {
-                    let match = document.body.innerText.match(/Total battles\s+(\d+)|Total battles.*?\n(\d+)/);
+                    let match = document.body.innerText.match(/Total battles\s+(\d+)|Total battles.*?\n(\d+)/i);
                     if (match) {
                         let battles = parseInt(match[1] || match[2], 10);
                         let initial = sessionStorage.getItem('__ielts_initial_battles');
                         if (initial === null) {
                             sessionStorage.setItem('__ielts_initial_battles', battles.toString());
                         } else if (battles > parseInt(initial, 10)) {
-                            if (!sessionStorage.getItem('__ielts_success_sent')) {
-                                sessionStorage.setItem('__ielts_success_sent', 'true');
-                                window.__TAURI__.core.invoke('ielts_battle_success', {}).catch(console.error);
-                            }
+                            sessionStorage.setItem('__ielts_initial_battles', battles.toString());
+                            window.__TAURI__.core.invoke('ielts_battle_success', {}).catch(console.error);
                         }
                     }
                 } catch(e) {}
             }
         }, 2000);
+        
     "#;
 
     let _webview = tauri::WebviewWindowBuilder::new(
@@ -228,8 +240,9 @@ pub async fn open_ielts_battle(app: tauri::AppHandle) -> Result<(), String> {
         "ielts_battle",
         tauri::WebviewUrl::External("https://ieltsleague.app".parse().unwrap())
     )
+    .user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
     .title("IELTS League")
-    .decorations(false)
+    .decorations(true) // Set decorations true so user can close or manipulate it
     .visible(true)
     .focused(true)
     .inner_size(inner_size.width as f64, (inner_size.height.saturating_sub(80)) as f64)
@@ -247,9 +260,7 @@ pub async fn ielts_battle_success(
     state: State<'_, ConfigState>
 ) -> Result<(), String> {
     use tauri::{Manager, Emitter};
-    if let Some(window) = app.get_webview_window("ielts_battle") {
-        let _ = window.close();
-    }
+    
     
     let mut config_data = state.0.lock().map_err(|_| "Mutex poisoned".to_string())?;
     config_data.daily_quota_minutes = config_data.daily_quota_minutes.saturating_add(30);
@@ -258,4 +269,5 @@ pub async fn ielts_battle_success(
     let _ = app.emit("battle_success", ());
     Ok(())
 }
+
 
