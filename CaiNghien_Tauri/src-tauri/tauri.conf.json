@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "cainghien_tauri",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "identifier": "com.cainghien.desktop",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -13,7 +13,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "COSMOS Ã¢â‚¬â€ CaiNghiÃ¡Â»â€¡n Desktop Suite",
+        "title": "COSMOS \u00c3\u00a2\u00e2\u201a\u00ac\u00e2\u20ac\u009d CaiNghi\u00c3\u00a1\u00c2\u00bb\u00e2\u20ac\u00a1n Desktop Suite",
         "width": 1280,
         "height": 800,
         "minWidth": 1024,

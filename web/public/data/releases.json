@@ -1,11 +1,33 @@
 {
-    "latest": "1.4.3",
+    "latest": "1.4.4",
     "releases": [
+        {
+            "version": "1.4.4",
+            "tag": "v1.4.4",
+            "published_at": "2026-10-09",
+            "is_latest": true,
+            "title": "Bản Phát Hành Ổn Định v1.4.4",
+            "summary": "Bản build sạch sẽ, đảm bảo hoạt động trơn tru toàn bộ tính năng và fix triệt để cấu hình permission.",
+            "notes": [
+                "Hoàn thiện 100% CI/CD build success",
+                "Fix triệt để lỗi ACL của tính năng thi đấu IELTS",
+                "Build sạch sẽ các module Frontend"
+            ],
+            "files": {
+                "installer": {
+                    "filename": "cainghien_tauri_1.4.4_x64-setup.exe",
+                    "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.4.4/cainghien_tauri_1.4.4_x64-setup.exe",
+                    "direct_url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.4.4/cainghien_tauri_1.4.4_x64-setup.exe",
+                    "size_formatted": "11 MB",
+                    "sha256": ""
+                }
+            }
+        },
         {
             "version": "1.4.3",
             "tag": "v1.4.3",
             "published_at": "2026-10-09",
-            "is_latest": true,
+            "is_latest": false,
             "title": "Bản Vá Khẩn Cấp v1.4.3 (IELTS ACL Fix Final)",
             "summary": "Sửa lỗi không mở được tính năng Học IELTS do bị chặn bởi hệ thống phân quyền mới của Tauri v2.",
             "notes": [
