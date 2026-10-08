@@ -1,496 +1,523 @@
 {
-    "latest":  "1.4.1",
-    "releases":  [
-                     {
-                         "version":  "1.4.1",
-                         "files":  {
-                                       "installer":  {
-                                                         "direct_url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.4.1/cainghien_tauri_1.4.1_x64-setup.exe",
-                                                         "platform":  "Windows 10 / 11 (64-bit)",
-                                                         "url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.4.1/cainghien_tauri_1.4.1_x64-setup.exe",
-                                                         "filename":  "cainghien_tauri_1.4.1_x64-setup.exe",
-                                                         "size_formatted":  "11 MB"
-                                                     },
-                                       "msi":  {
-                                                   "platform":  "Windows MSI Installer",
-                                                   "url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.4.1/cainghien_tauri_1.4.1_x64_en-US.msi",
-                                                   "filename":  "cainghien_tauri_1.4.1_x64_en-US.msi",
-                                                   "size_formatted":  "13 MB"
-                                               }
-                                   },
-                         "title":  "Bản Phát Hành Ổn Định v1.4.1 (Fixes \u0026 Stability)",
-                         "is_latest":  true,
-                         "published_at":  "2026-10-07",
-                         "summary":  "Phiên bản tối ưu hóa, sửa lỗi crash màn hình Settings và nâng cấp module tự bảo vệ.",
-                         "notes":  [
-                                       "Sửa lỗi Crash màn hình Cài đặt khi dữ liệu JSON bị hỏng hoặc null.",
-                                       "Sửa lỗi parser chặn hệ thống cấp quyền (ACL) của Tauri khiến các nút không hoạt động.",
-                                       "Sửa hiển thị xuống dòng của danh sách chặn website trong Cài đặt.",
-                                       "Cập nhật Control Tool: Thêm tùy chọn Dọn dẹp dung lượng và tự nhập version."
-                                   ],
-                         "tag":  "v1.4.1"
-                     },
-                     {
-                         "version":  "1.4.1",
-                         "files":  {
-                                       "installer":  {
-                                                         "direct_url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.4.1/cainghien_tauri_1.4.1_x64-setup.exe",
-                                                         "platform":  "Windows 10 / 11 (64-bit)",
-                                                         "url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.4.1/cainghien_tauri_1.4.1_x64-setup.exe",
-                                                         "filename":  "cainghien_tauri_1.4.1_x64-setup.exe",
-                                                         "size_formatted":  "11 MB"
-                                                     },
-                                       "msi":  {
-                                                   "platform":  "Windows MSI Installer",
-                                                   "url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.4.1/cainghien_tauri_1.4.1_x64_en-US.msi",
-                                                   "filename":  "cainghien_tauri_1.4.1_x64_en-US.msi",
-                                                   "size_formatted":  "13 MB"
-                                               }
-                                   },
-                         "title":  "Báº£n PhÃ¡t HÃ nh á»”n Äá»‹nh v1.4.1 (Fixes \u0026 Stability)",
-                         "is_latest":  false,
-                         "published_at":  "2026-10-07",
-                         "summary":  "PhiÃªn báº£n tá»‘i Æ°u hÃ³a, sá»­a lá»—i crash mÃ n hÃ¬nh Settings vÃ  nÃ¢ng cáº¥p module tá»± báº£o vá»‡.",
-                         "notes":  [
-                                       "Sá»­a lá»—i Crash mÃ n hÃ¬nh CÃ i Ä‘áº·t khi dá»¯ liá»‡u JSON bá»‹ há»ng hoáº·c null.",
-                                       "Sá»­a lá»—i parser cháº·n há»‡ thá»‘ng cáº¥p quyá»n (ACL) cá»§a Tauri khiáº¿n cÃ¡c nÃºt khÃ´ng hoáº¡t Ä‘á»™ng.",
-                                       "Sá»­a hiá»ƒn thá»‹ xuá»‘ng dÃ²ng cá»§a danh sÃ¡ch cháº·n website trong CÃ i Ä‘áº·t.",
-                                       "Cáº­p nháº­t Control Tool: ThÃªm tÃ¹y chá»n Dá»n dáº¹p dung lÆ°á»£ng vÃ  tá»± nháº­p version."
-                                   ],
-                         "tag":  "v1.4.1"
-                     },
-                     {
-                         "version":  "v1.4.1",
-                         "notes":  [
-                                       "Fix IELTS Battle window silently failing",
-                                       "Fix Settings tab not rendering on fresh builds"
-                                   ],
-                         "description":  "S?a l?i nÃºt Ã?u tru?ng IELTS vÃ  mÃ n hÃ¬nh CÃ i d?t",
-                         "type":  "stable",
-                         "date":  "2026-10-07",
-                         "title":  "CaiNghien Desktop v1.4.1 (Hotfix)",
-                         "url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.4.1/cainghien_tauri_1.4.1_x64-setup.exe",
-                         "is_latest":  false
-                     },
-                     {
-                         "version":  "v1.4.0",
-                         "date":  "2026-10-04",
-                         "tag_name":  "v1.4.0",
-                         "is_latest":  false,
-                         "notes":  [
-                                       "Ã°Å¸Å¡â‚¬ CÃ¡ÂºÂ­p nhÃ¡ÂºÂ­t v1.4.0 (Big Update):",
-                                       "- BÃ¡Â»â€¢ sung hÃ¡Â»â€¡ thÃ¡Â»â€˜ng 4000 tÃ¡Â»Â« vÃ¡Â»Â±ng nÃƒÂ¢ng cao chia thÃƒÂ nh 20 chÃ¡Â»Â§ Ã„â€˜Ã¡Â»Â (IELTS 6.5 - 7.5).",
-                                       "- TÃƒÂ­ch hÃ¡Â»Â£p tÃƒÂ­nh nÃ„Æ’ng Ã„ÂÃ¡ÂºÂ¥u trÃ†Â°Ã¡Â»Âng IELTS League (MÃ¡Â»Å¸ Ã„â€˜ÃƒÂ¨ webview, tÃ¡Â»Â± Ã„â€˜Ã¡Â»â„¢ng bÃ¡ÂºÂ¯t sÃ¡Â»Â± kiÃ¡Â»â€¡n +30 phÃƒÂºt Quota).",
-                                       "- TÃƒÂ­ch hÃ¡Â»Â£p ÃƒÂ¢m thanh, phiÃƒÂªn ÃƒÂ¢m, Ã„â€˜Ã¡Â»â€¹nh nghÃ„Â©a chuÃ¡ÂºÂ©n tÃ¡Â»Â« Cambridge Dictionary."
-                                   ],
-                         "files":  {
-                                       "installer":  {
-                                                         "name":  "cainghien_tauri_1.4.0_x64-setup.exe",
-                                                         "url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.4.0/cainghien_tauri_1.4.0_x64-setup.exe",
-                                                         "size":  "KhoÃ¡ÂºÂ£ng 65 MB",
-                                                         "type":  "Installer (NSIS)"
-                                                     },
-                                       "msi":  {
-                                                   "name":  "cainghien_tauri_1.4.0_x64_en-US.msi",
-                                                   "url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.4.0/cainghien_tauri_1.4.0_x64_en-US.msi",
-                                                   "size":  "KhoÃ¡ÂºÂ£ng 60 MB",
-                                                   "type":  "MSI Package"
-                                               }
-                                   }
-                     },
-                     {
-                         "version":  "1.3.9",
-                         "tag":  "v1.3.9",
-                         "published_at":  "2026-10-03",
-                         "is_latest":  false,
-                         "title":  "Them tinh nang Quota - Thoi gian giai tri",
-                         "summary":  "Hoan thien bo dem thoi gian giai tri (Quota) kem giao dien moi trong Dashboard.",
-                         "notes":  [
-                                       "Them Quota Widget vao Dashboard (man hinh Tong quan).",
-                                       "Cho phep Bat dau / Tam dung quota thoi gian ranh truc tiep tu UI.",
-                                       "Hien thi thoi gian con lai chuan xac va dong bo 100% voi backend Rust.",
-                                       "Viet hoa hoan toan cac thanh phan thoi gian, ngan chan loi lay-out shift khi dem nguoc.",
-                                       "Cap nhat vao thu vien test, Backend vuot qua 68/68 kiem thu."
-                                   ],
-                         "categorized_notes":  {
-                                                   "features":  [
-                                                                    "Them Quota Widget de quan ly Thoi gian giai tri.",
-                                                                    "Dong bo realtime UI voi backend."
-                                                                ]
-                                               },
-                         "files":  {
-                                       "installer":  {
-                                                         "filename":  "cainghien_tauri_1.3.9_x64-setup.exe",
-                                                         "url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.9/cainghien_tauri_1.3.9_x64-setup.exe",
-                                                         "direct_url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.9/cainghien_tauri_1.3.9_x64-setup.exe",
-                                                         "size_formatted":  "50 MB",
-                                                         "platform":  "Windows 10 / 11 (64-bit)"
-                                                     },
-                                       "msi":  {
-                                                   "filename":  "cainghien_tauri_1.3.9_x64_en-US.msi",
-                                                   "url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.9/cainghien_tauri_1.3.9_x64_en-US.msi",
-                                                   "size_formatted":  "45 MB",
-                                                   "platform":  "Windows MSI Installer"
-                                               }
-                                   }
-                     },
-                     {
-                         "version":  "1.3.8",
-                         "tag":  "v1.3.8",
-                         "published_at":  "2026-10-01",
-                         "is_latest":  false,
-                         "title":  "Fix cai dat chung hoat dong that su",
-                         "summary":  "Su co logic toggle bao ve va on dinh cai dat chung.",
-                         "notes":  [
-                                       "Sua loi interval leak khi tat che do bao ve - neu chuyen tab trong khi dem nguoc, bao ve giu nguyen.",
-                                       "Cai dat chung da duoc ket noi day du voi SQLite backend.",
-                                       "On dinh UI lock/unlock cai dat khi protection_enabled thay doi."
-                                   ],
-                         "categorized_notes":  {
-                                                   "fixes":  [
-                                                                 "Sua loi interval leak khi tat Bao ve chinh.",
-                                                                 "Logic lock cai dat on dinh hon khi chuyen tab."
-                                                             ]
-                                               },
-                         "files":  {
-                                       "installer":  {
-                                                         "filename":  "cainghien_tauri_1.3.8_x64-setup.exe",
-                                                         "url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.8/cainghien_tauri_1.3.8_x64-setup.exe",
-                                                         "direct_url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.8/cainghien_tauri_1.3.8_x64-setup.exe",
-                                                         "size_formatted":  "50 MB",
-                                                         "platform":  "Windows 10 / 11 (64-bit)"
-                                                     },
-                                       "msi":  {
-                                                   "filename":  "cainghien_tauri_1.3.8_x64_en-US.msi",
-                                                   "url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.8/cainghien_tauri_1.3.8_x64_en-US.msi",
-                                                   "size_formatted":  "45 MB",
-                                                   "platform":  "Windows MSI Installer"
-                                               }
-                                   }
-                     },
-                     {
-                         "version":  "1.3.7",
-                         "tag":  "v1.3.7",
-                         "published_at":  "2026-09-27",
-                         "is_latest":  false,
-                         "title":  "BÃ¡ÂºÂ£n vÃƒÂ¡ sÃ¡Â»Â­a lÃ¡Â»â€”i gÃƒÂµ tiÃ¡ÂºÂ¿ng ViÃ¡Â»â€¡t",
-                         "summary":  "TÃƒÂ­ch hÃ¡Â»Â£p bÃ¡Â»â„¢ gÃƒÂµ Telex nÃ¡Â»â„¢i bÃ¡Â»â„¢ vÃƒÂ o tÃ¡ÂºÂ¥t cÃ¡ÂºÂ£ cÃƒÂ¡c ÃƒÂ´ nhÃ¡ÂºÂ­p liÃ¡Â»â€¡u.",
-                         "notes":  [
-                                       "HÃ¡Â»â€” trÃ¡Â»Â£ gÃƒÂµ tiÃ¡ÂºÂ¿ng ViÃ¡Â»â€¡t mÃ†Â°Ã¡Â»Â£t mÃƒÂ  Ã¡Â»Å¸ ÃƒÂ´ cam kÃ¡ÂºÂ¿t vÃƒÂ  bÃƒÂ i thu hoÃ¡ÂºÂ¡ch mÃƒÂ  khÃƒÂ´ng cÃ¡ÂºÂ§n bÃ¡ÂºÂ­t Unikey/EVKey.",
-                                       "VÃ†Â°Ã¡Â»Â£t qua hÃ¡Â»â€¡ thÃ¡Â»â€˜ng chÃ¡Â»â€˜ng gian lÃ¡ÂºÂ­n Copy-Paste thÃƒÂ nh cÃƒÂ´ng khi dÃƒÂ¹ng Telex."
-                                   ],
-                         "categorized_notes":  {
-                                                   "features":  [
-                                                                    "SÃ¡Â»Â­ dÃ¡Â»Â¥ng TelexInput/TelexTextarea nÃ¡Â»â„¢i bÃ¡Â»â„¢ cho toÃƒÂ n bÃ¡Â»â„¢ Focus Room."
-                                                                ]
-                                               },
-                         "files":  {
-                                       "installer":  {
-                                                         "filename":  "cainghien_tauri_1.3.7_x64-setup.exe",
-                                                         "url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.7/cainghien_tauri_1.3.7_x64-setup.exe",
-                                                         "direct_url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.7/cainghien_tauri_1.3.7_x64-setup.exe",
-                                                         "size_formatted":  "50 MB",
-                                                         "platform":  "Windows 10 / 11 (64-bit)"
-                                                     },
-                                       "msi":  {
-                                                   "filename":  "cainghien_tauri_1.3.7_x64_en-US.msi",
-                                                   "url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.7/cainghien_tauri_1.3.7_x64_en-US.msi",
-                                                   "size_formatted":  "45 MB",
-                                                   "platform":  "Windows MSI Installer"
-                                               }
-                                   }
-                     },
-                     {
-                         "version":  "1.3.6",
-                         "tag":  "v1.3.6",
-                         "published_at":  "2026-09-26",
-                         "is_latest":  false,
-                         "title":  "BÃ¡ÂºÂ£n vÃƒÂ¡ thÃƒÂªm NÃƒÂºt TÃ¡ÂºÂ¯t vÃƒÂ  CÃ¡ÂºÂ­p nhÃ¡ÂºÂ­t",
-                         "summary":  "BÃ¡Â»â€¢ sung nÃƒÂºt TÃ¡ÂºÂ¯t Ã¡Â»Â©ng dÃ¡Â»Â¥ng hoÃƒÂ n toÃƒÂ n vÃƒÂ  sÃ¡Â»Â­a lÃ¡Â»â€”i hiÃ¡Â»Æ’n thÃ¡Â»â€¹ KiÃ¡Â»Æ’m tra cÃ¡ÂºÂ­p nhÃ¡ÂºÂ­t.",
-                         "notes":  [
-                                       "ThÃƒÂªm nÃƒÂºt TÃ¡ÂºÂ¯t hoÃƒÂ n toÃƒÂ n Focus Guard trong mÃ¡Â»Â¥c CÃƒÂ i Ã„â€˜Ã¡ÂºÂ·t chung.",
-                                       "SÃ¡Â»Â­a thÃƒÂ´ng bÃƒÂ¡o lÃ¡Â»â€”i cÃ¡ÂºÂ­p nhÃ¡ÂºÂ­t khi tÃ¡ÂºÂ£i tÃ¡Â»Â« kho lÃ†Â°u trÃ¡Â»Â¯ riÃƒÂªng tÃ†Â°."
-                                   ],
-                         "categorized_notes":  {
-                                                   "features":  [
-                                                                    "ThÃƒÂªm nÃƒÂºt tÃ¡ÂºÂ¯t Ã¡Â»Â©ng dÃ¡Â»Â¥ng bÃ¡ÂºÂ±ng plugin-process."
-                                                                ]
-                                               },
-                         "files":  {
-                                       "installer":  {
-                                                         "filename":  "cainghien_tauri_1.3.6_x64-setup.exe",
-                                                         "url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.6/cainghien_tauri_1.3.6_x64-setup.exe",
-                                                         "direct_url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.6/cainghien_tauri_1.3.6_x64-setup.exe",
-                                                         "size_formatted":  "50 MB",
-                                                         "platform":  "Windows 10 / 11 (64-bit)"
-                                                     },
-                                       "msi":  {
-                                                   "filename":  "cainghien_tauri_1.3.6_x64_en-US.msi",
-                                                   "url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.6/cainghien_tauri_1.3.6_x64_en-US.msi",
-                                                   "size_formatted":  "45 MB",
-                                                   "platform":  "Windows MSI Installer"
-                                               }
-                                   }
-                     },
-                     {
-                         "version":  "1.3.5",
-                         "tag":  "v1.3.5",
-                         "published_at":  "2026-09-26",
-                         "is_latest":  false,
-                         "title":  "BÃ¡ÂºÂ£n vÃƒÂ¡ sÃ¡Â»Â­a lÃ¡Â»â€”i ChÃ¡ÂºÂ·n Website v1.3.5",
-                         "summary":  "KhÃ¡ÂºÂ¯c phÃ¡Â»Â¥c lÃ¡Â»â€”i khÃƒÂ´ng chÃ¡ÂºÂ·n mÃ¡ÂºÂ¡ng xÃƒÂ£ hÃ¡Â»â„¢i vÃƒÂ  web Ã„â€˜en khi bÃ¡Â»â€¹ vÃ†Â°Ã¡Â»â€ºng quyÃ¡Â»Ân Administrator.",
-                         "notes":  [
-                                       "SÃ¡Â»Â­a lÃ¡Â»â€”i UAC (hÃ¡Â»â„¢p thoÃ¡ÂºÂ¡i cÃ¡ÂºÂ¥p quyÃ¡Â»Ân) chÃ¡ÂºÂ·n Ã„â€˜Ã¡Â»Â©ng vÃƒÂ²ng lÃ¡ÂºÂ·p kiÃ¡Â»Æ’m tra trang web cÃ¡Â»Â§a hÃ¡Â»â€¡ thÃ¡Â»â€˜ng.",
-                                       "KhÃƒÂ´i phÃ¡Â»Â¥c tÃƒÂ­nh nÃ„Æ’ng tÃ¡Â»Â± Ã„â€˜Ã¡Â»â„¢ng Ã„â€˜ÃƒÂ³ng trÃƒÂ¬nh duyÃ¡Â»â€¡t (Process Killer) khi phÃƒÂ¡t hiÃ¡Â»â€¡n web Ã„â€˜en hoÃ¡ÂºÂ·c mÃ¡ÂºÂ¡ng xÃƒÂ£ hÃ¡Â»â„¢i bÃ¡Â»â€¹ cÃ¡ÂºÂ¥m.",
-                                       "HÃ¡Â»â€¡ thÃ¡Â»â€˜ng tÃ¡Â»Â± Ã„â€˜Ã¡Â»â„¢ng Ã„â€˜Ã¡Â»â€œng bÃ¡Â»â„¢ Hosts vÃƒÂ  DNS chÃ¡ÂºÂ¡y ngÃ¡ÂºÂ§m mÃ†Â°Ã¡Â»Â£t mÃƒÂ  hÃ†Â¡n, khÃƒÂ´ng gÃƒÂ¢y Ã„â€˜Ã†Â¡ Ã¡Â»Â©ng dÃ¡Â»Â¥ng."
-                                   ],
-                         "categorized_notes":  {
-                                                   "fixes":  [
-                                                                 "SÃ¡Â»Â­a lÃ¡Â»â€”i khÃƒÂ´ng chÃ¡ÂºÂ·n Ã„â€˜Ã†Â°Ã¡Â»Â£c mÃ¡ÂºÂ¡ng xÃƒÂ£ hÃ¡Â»â„¢i vÃƒÂ  web 18+ do xung Ã„â€˜Ã¡Â»â„¢t quyÃ¡Â»Ân Admin trÃƒÂªn Windows.",
-                                                                 "CÃ¡ÂºÂ£i thiÃ¡Â»â€¡n hiÃ¡Â»â€¡u nÃ„Æ’ng xÃ¡Â»Â­ lÃƒÂ½ Ã„â€˜a luÃ¡Â»â€œng cho hÃ¡Â»â€¡ thÃ¡Â»â€˜ng bÃ¡ÂºÂ£o vÃ¡Â»â€¡."
-                                                             ]
-                                               },
-                         "files":  {
-                                       "installer":  {
-                                                         "filename":  "cainghien_tauri_1.3.5_x64-setup.exe",
-                                                         "url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.5/cainghien_tauri_1.3.5_x64-setup.exe",
-                                                         "direct_url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.5/cainghien_tauri_1.3.5_x64-setup.exe",
-                                                         "size_formatted":  "50 MB",
-                                                         "platform":  "Windows 10 / 11 (64-bit)"
-                                                     },
-                                       "msi":  {
-                                                   "filename":  "cainghien_tauri_1.3.5_x64_en-US.msi",
-                                                   "url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.5/cainghien_tauri_1.3.5_x64_en-US.msi",
-                                                   "size_formatted":  "45 MB",
-                                                   "platform":  "Windows MSI Installer"
-                                               }
-                                   }
-                     },
-                     {
-                         "version":  "1.3.4",
-                         "tag":  "v1.3.4",
-                         "published_at":  "2026-09-26",
-                         "is_latest":  false,
-                         "title":  "BÃ¡ÂºÂ£n vÃƒÂ¡ sÃ¡Â»Â­a lÃ¡Â»â€”i Uninstall v1.3.4",
-                         "summary":  "KhÃ¡ÂºÂ¯c phÃ¡Â»Â¥c hoÃƒÂ n toÃƒÂ n lÃ¡Â»â€”i Uninstaller khÃƒÂ´ng dÃ¡Â»Ân sÃ¡ÂºÂ¡ch chÃ†Â°Ã†Â¡ng trÃƒÂ¬nh ngÃ¡ÂºÂ§m.",
-                         "notes":  [
-                                       "BÃ¡Â»â€¢ sung Hook PREUNINSTALL vÃƒÂ  PREINSTALL cho NSIS.",
-                                       "SÃ¡Â»Â­ dÃ¡Â»Â¥ng lÃ¡Â»â€¡nh Taskkill ÃƒÂ©p buÃ¡Â»â„¢c tÃ¡ÂºÂ¯t hoÃƒÂ n toÃƒÂ n tiÃ¡ÂºÂ¿n trÃƒÂ¬nh cainghien_tauri.exe vÃƒÂ  cÃƒÂ¡c tÃ¡Â»â€¡p liÃƒÂªn quan trÃ†Â°Ã¡Â»â€ºc khi cÃ¡ÂºÂ­p nhÃ¡ÂºÂ­t hoÃ¡ÂºÂ·c gÃ¡Â»Â¡ cÃƒÂ i Ã„â€˜Ã¡ÂºÂ·t."
-                                   ],
-                         "categorized_notes":  {
-                                                   "fixes":  [
-                                                                 "SÃ¡Â»Â­a lÃ¡Â»â€”i bÃ¡Â»â„¢ cÃƒÂ i Ã„â€˜Ã¡ÂºÂ·t (Uninstaller) khÃƒÂ´ng dÃ¡Â»Ân sÃ¡ÂºÂ¡ch cÃƒÂ¡c chÃ†Â°Ã†Â¡ng trÃƒÂ¬nh Ã„â€˜ang chÃ¡ÂºÂ¡y ngÃ¡ÂºÂ§m khi gÃ¡Â»Â¡ cÃƒÂ i Ã„â€˜Ã¡ÂºÂ·t hoÃ¡ÂºÂ·c cÃ¡ÂºÂ­p nhÃ¡ÂºÂ­t phiÃƒÂªn bÃ¡ÂºÂ£n mÃ¡Â»â€ºi."
-                                                             ]
-                                               },
-                         "files":  {
-                                       "installer":  {
-                                                         "filename":  "cainghien_tauri_1.3.4_x64-setup.exe",
-                                                         "url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.4/cainghien_tauri_1.3.4_x64-setup.exe",
-                                                         "direct_url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.4/cainghien_tauri_1.3.4_x64-setup.exe",
-                                                         "size_formatted":  "50 MB",
-                                                         "platform":  "Windows 10 / 11 (64-bit)"
-                                                     },
-                                       "msi":  {
-                                                   "filename":  "cainghien_tauri_1.3.4_x64_en-US.msi",
-                                                   "url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.4/cainghien_tauri_1.3.4_x64_en-US.msi",
-                                                   "size_formatted":  "45 MB",
-                                                   "platform":  "Windows MSI Installer"
-                                               }
-                                   }
-                     },
-                     {
-                         "version":  "1.3.3",
-                         "tag":  "v1.3.3",
-                         "published_at":  "2026-09-26",
-                         "is_latest":  false,
-                         "title":  "BÃ¡ÂºÂ£n phÃƒÂ¡t hÃƒÂ nh tÃ¡Â»â€˜i Ã†Â°u Logo v1.3.3",
-                         "summary":  "ThiÃ¡ÂºÂ¿t kÃ¡ÂºÂ¿ lÃ¡ÂºÂ¡i Logo Solid mÃ¡Â»â€ºi vÃƒÂ  tÃ¡Â»Â± Ã„â€˜Ã¡Â»â„¢ng hÃƒÂ³a cÃ¡ÂºÂ­p nhÃ¡ÂºÂ­t.",
-                         "notes":  [
-                                       "ThiÃ¡ÂºÂ¿t kÃ¡ÂºÂ¿ lÃ¡ÂºÂ¡i Logo theo phong cÃƒÂ¡ch Solid Gradient.",
-                                       "LoÃ¡ÂºÂ¡i bÃ¡Â»Â viÃ¡Â»Ân trÃ¡ÂºÂ¯ng thÃ¡Â»Â«a Ã„â€˜Ã¡Â»Æ’ hiÃ¡Â»Æ’n thÃ¡Â»â€¹ sÃ¡ÂºÂ¯c nÃƒÂ©t, tÃ†Â°Ã†Â¡ng phÃ¡ÂºÂ£n trÃƒÂªn mÃ¡Â»Âi nÃ¡Â»Ân.",
-                                       "SÃ¡Â»Â­a giao diÃ¡Â»â€¡n CÃƒÂ i Ã„â€˜Ã¡ÂºÂ·t vÃƒÂ  thanh Ã„â€˜iÃ¡Â»Âu hÃ†Â°Ã¡Â»â€ºng Navbar tÃ¡Â»â€˜i giÃ¡ÂºÂ£n hÃ†Â¡n."
-                                   ],
-                         "categorized_notes":  {
-                                                   "features":  [
-                                                                    "NÃƒÂ¢ng cÃ¡ÂºÂ¥p Logo Solid tÃ¡Â»â€˜i Ã†Â°u cho Dark Mode/Light Mode.",
-                                                                    "TÃƒÂ¡i cÃ¡ÂºÂ¥u trÃƒÂºc Sidebar CÃƒÂ i Ã„â€˜Ã¡ÂºÂ·t."
-                                                                ],
-                                                   "fixes":  [
-                                                                 "SÃ¡Â»Â­a lÃ¡Â»â€”i Ã„â€˜Ã¡Â»â„¢ phÃƒÂ¢n giÃ¡ÂºÂ£i vÃƒÂ  viÃ¡Â»Ân padding trong suÃ¡Â»â€˜t cÃ¡Â»Â§a App Icon.",
-                                                                 "SÃ¡Â»Â­a lÃ¡Â»â€”i tÃ†Â°Ã†Â¡ng phÃ¡ÂºÂ£n mÃƒÂ u sÃ¡ÂºÂ¯c cÃ¡Â»Â§a Logo trÃƒÂªn thanh Navbar."
-                                                             ]
-                                               },
-                         "files":  {
-                                       "installer":  {
-                                                         "filename":  "cainghien_tauri_1.3.3_x64-setup.exe",
-                                                         "url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.3/cainghien_tauri_1.3.3_x64-setup.exe",
-                                                         "direct_url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.3/cainghien_tauri_1.3.3_x64-setup.exe",
-                                                         "size_formatted":  "50 MB",
-                                                         "platform":  "Windows 10 / 11 (64-bit)"
-                                                     },
-                                       "msi":  {
-                                                   "filename":  "cainghien_tauri_1.3.3_x64_en-US.msi",
-                                                   "url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.3/cainghien_tauri_1.3.3_x64_en-US.msi",
-                                                   "size_formatted":  "45 MB",
-                                                   "platform":  "Windows MSI Installer"
-                                               }
-                                   }
-                     },
-                     {
-                         "version":  "1.3.2",
-                         "tag":  "v1.3.2",
-                         "published_at":  "2026-09-26",
-                         "is_latest":  false,
-                         "title":  "BÃ¡ÂºÂ£n cÃ¡ÂºÂ­p nhÃ¡ÂºÂ­t Auto Update v1.3.2",
-                         "summary":  "HoÃƒÂ n thiÃ¡Â»â€¡n hÃ¡Â»â€¡ thÃ¡Â»â€˜ng TÃ¡Â»Â± Ã„â€˜Ã¡Â»â„¢ng cÃ¡ÂºÂ­p nhÃ¡ÂºÂ­t (Auto Updater) qua Github Releases, tÃ¡Â»Â± Ã„â€˜Ã¡Â»â„¢ng tÃ¡ÂºÂ£i vÃƒÂ  cÃƒÂ i Ã„â€˜Ã¡ÂºÂ·t bÃ¡ÂºÂ±ng chÃ¡Â»Â¯ kÃƒÂ½ sÃ¡Â»â€˜.",
-                         "notes":  [
-                                       "TÃƒÂ­ch hÃ¡Â»Â£p Private Key/Public Key Ed25519 cho Tauri Updater.",
-                                       "HÃ¡Â»â€” trÃ¡Â»Â£ tÃ¡Â»Â± Ã„â€˜Ã¡Â»â„¢ng kiÃ¡Â»Æ’m tra vÃƒÂ  cÃƒÂ i Ã„â€˜Ã¡ÂºÂ·t bÃ¡ÂºÂ£n cÃ¡ÂºÂ­p nhÃ¡ÂºÂ­t mÃ¡Â»â€ºi ngay trong app.",
-                                       "BÃ¡Â»â€¢ sung kÃ¡Â»â€¹ch bÃ¡ÂºÂ£n Release Pipeline tÃ¡Â»Â± Ã„â€˜Ã¡Â»â„¢ng hÃƒÂ³a hoÃƒÂ n toÃƒÂ n quy trÃƒÂ¬nh phÃƒÂ¡t hÃƒÂ nh."
-                                   ],
-                         "categorized_notes":  {
-                                                   "features":  [
-                                                                    "HoÃƒÂ n thiÃ¡Â»â€¡n hÃ¡Â»â€¡ thÃ¡Â»â€˜ng TÃ¡Â»Â± Ã„â€˜Ã¡Â»â„¢ng cÃ¡ÂºÂ­p nhÃ¡ÂºÂ­t (Auto Updater)."
-                                                                ]
-                                               },
-                         "files":  {
-                                       "installer":  {
-                                                         "filename":  "cainghien_tauri_1.3.2_x64-setup.exe",
-                                                         "url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.2/cainghien_tauri_1.3.2_x64-setup.exe",
-                                                         "direct_url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.2/cainghien_tauri_1.3.2_x64-setup.exe",
-                                                         "size_formatted":  "50 MB",
-                                                         "platform":  "Windows 10 / 11 (64-bit)"
-                                                     },
-                                       "msi":  {
-                                                   "filename":  "cainghien_tauri_1.3.2_x64_en-US.msi",
-                                                   "url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.2/cainghien_tauri_1.3.2_x64_en-US.msi",
-                                                   "size_formatted":  "45 MB",
-                                                   "platform":  "Windows MSI Installer"
-                                               }
-                                   }
-                     },
-                     {
-                         "version":  "1.3.1",
-                         "is_latest":  false,
-                         "notes":  [
-                                       "CÃ¡ÂºÂ£i thiÃ¡Â»â€¡n System Menu vÃƒÂ  Titlebar (HÃ¡Â»â€” trÃ¡Â»Â£ menu TÃ¡Â»â€¡p, Xem, CÃ¡Â»Â­a sÃ¡Â»â€¢ tÃƒÂ­ch hÃ¡Â»Â£p).",
-                                       "BÃ¡Â»â€¢ sung Widget Ãƒâ€šm nhÃ¡ÂºÂ¡c Ã„â€˜a nÃ„Æ’ng trong PhÃƒÂ²ng tÃ¡ÂºÂ­p trung (HÃ¡Â»â€” trÃ¡Â»Â£ Lofi Local, Spotify, YouTube).",
-                                       "KhÃ¡ÂºÂ¯c phÃ¡Â»Â¥c lÃ¡Â»â€”i hiÃ¡Â»Æ’n thÃ¡Â»â€¹ tiÃ¡ÂºÂ¿ng ViÃ¡Â»â€¡t trÃƒÂªn Menu vÃƒÂ  Level Badge.",
-                                       "SÃ¡Â»Â­a lÃ¡Â»â€”i Autostart: GiÃ¡Â»Â Ã„â€˜ÃƒÂ¢y chÃ¡Â»Â©c nÃ„Æ’ng KhÃ¡Â»Å¸i Ã„â€˜Ã¡Â»â„¢ng cÃƒÂ¹ng Windows Ã„â€˜ÃƒÂ£ Ã„â€˜Ã¡Â»â€œng bÃ¡Â»â„¢ an toÃƒÂ n vÃ¡Â»â€ºi OS thÃƒÂ´ng qua Tauri Plugin, khÃƒÂ´ng bÃƒÂ¡o sai hay bÃ¡Â»â€¹ xung Ã„â€˜Ã¡Â»â„¢t.",
-                                       "VÃƒÂ´ hiÃ¡Â»â€¡u hÃƒÂ³a Context Menu mÃ¡ÂºÂ·c Ã„â€˜Ã¡Â»â€¹nh Ã„â€˜Ã¡Â»Æ’ Ã¡Â»Â©ng dÃ¡Â»Â¥ng mÃ†Â°Ã¡Â»Â£t mÃƒÂ  vÃƒÂ  giÃ¡Â»â€˜ng app native hÃ†Â¡n."
-                                   ],
-                         "files":  {
-                                       "installer":  {
-                                                         "filename":  "cainghien_tauri_1.3.1_x64-setup.exe",
-                                                         "url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.1/cainghien_tauri_1.3.1_x64-setup.exe",
-                                                         "direct_url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.1/cainghien_tauri_1.3.1_x64-setup.exe",
-                                                         "size_formatted":  "50 MB",
-                                                         "platform":  "Windows 10 / 11 (64-bit)"
-                                                     },
-                                       "msi":  {
-                                                   "filename":  "cainghien_tauri_1.3.1_x64_en-US.msi",
-                                                   "url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.1/cainghien_tauri_1.3.1_x64_en-US.msi",
-                                                   "size_formatted":  "45 MB",
-                                                   "platform":  "Windows MSI Installer"
-                                               }
-                                   },
-                         "tag":  "v1.3.1",
-                         "published_at":  "2026-09-26",
-                         "title":  "BÃ¡ÂºÂ£n cÃ¡ÂºÂ­p nhÃ¡ÂºÂ­t v1.3.1",
-                         "summary":  "TÃƒÂ­ch hÃ¡Â»Â£p Music Widget, Menu System chuÃ¡ÂºÂ©n mÃ¡Â»Â±c vÃƒÂ  khÃ¡ÂºÂ¯c phÃ¡Â»Â¥c Autostart.",
-                         "categorized_notes":  {
-                                                   "features":  [
-                                                                    "BÃ¡Â»â€¢ sung Widget Ãƒâ€šm nhÃ¡ÂºÂ¡c Ã„â€˜a nÃ„Æ’ng trong PhÃƒÂ²ng tÃ¡ÂºÂ­p trung (HÃ¡Â»â€” trÃ¡Â»Â£ Lofi Local, Spotify, YouTube).",
-                                                                    "CÃ¡ÂºÂ£i thiÃ¡Â»â€¡n System Menu vÃƒÂ  Titlebar (HÃ¡Â»â€” trÃ¡Â»Â£ menu TÃ¡Â»â€¡p, Xem, CÃ¡Â»Â­a sÃ¡Â»â€¢ tÃƒÂ­ch hÃ¡Â»Â£p)."
-                                                                ],
-                                                   "improvements":  [
-                                                                        "VÃƒÂ´ hiÃ¡Â»â€¡u hÃƒÂ³a Context Menu mÃ¡ÂºÂ·c Ã„â€˜Ã¡Â»â€¹nh Ã„â€˜Ã¡Â»Æ’ Ã¡Â»Â©ng dÃ¡Â»Â¥ng mÃ†Â°Ã¡Â»Â£t mÃƒÂ  vÃƒÂ  giÃ¡Â»â€˜ng app native hÃ†Â¡n."
-                                                                    ],
-                                                   "fixes":  [
-                                                                 "SÃ¡Â»Â­a lÃ¡Â»â€”i Autostart: GiÃ¡Â»Â Ã„â€˜ÃƒÂ¢y chÃ¡Â»Â©c nÃ„Æ’ng KhÃ¡Â»Å¸i Ã„â€˜Ã¡Â»â„¢ng cÃƒÂ¹ng Windows Ã„â€˜ÃƒÂ£ Ã„â€˜Ã¡Â»â€œng bÃ¡Â»â„¢ an toÃƒÂ n vÃ¡Â»â€ºi OS.",
-                                                                 "KhÃ¡ÂºÂ¯c phÃ¡Â»Â¥c lÃ¡Â»â€”i hiÃ¡Â»Æ’n thÃ¡Â»â€¹ tiÃ¡ÂºÂ¿ng ViÃ¡Â»â€¡t trÃƒÂªn Menu vÃƒÂ  Level Badge."
-                                                             ]
-                                               }
-                     },
-                     {
-                         "version":  "1.3.0",
-                         "tag":  "v1.3.0",
-                         "published_at":  "2026-09-25",
-                         "is_latest":  false,
-                         "title":  "BÃ¡ÂºÂ£n cÃ¡ÂºÂ­p nhÃ¡ÂºÂ­t BÃ¡ÂºÂ£o mÃ¡ÂºÂ­t TuyÃ¡Â»â€¡t Ã„â€˜Ã¡Â»â€˜i \u0026 Ã¡Â»â€n Ã„â€˜Ã¡Â»â€¹nh HÃ¡Â»â€¡ thÃ¡Â»â€˜ng v1.3.0",
-                         "summary":  "SÃ¡Â»Â­a hÃ†Â¡n 30 lÃ¡Â»â€”i bÃ¡ÂºÂ£o mÃ¡ÂºÂ­t nghiÃƒÂªm trÃ¡Â»Âng, tÃƒÂ­ch hÃ¡Â»Â£p React Error Boundaries, tÃ¡Â»â€˜i Ã†Â°u RAM Web Audio vÃƒÂ  siÃ¡ÂºÂ¿t chÃ¡ÂºÂ·t phÃƒÂ¢n quyÃ¡Â»Ân hÃ¡Â»â€¡ thÃ¡Â»â€˜ng.",
-                         "notes":  [
-                                       "SÃ¡Â»Â­a hÃ†Â¡n 30 lÃ¡Â»â€”i bÃ¡ÂºÂ£o mÃ¡ÂºÂ­t nghiÃƒÂªm trÃ¡Â»Âng (Ã„â€˜Ã†Â°Ã¡Â»Â£c bÃƒÂ¡o cÃƒÂ¡o bÃ¡Â»Å¸i hÃ¡Â»â€¡ thÃ¡Â»â€˜ng Audit Ã„ÂÃ¡Â»â„¢c lÃ¡ÂºÂ­p).",
-                                       "Trang bÃ¡Â»â€¹ cÃƒÂ´ng nghÃ¡Â»â€¡ React Error Boundaries giÃƒÂºp thoÃƒÂ¡t khÃ¡Â»Âi Kiosk Mode an toÃƒÂ n.",
-                                       "ThiÃ¡ÂºÂ¿t kÃ¡ÂºÂ¿ lÃ¡ÂºÂ¡i luÃ¡Â»â€œng phÃƒÂ¢n quyÃ¡Â»Ân Windows (UAC): HoÃ¡ÂºÂ¡t Ã„â€˜Ã¡Â»â„¢ng hoÃƒÂ n toÃƒÂ n dÃ†Â°Ã¡Â»â€ºi quyÃ¡Â»Ân ngÃ†Â°Ã¡Â»Âi dÃƒÂ¹ng.",
-                                       "SÃ¡Â»Â­a dÃ¡Â»Â©t Ã„â€˜iÃ¡Â»Æ’m lÃ¡Â»â€”i trÃƒÂ n RAM rÃƒÂ² rÃ¡Â»â€° bÃ¡Â»â„¢ nhÃ¡Â»â€º khi nghe nhÃ¡ÂºÂ¡c Lofi.",
-                                       "CÃ†Â¡ chÃ¡ÂºÂ¿ chÃ¡Â»â€˜ng gian lÃ¡ÂºÂ­n mÃ¡Â»â€ºi: KhÃƒÂ³a API nÃ¡Â»â„¢i bÃ¡Â»â„¢ chÃ¡ÂºÂ·n hack giÃ¡Â»Â chÃ†Â¡i (Study-to-Earn).",
-                                       "Thay Ã„â€˜Ã¡Â»â€¢i ID cÃ¡Â»Â§a CÃ†Â¡ sÃ¡Â»Å¸ dÃ¡Â»Â¯ liÃ¡Â»â€¡u SQLite chÃ¡Â»â€˜ng sÃ¡ÂºÂ­p khi spam phÃƒÂ­m."
-                                   ],
-                         "files":  {
-                                       "installer":  {
-                                                         "filename":  "cainghien_tauri_1.3.0_x64-setup.exe",
-                                                         "url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.0/cainghien_tauri_1.3.0_x64-setup.exe",
-                                                         "direct_url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.0/cainghien_tauri_1.3.0_x64-setup.exe",
-                                                         "size_formatted":  "10 MB",
-                                                         "platform":  "Windows 10 / 11 (64-bit)"
-                                                     },
-                                       "msi":  {
-                                                   "filename":  "cainghien_tauri_1.3.0_x64_en-US.msi",
-                                                   "url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.0/cainghien_tauri_1.3.0_x64_en-US.msi",
-                                                   "size_formatted":  "12 MB",
-                                                   "platform":  "Windows MSI Installer"
-                                               }
-                                   }
-                     },
-                     {
-                         "version":  "1.1.0",
-                         "tag":  "v1.1.0",
-                         "published_at":  "2026-09-17",
-                         "is_latest":  false,
-                         "title":  "BÃ¡ÂºÂ£n PhÃƒÂ¡t HÃƒÂ nh v1.1.0",
-                         "summary":  "Ã„ÂÃ¡ÂºÂ¡i tu toÃƒÂ n diÃ¡Â»â€¡n thiÃ¡ÂºÂ¿t kÃ¡ÂºÂ¿ Cosmos Glassmorphism, tÃƒÂ­ch hÃ¡Â»Â£p Heatmap 365 ngÃƒÂ y vÃƒÂ  Focus Room Lofi.",
-                         "notes":  [
-                                       "Ã„ÂÃ¡ÂºÂ¡i tu giao diÃ¡Â»â€¡n toÃƒÂ n diÃ¡Â»â€¡n vÃ¡Â»â€ºi thiÃ¡ÂºÂ¿t kÃ¡ÂºÂ¿ Cosmos Glassmorphism.",
-                                       "TÃƒÂ­ch hÃ¡Â»Â£p mÃƒÂ n hÃƒÂ¬nh Dashboard Heatmap 365 ngÃƒÂ y.",
-                                       "TÃƒÂ­ch hÃ¡Â»Â£p mÃƒÂ n hÃƒÂ¬nh Focus Room vÃ¡Â»â€ºi nhÃ¡ÂºÂ¡c Lofi.",
-                                       "TÃƒÂ­ch hÃ¡Â»Â£p mÃƒÂ n hÃƒÂ¬nh Typing Challenge chÃ¡ÂºÂ¥m Ã„â€˜iÃ¡Â»Æ’m theo thÃ¡Â»Âi gian thÃ¡Â»Â±c."
-                                   ],
-                         "files":  {
-                                       "installer":  {
-                                                         "filename":  "cainghien_tauri_1.1.0_x64-setup.exe",
-                                                         "url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.1.0/cainghien_tauri_1.1.0_x64-setup.exe",
-                                                         "size_formatted":  "4.5 MB",
-                                                         "platform":  "Windows 10 / 11 (64-bit)"
-                                                     },
-                                       "msi":  {
-                                                   "filename":  "cainghien_tauri_1.1.0_x64_en-US.msi",
-                                                   "url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.1.0/cainghien_tauri_1.1.0_x64_en-US.msi",
-                                                   "size_formatted":  "7.7 MB",
-                                                   "platform":  "Windows MSI Installer"
-                                               }
-                                   }
-                     },
-                     {
-                         "version":  "1.0.0",
-                         "tag":  "v1.0.0",
-                         "published_at":  "2026-09-16",
-                         "is_latest":  false,
-                         "title":  "BÃ¡ÂºÂ£n PhÃƒÂ¡t HÃƒÂ nh KhÃ¡Â»Å¸i Ã„ÂÃ¡ÂºÂ§u v1.0.0",
-                         "summary":  "PhiÃƒÂªn bÃ¡ÂºÂ£n chÃƒÂ­nh thÃ¡Â»Â©c Ã„â€˜Ã¡ÂºÂ§u tiÃƒÂªn trÃƒÂªn nÃ¡Â»Ân tÃ¡ÂºÂ£ng Rust \u0026 Tauri v2 vÃ¡Â»â€ºi kiÃ¡ÂºÂ¿n trÃƒÂºc bÃ¡ÂºÂ£o vÃ¡Â»â€¡ hÃ¡Â»â€¡ thÃ¡Â»â€˜ng Ã„â€˜a tÃ¡ÂºÂ§ng.",
-                         "notes":  [
-                                       "PhiÃƒÂªn bÃ¡ÂºÂ£n v1.0.0 ChÃƒÂ­nh ThÃ¡Â»Â©c vÃ¡Â»â€ºi kiÃ¡ÂºÂ¿n trÃƒÂºc Rust \u0026 Tauri tÃ¡Â»â€˜i Ã†Â°u hÃƒÂ³a bÃ¡Â»â„¢ nhÃ¡Â»â€º RAM.",
-                                       "ChÃ¡ÂºÂ¿ Ã„â€˜Ã¡Â»â„¢ khÃƒÂ³a cÃ¡Â»Â©ng Ã¡Â»Â©ng dÃ¡Â»Â¥ng (Kiosk Mode) vÃƒÂ´ hiÃ¡Â»â€¡u hÃƒÂ³a Alt+Tab vÃƒÂ  Windows Key."
-                                   ],
-                         "files":  {
-                                       "installer":  {
-                                                         "filename":  "cainghien_tauri_0.1.0_x64-setup.exe",
-                                                         "url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.0.0/cainghien_tauri_0.1.0_x64-setup.exe",
-                                                         "direct_url":  "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.0.0/cainghien_tauri_0.1.0_x64-setup.exe",
-                                                         "size_formatted":  "4.4 MB",
-                                                         "platform":  "Windows 10 / 11 (64-bit)"
-                                                     }
-                                   }
-                     }
-                 ]
+    "latest": "1.4.2",
+    "releases": [
+        {
+            "version": "1.4.2",
+            "tag": "v1.4.2",
+            "published_at": "2026-10-09",
+            "is_latest": true,
+            "title": "Bản Vá Khẩn Cấp v1.4.2 (IELTS ACL Fix)",
+            "summary": "Sửa lỗi không mở được tính năng Học IELTS do bị chặn bởi hệ thống phân quyền mới của Tauri v2.",
+            "notes": [
+                "Sửa lỗi 'Command not allowed by ACL' khi mở tab Học IELTS và thi đấu.",
+                "Cấp quyền đầy đủ cho 35 API của hệ thống giao tiếp Rust - React."
+            ],
+            "files": {
+                "installer": {
+                    "filename": "cainghien_tauri_1.4.2_x64-setup.exe",
+                    "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.4.2/cainghien_tauri_1.4.2_x64-setup.exe",
+                    "direct_url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.4.2/cainghien_tauri_1.4.2_x64-setup.exe",
+                    "size_formatted": "11 MB",
+                    "platform": "Windows 10 / 11 (64-bit)"
+                },
+                "msi": {
+                    "filename": "cainghien_tauri_1.4.2_x64_en-US.msi",
+                    "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.4.2/cainghien_tauri_1.4.2_x64_en-US.msi",
+                    "size_formatted": "13 MB",
+                    "platform": "Windows MSI Installer"
+                }
+            }
+        },
+        {
+            "version": "1.4.1",
+            "files": {
+                "installer": {
+                    "direct_url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.4.1/cainghien_tauri_1.4.1_x64-setup.exe",
+                    "platform": "Windows 10 / 11 (64-bit)",
+                    "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.4.1/cainghien_tauri_1.4.1_x64-setup.exe",
+                    "filename": "cainghien_tauri_1.4.1_x64-setup.exe",
+                    "size_formatted": "11 MB"
+                },
+                "msi": {
+                    "platform": "Windows MSI Installer",
+                    "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.4.1/cainghien_tauri_1.4.1_x64_en-US.msi",
+                    "filename": "cainghien_tauri_1.4.1_x64_en-US.msi",
+                    "size_formatted": "13 MB"
+                }
+            },
+            "title": "Bản Phát Hành Ổn Định v1.4.1 (Fixes & Stability)",
+            "is_latest": false,
+            "published_at": "2026-10-07",
+            "summary": "Phiên bản tối ưu hóa, sửa lỗi crash màn hình Settings và nâng cấp module tự bảo vệ.",
+            "notes": [
+                "Sửa lỗi Crash màn hình Cài đặt khi dữ liệu JSON bị hỏng hoặc null.",
+                "Sửa lỗi parser chặn hệ thống cấp quyền (ACL) của Tauri khiến các nút không hoạt động.",
+                "Sửa hiển thị xuống dòng của danh sách chặn website trong Cài đặt.",
+                "Cập nhật Control Tool: Thêm tùy chọn Dọn dẹp dung lượng và tự nhập version."
+            ],
+            "tag": "v1.4.1"
+        },
+        {
+            "version": "1.4.1",
+            "files": {
+                "installer": {
+                    "direct_url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.4.1/cainghien_tauri_1.4.1_x64-setup.exe",
+                    "platform": "Windows 10 / 11 (64-bit)",
+                    "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.4.1/cainghien_tauri_1.4.1_x64-setup.exe",
+                    "filename": "cainghien_tauri_1.4.1_x64-setup.exe",
+                    "size_formatted": "11 MB"
+                },
+                "msi": {
+                    "platform": "Windows MSI Installer",
+                    "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.4.1/cainghien_tauri_1.4.1_x64_en-US.msi",
+                    "filename": "cainghien_tauri_1.4.1_x64_en-US.msi",
+                    "size_formatted": "13 MB"
+                }
+            },
+            "title": "Báº£n PhÃ¡t HÃ nh á»”n Äá»‹nh v1.4.1 (Fixes & Stability)",
+            "is_latest": false,
+            "published_at": "2026-10-07",
+            "summary": "PhiÃªn báº£n tá»‘i Æ°u hÃ³a, sá»­a lá»—i crash mÃ n hÃ¬nh Settings vÃ  nÃ¢ng cáº¥p module tá»± báº£o vá»‡.",
+            "notes": [
+                "Sá»­a lá»—i Crash mÃ n hÃ¬nh CÃ i Ä‘áº·t khi dá»¯ liá»‡u JSON bá»‹ há»ng hoáº·c null.",
+                "Sá»­a lá»—i parser cháº·n há»‡ thá»‘ng cáº¥p quyá»n (ACL) cá»§a Tauri khiáº¿n cÃ¡c nÃºt khÃ´ng hoáº¡t Ä‘á»™ng.",
+                "Sá»­a hiá»ƒn thá»‹ xuá»‘ng dÃ²ng cá»§a danh sÃ¡ch cháº·n website trong CÃ i Ä‘áº·t.",
+                "Cáº­p nháº­t Control Tool: ThÃªm tÃ¹y chá»n Dá»n dáº¹p dung lÆ°á»£ng vÃ  tá»± nháº­p version."
+            ],
+            "tag": "v1.4.1"
+        },
+        {
+            "version": "v1.4.1",
+            "notes": [
+                "Fix IELTS Battle window silently failing",
+                "Fix Settings tab not rendering on fresh builds"
+            ],
+            "description": "S?a l?i nÃºt Ã?u tru?ng IELTS vÃ  mÃ n hÃ¬nh CÃ i d?t",
+            "type": "stable",
+            "date": "2026-10-07",
+            "title": "CaiNghien Desktop v1.4.1 (Hotfix)",
+            "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.4.1/cainghien_tauri_1.4.1_x64-setup.exe",
+            "is_latest": false
+        },
+        {
+            "version": "v1.4.0",
+            "date": "2026-10-04",
+            "tag_name": "v1.4.0",
+            "is_latest": false,
+            "notes": [
+                "Ã°Å¸Å¡â‚¬ CÃ¡ÂºÂ­p nhÃ¡ÂºÂ­t v1.4.0 (Big Update):",
+                "- BÃ¡Â»â€¢ sung hÃ¡Â»â€¡ thÃ¡Â»â€˜ng 4000 tÃ¡Â»Â« vÃ¡Â»Â±ng nÃƒÂ¢ng cao chia thÃƒÂ nh 20 chÃ¡Â»Â§ Ã„â€˜Ã¡Â»Â (IELTS 6.5 - 7.5).",
+                "- TÃƒÂ­ch hÃ¡Â»Â£p tÃƒÂ­nh nÃ„Æ’ng Ã„ÂÃ¡ÂºÂ¥u trÃ†Â°Ã¡Â»Âng IELTS League (MÃ¡Â»Å¸ Ã„â€˜ÃƒÂ¨ webview, tÃ¡Â»Â± Ã„â€˜Ã¡Â»â„¢ng bÃ¡ÂºÂ¯t sÃ¡Â»Â± kiÃ¡Â»â€¡n +30 phÃƒÂºt Quota).",
+                "- TÃƒÂ­ch hÃ¡Â»Â£p ÃƒÂ¢m thanh, phiÃƒÂªn ÃƒÂ¢m, Ã„â€˜Ã¡Â»â€¹nh nghÃ„Â©a chuÃ¡ÂºÂ©n tÃ¡Â»Â« Cambridge Dictionary."
+            ],
+            "files": {
+                "installer": {
+                    "name": "cainghien_tauri_1.4.0_x64-setup.exe",
+                    "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.4.0/cainghien_tauri_1.4.0_x64-setup.exe",
+                    "size": "KhoÃ¡ÂºÂ£ng 65 MB",
+                    "type": "Installer (NSIS)"
+                },
+                "msi": {
+                    "name": "cainghien_tauri_1.4.0_x64_en-US.msi",
+                    "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.4.0/cainghien_tauri_1.4.0_x64_en-US.msi",
+                    "size": "KhoÃ¡ÂºÂ£ng 60 MB",
+                    "type": "MSI Package"
+                }
+            }
+        },
+        {
+            "version": "1.3.9",
+            "tag": "v1.3.9",
+            "published_at": "2026-10-03",
+            "is_latest": false,
+            "title": "Them tinh nang Quota - Thoi gian giai tri",
+            "summary": "Hoan thien bo dem thoi gian giai tri (Quota) kem giao dien moi trong Dashboard.",
+            "notes": [
+                "Them Quota Widget vao Dashboard (man hinh Tong quan).",
+                "Cho phep Bat dau / Tam dung quota thoi gian ranh truc tiep tu UI.",
+                "Hien thi thoi gian con lai chuan xac va dong bo 100% voi backend Rust.",
+                "Viet hoa hoan toan cac thanh phan thoi gian, ngan chan loi lay-out shift khi dem nguoc.",
+                "Cap nhat vao thu vien test, Backend vuot qua 68/68 kiem thu."
+            ],
+            "categorized_notes": {
+                "features": [
+                    "Them Quota Widget de quan ly Thoi gian giai tri.",
+                    "Dong bo realtime UI voi backend."
+                ]
+            },
+            "files": {
+                "installer": {
+                    "filename": "cainghien_tauri_1.3.9_x64-setup.exe",
+                    "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.9/cainghien_tauri_1.3.9_x64-setup.exe",
+                    "direct_url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.9/cainghien_tauri_1.3.9_x64-setup.exe",
+                    "size_formatted": "50 MB",
+                    "platform": "Windows 10 / 11 (64-bit)"
+                },
+                "msi": {
+                    "filename": "cainghien_tauri_1.3.9_x64_en-US.msi",
+                    "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.9/cainghien_tauri_1.3.9_x64_en-US.msi",
+                    "size_formatted": "45 MB",
+                    "platform": "Windows MSI Installer"
+                }
+            }
+        },
+        {
+            "version": "1.3.8",
+            "tag": "v1.3.8",
+            "published_at": "2026-10-01",
+            "is_latest": false,
+            "title": "Fix cai dat chung hoat dong that su",
+            "summary": "Su co logic toggle bao ve va on dinh cai dat chung.",
+            "notes": [
+                "Sua loi interval leak khi tat che do bao ve - neu chuyen tab trong khi dem nguoc, bao ve giu nguyen.",
+                "Cai dat chung da duoc ket noi day du voi SQLite backend.",
+                "On dinh UI lock/unlock cai dat khi protection_enabled thay doi."
+            ],
+            "categorized_notes": {
+                "fixes": [
+                    "Sua loi interval leak khi tat Bao ve chinh.",
+                    "Logic lock cai dat on dinh hon khi chuyen tab."
+                ]
+            },
+            "files": {
+                "installer": {
+                    "filename": "cainghien_tauri_1.3.8_x64-setup.exe",
+                    "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.8/cainghien_tauri_1.3.8_x64-setup.exe",
+                    "direct_url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.8/cainghien_tauri_1.3.8_x64-setup.exe",
+                    "size_formatted": "50 MB",
+                    "platform": "Windows 10 / 11 (64-bit)"
+                },
+                "msi": {
+                    "filename": "cainghien_tauri_1.3.8_x64_en-US.msi",
+                    "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.8/cainghien_tauri_1.3.8_x64_en-US.msi",
+                    "size_formatted": "45 MB",
+                    "platform": "Windows MSI Installer"
+                }
+            }
+        },
+        {
+            "version": "1.3.7",
+            "tag": "v1.3.7",
+            "published_at": "2026-09-27",
+            "is_latest": false,
+            "title": "BÃ¡ÂºÂ£n vÃƒÂ¡ sÃ¡Â»Â­a lÃ¡Â»â€”i gÃƒÂµ tiÃ¡ÂºÂ¿ng ViÃ¡Â»â€¡t",
+            "summary": "TÃƒÂ­ch hÃ¡Â»Â£p bÃ¡Â»â„¢ gÃƒÂµ Telex nÃ¡Â»â„¢i bÃ¡Â»â„¢ vÃƒÂ o tÃ¡ÂºÂ¥t cÃ¡ÂºÂ£ cÃƒÂ¡c ÃƒÂ´ nhÃ¡ÂºÂ­p liÃ¡Â»â€¡u.",
+            "notes": [
+                "HÃ¡Â»â€” trÃ¡Â»Â£ gÃƒÂµ tiÃ¡ÂºÂ¿ng ViÃ¡Â»â€¡t mÃ†Â°Ã¡Â»Â£t mÃƒÂ  Ã¡Â»Å¸ ÃƒÂ´ cam kÃ¡ÂºÂ¿t vÃƒÂ  bÃƒÂ i thu hoÃ¡ÂºÂ¡ch mÃƒÂ  khÃƒÂ´ng cÃ¡ÂºÂ§n bÃ¡ÂºÂ­t Unikey/EVKey.",
+                "VÃ†Â°Ã¡Â»Â£t qua hÃ¡Â»â€¡ thÃ¡Â»â€˜ng chÃ¡Â»â€˜ng gian lÃ¡ÂºÂ­n Copy-Paste thÃƒÂ nh cÃƒÂ´ng khi dÃƒÂ¹ng Telex."
+            ],
+            "categorized_notes": {
+                "features": [
+                    "SÃ¡Â»Â­ dÃ¡Â»Â¥ng TelexInput/TelexTextarea nÃ¡Â»â„¢i bÃ¡Â»â„¢ cho toÃƒÂ n bÃ¡Â»â„¢ Focus Room."
+                ]
+            },
+            "files": {
+                "installer": {
+                    "filename": "cainghien_tauri_1.3.7_x64-setup.exe",
+                    "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.7/cainghien_tauri_1.3.7_x64-setup.exe",
+                    "direct_url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.7/cainghien_tauri_1.3.7_x64-setup.exe",
+                    "size_formatted": "50 MB",
+                    "platform": "Windows 10 / 11 (64-bit)"
+                },
+                "msi": {
+                    "filename": "cainghien_tauri_1.3.7_x64_en-US.msi",
+                    "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.7/cainghien_tauri_1.3.7_x64_en-US.msi",
+                    "size_formatted": "45 MB",
+                    "platform": "Windows MSI Installer"
+                }
+            }
+        },
+        {
+            "version": "1.3.6",
+            "tag": "v1.3.6",
+            "published_at": "2026-09-26",
+            "is_latest": false,
+            "title": "BÃ¡ÂºÂ£n vÃƒÂ¡ thÃƒÂªm NÃƒÂºt TÃ¡ÂºÂ¯t vÃƒÂ  CÃ¡ÂºÂ­p nhÃ¡ÂºÂ­t",
+            "summary": "BÃ¡Â»â€¢ sung nÃƒÂºt TÃ¡ÂºÂ¯t Ã¡Â»Â©ng dÃ¡Â»Â¥ng hoÃƒÂ n toÃƒÂ n vÃƒÂ  sÃ¡Â»Â­a lÃ¡Â»â€”i hiÃ¡Â»Æ’n thÃ¡Â»â€¹ KiÃ¡Â»Æ’m tra cÃ¡ÂºÂ­p nhÃ¡ÂºÂ­t.",
+            "notes": [
+                "ThÃƒÂªm nÃƒÂºt TÃ¡ÂºÂ¯t hoÃƒÂ n toÃƒÂ n Focus Guard trong mÃ¡Â»Â¥c CÃƒÂ i Ã„â€˜Ã¡ÂºÂ·t chung.",
+                "SÃ¡Â»Â­a thÃƒÂ´ng bÃƒÂ¡o lÃ¡Â»â€”i cÃ¡ÂºÂ­p nhÃ¡ÂºÂ­t khi tÃ¡ÂºÂ£i tÃ¡Â»Â« kho lÃ†Â°u trÃ¡Â»Â¯ riÃƒÂªng tÃ†Â°."
+            ],
+            "categorized_notes": {
+                "features": [
+                    "ThÃƒÂªm nÃƒÂºt tÃ¡ÂºÂ¯t Ã¡Â»Â©ng dÃ¡Â»Â¥ng bÃ¡ÂºÂ±ng plugin-process."
+                ]
+            },
+            "files": {
+                "installer": {
+                    "filename": "cainghien_tauri_1.3.6_x64-setup.exe",
+                    "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.6/cainghien_tauri_1.3.6_x64-setup.exe",
+                    "direct_url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.6/cainghien_tauri_1.3.6_x64-setup.exe",
+                    "size_formatted": "50 MB",
+                    "platform": "Windows 10 / 11 (64-bit)"
+                },
+                "msi": {
+                    "filename": "cainghien_tauri_1.3.6_x64_en-US.msi",
+                    "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.6/cainghien_tauri_1.3.6_x64_en-US.msi",
+                    "size_formatted": "45 MB",
+                    "platform": "Windows MSI Installer"
+                }
+            }
+        },
+        {
+            "version": "1.3.5",
+            "tag": "v1.3.5",
+            "published_at": "2026-09-26",
+            "is_latest": false,
+            "title": "BÃ¡ÂºÂ£n vÃƒÂ¡ sÃ¡Â»Â­a lÃ¡Â»â€”i ChÃ¡ÂºÂ·n Website v1.3.5",
+            "summary": "KhÃ¡ÂºÂ¯c phÃ¡Â»Â¥c lÃ¡Â»â€”i khÃƒÂ´ng chÃ¡ÂºÂ·n mÃ¡ÂºÂ¡ng xÃƒÂ£ hÃ¡Â»â„¢i vÃƒÂ  web Ã„â€˜en khi bÃ¡Â»â€¹ vÃ†Â°Ã¡Â»â€ºng quyÃ¡Â»Ân Administrator.",
+            "notes": [
+                "SÃ¡Â»Â­a lÃ¡Â»â€”i UAC (hÃ¡Â»â„¢p thoÃ¡ÂºÂ¡i cÃ¡ÂºÂ¥p quyÃ¡Â»Ân) chÃ¡ÂºÂ·n Ã„â€˜Ã¡Â»Â©ng vÃƒÂ²ng lÃ¡ÂºÂ·p kiÃ¡Â»Æ’m tra trang web cÃ¡Â»Â§a hÃ¡Â»â€¡ thÃ¡Â»â€˜ng.",
+                "KhÃƒÂ´i phÃ¡Â»Â¥c tÃƒÂ­nh nÃ„Æ’ng tÃ¡Â»Â± Ã„â€˜Ã¡Â»â„¢ng Ã„â€˜ÃƒÂ³ng trÃƒÂ¬nh duyÃ¡Â»â€¡t (Process Killer) khi phÃƒÂ¡t hiÃ¡Â»â€¡n web Ã„â€˜en hoÃ¡ÂºÂ·c mÃ¡ÂºÂ¡ng xÃƒÂ£ hÃ¡Â»â„¢i bÃ¡Â»â€¹ cÃ¡ÂºÂ¥m.",
+                "HÃ¡Â»â€¡ thÃ¡Â»â€˜ng tÃ¡Â»Â± Ã„â€˜Ã¡Â»â„¢ng Ã„â€˜Ã¡Â»â€œng bÃ¡Â»â„¢ Hosts vÃƒÂ  DNS chÃ¡ÂºÂ¡y ngÃ¡ÂºÂ§m mÃ†Â°Ã¡Â»Â£t mÃƒÂ  hÃ†Â¡n, khÃƒÂ´ng gÃƒÂ¢y Ã„â€˜Ã†Â¡ Ã¡Â»Â©ng dÃ¡Â»Â¥ng."
+            ],
+            "categorized_notes": {
+                "fixes": [
+                    "SÃ¡Â»Â­a lÃ¡Â»â€”i khÃƒÂ´ng chÃ¡ÂºÂ·n Ã„â€˜Ã†Â°Ã¡Â»Â£c mÃ¡ÂºÂ¡ng xÃƒÂ£ hÃ¡Â»â„¢i vÃƒÂ  web 18+ do xung Ã„â€˜Ã¡Â»â„¢t quyÃ¡Â»Ân Admin trÃƒÂªn Windows.",
+                    "CÃ¡ÂºÂ£i thiÃ¡Â»â€¡n hiÃ¡Â»â€¡u nÃ„Æ’ng xÃ¡Â»Â­ lÃƒÂ½ Ã„â€˜a luÃ¡Â»â€œng cho hÃ¡Â»â€¡ thÃ¡Â»â€˜ng bÃ¡ÂºÂ£o vÃ¡Â»â€¡."
+                ]
+            },
+            "files": {
+                "installer": {
+                    "filename": "cainghien_tauri_1.3.5_x64-setup.exe",
+                    "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.5/cainghien_tauri_1.3.5_x64-setup.exe",
+                    "direct_url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.5/cainghien_tauri_1.3.5_x64-setup.exe",
+                    "size_formatted": "50 MB",
+                    "platform": "Windows 10 / 11 (64-bit)"
+                },
+                "msi": {
+                    "filename": "cainghien_tauri_1.3.5_x64_en-US.msi",
+                    "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.5/cainghien_tauri_1.3.5_x64_en-US.msi",
+                    "size_formatted": "45 MB",
+                    "platform": "Windows MSI Installer"
+                }
+            }
+        },
+        {
+            "version": "1.3.4",
+            "tag": "v1.3.4",
+            "published_at": "2026-09-26",
+            "is_latest": false,
+            "title": "BÃ¡ÂºÂ£n vÃƒÂ¡ sÃ¡Â»Â­a lÃ¡Â»â€”i Uninstall v1.3.4",
+            "summary": "KhÃ¡ÂºÂ¯c phÃ¡Â»Â¥c hoÃƒÂ n toÃƒÂ n lÃ¡Â»â€”i Uninstaller khÃƒÂ´ng dÃ¡Â»Ân sÃ¡ÂºÂ¡ch chÃ†Â°Ã†Â¡ng trÃƒÂ¬nh ngÃ¡ÂºÂ§m.",
+            "notes": [
+                "BÃ¡Â»â€¢ sung Hook PREUNINSTALL vÃƒÂ  PREINSTALL cho NSIS.",
+                "SÃ¡Â»Â­ dÃ¡Â»Â¥ng lÃ¡Â»â€¡nh Taskkill ÃƒÂ©p buÃ¡Â»â„¢c tÃ¡ÂºÂ¯t hoÃƒÂ n toÃƒÂ n tiÃ¡ÂºÂ¿n trÃƒÂ¬nh cainghien_tauri.exe vÃƒÂ  cÃƒÂ¡c tÃ¡Â»â€¡p liÃƒÂªn quan trÃ†Â°Ã¡Â»â€ºc khi cÃ¡ÂºÂ­p nhÃ¡ÂºÂ­t hoÃ¡ÂºÂ·c gÃ¡Â»Â¡ cÃƒÂ i Ã„â€˜Ã¡ÂºÂ·t."
+            ],
+            "categorized_notes": {
+                "fixes": [
+                    "SÃ¡Â»Â­a lÃ¡Â»â€”i bÃ¡Â»â„¢ cÃƒÂ i Ã„â€˜Ã¡ÂºÂ·t (Uninstaller) khÃƒÂ´ng dÃ¡Â»Ân sÃ¡ÂºÂ¡ch cÃƒÂ¡c chÃ†Â°Ã†Â¡ng trÃƒÂ¬nh Ã„â€˜ang chÃ¡ÂºÂ¡y ngÃ¡ÂºÂ§m khi gÃ¡Â»Â¡ cÃƒÂ i Ã„â€˜Ã¡ÂºÂ·t hoÃ¡ÂºÂ·c cÃ¡ÂºÂ­p nhÃ¡ÂºÂ­t phiÃƒÂªn bÃ¡ÂºÂ£n mÃ¡Â»â€ºi."
+                ]
+            },
+            "files": {
+                "installer": {
+                    "filename": "cainghien_tauri_1.3.4_x64-setup.exe",
+                    "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.4/cainghien_tauri_1.3.4_x64-setup.exe",
+                    "direct_url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.4/cainghien_tauri_1.3.4_x64-setup.exe",
+                    "size_formatted": "50 MB",
+                    "platform": "Windows 10 / 11 (64-bit)"
+                },
+                "msi": {
+                    "filename": "cainghien_tauri_1.3.4_x64_en-US.msi",
+                    "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.4/cainghien_tauri_1.3.4_x64_en-US.msi",
+                    "size_formatted": "45 MB",
+                    "platform": "Windows MSI Installer"
+                }
+            }
+        },
+        {
+            "version": "1.3.3",
+            "tag": "v1.3.3",
+            "published_at": "2026-09-26",
+            "is_latest": false,
+            "title": "BÃ¡ÂºÂ£n phÃƒÂ¡t hÃƒÂ nh tÃ¡Â»â€˜i Ã†Â°u Logo v1.3.3",
+            "summary": "ThiÃ¡ÂºÂ¿t kÃ¡ÂºÂ¿ lÃ¡ÂºÂ¡i Logo Solid mÃ¡Â»â€ºi vÃƒÂ  tÃ¡Â»Â± Ã„â€˜Ã¡Â»â„¢ng hÃƒÂ³a cÃ¡ÂºÂ­p nhÃ¡ÂºÂ­t.",
+            "notes": [
+                "ThiÃ¡ÂºÂ¿t kÃ¡ÂºÂ¿ lÃ¡ÂºÂ¡i Logo theo phong cÃƒÂ¡ch Solid Gradient.",
+                "LoÃ¡ÂºÂ¡i bÃ¡Â»Â viÃ¡Â»Ân trÃ¡ÂºÂ¯ng thÃ¡Â»Â«a Ã„â€˜Ã¡Â»Æ’ hiÃ¡Â»Æ’n thÃ¡Â»â€¹ sÃ¡ÂºÂ¯c nÃƒÂ©t, tÃ†Â°Ã†Â¡ng phÃ¡ÂºÂ£n trÃƒÂªn mÃ¡Â»Âi nÃ¡Â»Ân.",
+                "SÃ¡Â»Â­a giao diÃ¡Â»â€¡n CÃƒÂ i Ã„â€˜Ã¡ÂºÂ·t vÃƒÂ  thanh Ã„â€˜iÃ¡Â»Âu hÃ†Â°Ã¡Â»â€ºng Navbar tÃ¡Â»â€˜i giÃ¡ÂºÂ£n hÃ†Â¡n."
+            ],
+            "categorized_notes": {
+                "features": [
+                    "NÃƒÂ¢ng cÃ¡ÂºÂ¥p Logo Solid tÃ¡Â»â€˜i Ã†Â°u cho Dark Mode/Light Mode.",
+                    "TÃƒÂ¡i cÃ¡ÂºÂ¥u trÃƒÂºc Sidebar CÃƒÂ i Ã„â€˜Ã¡ÂºÂ·t."
+                ],
+                "fixes": [
+                    "SÃ¡Â»Â­a lÃ¡Â»â€”i Ã„â€˜Ã¡Â»â„¢ phÃƒÂ¢n giÃ¡ÂºÂ£i vÃƒÂ  viÃ¡Â»Ân padding trong suÃ¡Â»â€˜t cÃ¡Â»Â§a App Icon.",
+                    "SÃ¡Â»Â­a lÃ¡Â»â€”i tÃ†Â°Ã†Â¡ng phÃ¡ÂºÂ£n mÃƒÂ u sÃ¡ÂºÂ¯c cÃ¡Â»Â§a Logo trÃƒÂªn thanh Navbar."
+                ]
+            },
+            "files": {
+                "installer": {
+                    "filename": "cainghien_tauri_1.3.3_x64-setup.exe",
+                    "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.3/cainghien_tauri_1.3.3_x64-setup.exe",
+                    "direct_url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.3/cainghien_tauri_1.3.3_x64-setup.exe",
+                    "size_formatted": "50 MB",
+                    "platform": "Windows 10 / 11 (64-bit)"
+                },
+                "msi": {
+                    "filename": "cainghien_tauri_1.3.3_x64_en-US.msi",
+                    "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.3/cainghien_tauri_1.3.3_x64_en-US.msi",
+                    "size_formatted": "45 MB",
+                    "platform": "Windows MSI Installer"
+                }
+            }
+        },
+        {
+            "version": "1.3.2",
+            "tag": "v1.3.2",
+            "published_at": "2026-09-26",
+            "is_latest": false,
+            "title": "BÃ¡ÂºÂ£n cÃ¡ÂºÂ­p nhÃ¡ÂºÂ­t Auto Update v1.3.2",
+            "summary": "HoÃƒÂ n thiÃ¡Â»â€¡n hÃ¡Â»â€¡ thÃ¡Â»â€˜ng TÃ¡Â»Â± Ã„â€˜Ã¡Â»â„¢ng cÃ¡ÂºÂ­p nhÃ¡ÂºÂ­t (Auto Updater) qua Github Releases, tÃ¡Â»Â± Ã„â€˜Ã¡Â»â„¢ng tÃ¡ÂºÂ£i vÃƒÂ  cÃƒÂ i Ã„â€˜Ã¡ÂºÂ·t bÃ¡ÂºÂ±ng chÃ¡Â»Â¯ kÃƒÂ½ sÃ¡Â»â€˜.",
+            "notes": [
+                "TÃƒÂ­ch hÃ¡Â»Â£p Private Key/Public Key Ed25519 cho Tauri Updater.",
+                "HÃ¡Â»â€” trÃ¡Â»Â£ tÃ¡Â»Â± Ã„â€˜Ã¡Â»â„¢ng kiÃ¡Â»Æ’m tra vÃƒÂ  cÃƒÂ i Ã„â€˜Ã¡ÂºÂ·t bÃ¡ÂºÂ£n cÃ¡ÂºÂ­p nhÃ¡ÂºÂ­t mÃ¡Â»â€ºi ngay trong app.",
+                "BÃ¡Â»â€¢ sung kÃ¡Â»â€¹ch bÃ¡ÂºÂ£n Release Pipeline tÃ¡Â»Â± Ã„â€˜Ã¡Â»â„¢ng hÃƒÂ³a hoÃƒÂ n toÃƒÂ n quy trÃƒÂ¬nh phÃƒÂ¡t hÃƒÂ nh."
+            ],
+            "categorized_notes": {
+                "features": [
+                    "HoÃƒÂ n thiÃ¡Â»â€¡n hÃ¡Â»â€¡ thÃ¡Â»â€˜ng TÃ¡Â»Â± Ã„â€˜Ã¡Â»â„¢ng cÃ¡ÂºÂ­p nhÃ¡ÂºÂ­t (Auto Updater)."
+                ]
+            },
+            "files": {
+                "installer": {
+                    "filename": "cainghien_tauri_1.3.2_x64-setup.exe",
+                    "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.2/cainghien_tauri_1.3.2_x64-setup.exe",
+                    "direct_url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.2/cainghien_tauri_1.3.2_x64-setup.exe",
+                    "size_formatted": "50 MB",
+                    "platform": "Windows 10 / 11 (64-bit)"
+                },
+                "msi": {
+                    "filename": "cainghien_tauri_1.3.2_x64_en-US.msi",
+                    "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.2/cainghien_tauri_1.3.2_x64_en-US.msi",
+                    "size_formatted": "45 MB",
+                    "platform": "Windows MSI Installer"
+                }
+            }
+        },
+        {
+            "version": "1.3.1",
+            "is_latest": false,
+            "notes": [
+                "CÃ¡ÂºÂ£i thiÃ¡Â»â€¡n System Menu vÃƒÂ  Titlebar (HÃ¡Â»â€” trÃ¡Â»Â£ menu TÃ¡Â»â€¡p, Xem, CÃ¡Â»Â­a sÃ¡Â»â€¢ tÃƒÂ­ch hÃ¡Â»Â£p).",
+                "BÃ¡Â»â€¢ sung Widget Ãƒâ€šm nhÃ¡ÂºÂ¡c Ã„â€˜a nÃ„Æ’ng trong PhÃƒÂ²ng tÃ¡ÂºÂ­p trung (HÃ¡Â»â€” trÃ¡Â»Â£ Lofi Local, Spotify, YouTube).",
+                "KhÃ¡ÂºÂ¯c phÃ¡Â»Â¥c lÃ¡Â»â€”i hiÃ¡Â»Æ’n thÃ¡Â»â€¹ tiÃ¡ÂºÂ¿ng ViÃ¡Â»â€¡t trÃƒÂªn Menu vÃƒÂ  Level Badge.",
+                "SÃ¡Â»Â­a lÃ¡Â»â€”i Autostart: GiÃ¡Â»Â Ã„â€˜ÃƒÂ¢y chÃ¡Â»Â©c nÃ„Æ’ng KhÃ¡Â»Å¸i Ã„â€˜Ã¡Â»â„¢ng cÃƒÂ¹ng Windows Ã„â€˜ÃƒÂ£ Ã„â€˜Ã¡Â»â€œng bÃ¡Â»â„¢ an toÃƒÂ n vÃ¡Â»â€ºi OS thÃƒÂ´ng qua Tauri Plugin, khÃƒÂ´ng bÃƒÂ¡o sai hay bÃ¡Â»â€¹ xung Ã„â€˜Ã¡Â»â„¢t.",
+                "VÃƒÂ´ hiÃ¡Â»â€¡u hÃƒÂ³a Context Menu mÃ¡ÂºÂ·c Ã„â€˜Ã¡Â»â€¹nh Ã„â€˜Ã¡Â»Æ’ Ã¡Â»Â©ng dÃ¡Â»Â¥ng mÃ†Â°Ã¡Â»Â£t mÃƒÂ  vÃƒÂ  giÃ¡Â»â€˜ng app native hÃ†Â¡n."
+            ],
+            "files": {
+                "installer": {
+                    "filename": "cainghien_tauri_1.3.1_x64-setup.exe",
+                    "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.1/cainghien_tauri_1.3.1_x64-setup.exe",
+                    "direct_url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.1/cainghien_tauri_1.3.1_x64-setup.exe",
+                    "size_formatted": "50 MB",
+                    "platform": "Windows 10 / 11 (64-bit)"
+                },
+                "msi": {
+                    "filename": "cainghien_tauri_1.3.1_x64_en-US.msi",
+                    "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.1/cainghien_tauri_1.3.1_x64_en-US.msi",
+                    "size_formatted": "45 MB",
+                    "platform": "Windows MSI Installer"
+                }
+            },
+            "tag": "v1.3.1",
+            "published_at": "2026-09-26",
+            "title": "BÃ¡ÂºÂ£n cÃ¡ÂºÂ­p nhÃ¡ÂºÂ­t v1.3.1",
+            "summary": "TÃƒÂ­ch hÃ¡Â»Â£p Music Widget, Menu System chuÃ¡ÂºÂ©n mÃ¡Â»Â±c vÃƒÂ  khÃ¡ÂºÂ¯c phÃ¡Â»Â¥c Autostart.",
+            "categorized_notes": {
+                "features": [
+                    "BÃ¡Â»â€¢ sung Widget Ãƒâ€šm nhÃ¡ÂºÂ¡c Ã„â€˜a nÃ„Æ’ng trong PhÃƒÂ²ng tÃ¡ÂºÂ­p trung (HÃ¡Â»â€” trÃ¡Â»Â£ Lofi Local, Spotify, YouTube).",
+                    "CÃ¡ÂºÂ£i thiÃ¡Â»â€¡n System Menu vÃƒÂ  Titlebar (HÃ¡Â»â€” trÃ¡Â»Â£ menu TÃ¡Â»â€¡p, Xem, CÃ¡Â»Â­a sÃ¡Â»â€¢ tÃƒÂ­ch hÃ¡Â»Â£p)."
+                ],
+                "improvements": [
+                    "VÃƒÂ´ hiÃ¡Â»â€¡u hÃƒÂ³a Context Menu mÃ¡ÂºÂ·c Ã„â€˜Ã¡Â»â€¹nh Ã„â€˜Ã¡Â»Æ’ Ã¡Â»Â©ng dÃ¡Â»Â¥ng mÃ†Â°Ã¡Â»Â£t mÃƒÂ  vÃƒÂ  giÃ¡Â»â€˜ng app native hÃ†Â¡n."
+                ],
+                "fixes": [
+                    "SÃ¡Â»Â­a lÃ¡Â»â€”i Autostart: GiÃ¡Â»Â Ã„â€˜ÃƒÂ¢y chÃ¡Â»Â©c nÃ„Æ’ng KhÃ¡Â»Å¸i Ã„â€˜Ã¡Â»â„¢ng cÃƒÂ¹ng Windows Ã„â€˜ÃƒÂ£ Ã„â€˜Ã¡Â»â€œng bÃ¡Â»â„¢ an toÃƒÂ n vÃ¡Â»â€ºi OS.",
+                    "KhÃ¡ÂºÂ¯c phÃ¡Â»Â¥c lÃ¡Â»â€”i hiÃ¡Â»Æ’n thÃ¡Â»â€¹ tiÃ¡ÂºÂ¿ng ViÃ¡Â»â€¡t trÃƒÂªn Menu vÃƒÂ  Level Badge."
+                ]
+            }
+        },
+        {
+            "version": "1.3.0",
+            "tag": "v1.3.0",
+            "published_at": "2026-09-25",
+            "is_latest": false,
+            "title": "BÃ¡ÂºÂ£n cÃ¡ÂºÂ­p nhÃ¡ÂºÂ­t BÃ¡ÂºÂ£o mÃ¡ÂºÂ­t TuyÃ¡Â»â€¡t Ã„â€˜Ã¡Â»â€˜i & Ã¡Â»â€n Ã„â€˜Ã¡Â»â€¹nh HÃ¡Â»â€¡ thÃ¡Â»â€˜ng v1.3.0",
+            "summary": "SÃ¡Â»Â­a hÃ†Â¡n 30 lÃ¡Â»â€”i bÃ¡ÂºÂ£o mÃ¡ÂºÂ­t nghiÃƒÂªm trÃ¡Â»Âng, tÃƒÂ­ch hÃ¡Â»Â£p React Error Boundaries, tÃ¡Â»â€˜i Ã†Â°u RAM Web Audio vÃƒÂ  siÃ¡ÂºÂ¿t chÃ¡ÂºÂ·t phÃƒÂ¢n quyÃ¡Â»Ân hÃ¡Â»â€¡ thÃ¡Â»â€˜ng.",
+            "notes": [
+                "SÃ¡Â»Â­a hÃ†Â¡n 30 lÃ¡Â»â€”i bÃ¡ÂºÂ£o mÃ¡ÂºÂ­t nghiÃƒÂªm trÃ¡Â»Âng (Ã„â€˜Ã†Â°Ã¡Â»Â£c bÃƒÂ¡o cÃƒÂ¡o bÃ¡Â»Å¸i hÃ¡Â»â€¡ thÃ¡Â»â€˜ng Audit Ã„ÂÃ¡Â»â„¢c lÃ¡ÂºÂ­p).",
+                "Trang bÃ¡Â»â€¹ cÃƒÂ´ng nghÃ¡Â»â€¡ React Error Boundaries giÃƒÂºp thoÃƒÂ¡t khÃ¡Â»Âi Kiosk Mode an toÃƒÂ n.",
+                "ThiÃ¡ÂºÂ¿t kÃ¡ÂºÂ¿ lÃ¡ÂºÂ¡i luÃ¡Â»â€œng phÃƒÂ¢n quyÃ¡Â»Ân Windows (UAC): HoÃ¡ÂºÂ¡t Ã„â€˜Ã¡Â»â„¢ng hoÃƒÂ n toÃƒÂ n dÃ†Â°Ã¡Â»â€ºi quyÃ¡Â»Ân ngÃ†Â°Ã¡Â»Âi dÃƒÂ¹ng.",
+                "SÃ¡Â»Â­a dÃ¡Â»Â©t Ã„â€˜iÃ¡Â»Æ’m lÃ¡Â»â€”i trÃƒÂ n RAM rÃƒÂ² rÃ¡Â»â€° bÃ¡Â»â„¢ nhÃ¡Â»â€º khi nghe nhÃ¡ÂºÂ¡c Lofi.",
+                "CÃ†Â¡ chÃ¡ÂºÂ¿ chÃ¡Â»â€˜ng gian lÃ¡ÂºÂ­n mÃ¡Â»â€ºi: KhÃƒÂ³a API nÃ¡Â»â„¢i bÃ¡Â»â„¢ chÃ¡ÂºÂ·n hack giÃ¡Â»Â chÃ†Â¡i (Study-to-Earn).",
+                "Thay Ã„â€˜Ã¡Â»â€¢i ID cÃ¡Â»Â§a CÃ†Â¡ sÃ¡Â»Å¸ dÃ¡Â»Â¯ liÃ¡Â»â€¡u SQLite chÃ¡Â»â€˜ng sÃ¡ÂºÂ­p khi spam phÃƒÂ­m."
+            ],
+            "files": {
+                "installer": {
+                    "filename": "cainghien_tauri_1.3.0_x64-setup.exe",
+                    "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.0/cainghien_tauri_1.3.0_x64-setup.exe",
+                    "direct_url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.0/cainghien_tauri_1.3.0_x64-setup.exe",
+                    "size_formatted": "10 MB",
+                    "platform": "Windows 10 / 11 (64-bit)"
+                },
+                "msi": {
+                    "filename": "cainghien_tauri_1.3.0_x64_en-US.msi",
+                    "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.3.0/cainghien_tauri_1.3.0_x64_en-US.msi",
+                    "size_formatted": "12 MB",
+                    "platform": "Windows MSI Installer"
+                }
+            }
+        },
+        {
+            "version": "1.1.0",
+            "tag": "v1.1.0",
+            "published_at": "2026-09-17",
+            "is_latest": false,
+            "title": "BÃ¡ÂºÂ£n PhÃƒÂ¡t HÃƒÂ nh v1.1.0",
+            "summary": "Ã„ÂÃ¡ÂºÂ¡i tu toÃƒÂ n diÃ¡Â»â€¡n thiÃ¡ÂºÂ¿t kÃ¡ÂºÂ¿ Cosmos Glassmorphism, tÃƒÂ­ch hÃ¡Â»Â£p Heatmap 365 ngÃƒÂ y vÃƒÂ  Focus Room Lofi.",
+            "notes": [
+                "Ã„ÂÃ¡ÂºÂ¡i tu giao diÃ¡Â»â€¡n toÃƒÂ n diÃ¡Â»â€¡n vÃ¡Â»â€ºi thiÃ¡ÂºÂ¿t kÃ¡ÂºÂ¿ Cosmos Glassmorphism.",
+                "TÃƒÂ­ch hÃ¡Â»Â£p mÃƒÂ n hÃƒÂ¬nh Dashboard Heatmap 365 ngÃƒÂ y.",
+                "TÃƒÂ­ch hÃ¡Â»Â£p mÃƒÂ n hÃƒÂ¬nh Focus Room vÃ¡Â»â€ºi nhÃ¡ÂºÂ¡c Lofi.",
+                "TÃƒÂ­ch hÃ¡Â»Â£p mÃƒÂ n hÃƒÂ¬nh Typing Challenge chÃ¡ÂºÂ¥m Ã„â€˜iÃ¡Â»Æ’m theo thÃ¡Â»Âi gian thÃ¡Â»Â±c."
+            ],
+            "files": {
+                "installer": {
+                    "filename": "cainghien_tauri_1.1.0_x64-setup.exe",
+                    "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.1.0/cainghien_tauri_1.1.0_x64-setup.exe",
+                    "size_formatted": "4.5 MB",
+                    "platform": "Windows 10 / 11 (64-bit)"
+                },
+                "msi": {
+                    "filename": "cainghien_tauri_1.1.0_x64_en-US.msi",
+                    "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.1.0/cainghien_tauri_1.1.0_x64_en-US.msi",
+                    "size_formatted": "7.7 MB",
+                    "platform": "Windows MSI Installer"
+                }
+            }
+        },
+        {
+            "version": "1.0.0",
+            "tag": "v1.0.0",
+            "published_at": "2026-09-16",
+            "is_latest": false,
+            "title": "BÃ¡ÂºÂ£n PhÃƒÂ¡t HÃƒÂ nh KhÃ¡Â»Å¸i Ã„ÂÃ¡ÂºÂ§u v1.0.0",
+            "summary": "PhiÃƒÂªn bÃ¡ÂºÂ£n chÃƒÂ­nh thÃ¡Â»Â©c Ã„â€˜Ã¡ÂºÂ§u tiÃƒÂªn trÃƒÂªn nÃ¡Â»Ân tÃ¡ÂºÂ£ng Rust & Tauri v2 vÃ¡Â»â€ºi kiÃ¡ÂºÂ¿n trÃƒÂºc bÃ¡ÂºÂ£o vÃ¡Â»â€¡ hÃ¡Â»â€¡ thÃ¡Â»â€˜ng Ã„â€˜a tÃ¡ÂºÂ§ng.",
+            "notes": [
+                "PhiÃƒÂªn bÃ¡ÂºÂ£n v1.0.0 ChÃƒÂ­nh ThÃ¡Â»Â©c vÃ¡Â»â€ºi kiÃ¡ÂºÂ¿n trÃƒÂºc Rust & Tauri tÃ¡Â»â€˜i Ã†Â°u hÃƒÂ³a bÃ¡Â»â„¢ nhÃ¡Â»â€º RAM.",
+                "ChÃ¡ÂºÂ¿ Ã„â€˜Ã¡Â»â„¢ khÃƒÂ³a cÃ¡Â»Â©ng Ã¡Â»Â©ng dÃ¡Â»Â¥ng (Kiosk Mode) vÃƒÂ´ hiÃ¡Â»â€¡u hÃƒÂ³a Alt+Tab vÃƒÂ  Windows Key."
+            ],
+            "files": {
+                "installer": {
+                    "filename": "cainghien_tauri_0.1.0_x64-setup.exe",
+                    "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.0.0/cainghien_tauri_0.1.0_x64-setup.exe",
+                    "direct_url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.0.0/cainghien_tauri_0.1.0_x64-setup.exe",
+                    "size_formatted": "4.4 MB",
+                    "platform": "Windows 10 / 11 (64-bit)"
+                }
+            }
+        }
+    ]
 }
