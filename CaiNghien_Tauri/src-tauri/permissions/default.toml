@@ -127,6 +127,20 @@ permissions = [
   "allow-get-typing-scores",
   "allow-reset-all-data",
   "allow-submit-study-report",
+  "allow-get-ielts-topics",
+  "allow-get-topic-words",
+  "allow-fetch-cambridge",
+  "allow-update-vocab-progress",
+  "allow-get-vocab-progress",
+  "allow-submit-ielts-test",
+  "allow-open-ielts-battle",
+  "allow-ielts-battle-success",
+  "allow-get-system-diagnostics",
+  "allow-emergency-kill-and-restore",
+  "allow-toggle-hosts-block",
+  "allow-reset-password-and-hardcore",
+  "allow-backup-config",
+  "allow-restore-config",
 ]
 
 [[permission]]
@@ -144,3 +158,73 @@ identifier = "allow-add-study-reward-quota"
 description = "Allows the add_study_reward_quota command"
 commands.allow = ["add_study_reward_quota"]
 
+
+[[permission]]
+identifier = "allow-get-ielts-topics"
+description = "Allows the get_ielts_topics command"
+commands.allow = ["get_ielts_topics"]
+
+[[permission]]
+identifier = "allow-get-topic-words"
+description = "Allows the get_topic_words command"
+commands.allow = ["get_topic_words"]
+
+[[permission]]
+identifier = "allow-fetch-cambridge"
+description = "Allows the fetch_cambridge command"
+commands.allow = ["fetch_cambridge"]
+
+[[permission]]
+identifier = "allow-update-vocab-progress"
+description = "Allows the update_vocab_progress command"
+commands.allow = ["update_vocab_progress"]
+
+[[permission]]
+identifier = "allow-get-vocab-progress"
+description = "Allows the get_vocab_progress command"
+commands.allow = ["get_vocab_progress"]
+
+[[permission]]
+identifier = "allow-submit-ielts-test"
+description = "Allows the submit_ielts_test command"
+commands.allow = ["submit_ielts_test"]
+
+[[permission]]
+identifier = "allow-open-ielts-battle"
+description = "Allows the open_ielts_battle command"
+commands.allow = ["open_ielts_battle"]
+
+[[permission]]
+identifier = "allow-ielts-battle-success"
+description = "Allows the ielts_battle_success command"
+commands.allow = ["ielts_battle_success"]
+
+[[permission]]
+identifier = "allow-get-system-diagnostics"
+description = "Allows the get_system_diagnostics command"
+commands.allow = ["get_system_diagnostics"]
+
+[[permission]]
+identifier = "allow-emergency-kill-and-restore"
+description = "Allows the emergency_kill_and_restore command"
+commands.allow = ["emergency_kill_and_restore"]
+
+[[permission]]
+identifier = "allow-toggle-hosts-block"
+description = "Allows the toggle_hosts_block command"
+commands.allow = ["toggle_hosts_block"]
+
+[[permission]]
+identifier = "allow-reset-password-and-hardcore"
+description = "Allows the reset_password_and_hardcore command"
+commands.allow = ["reset_password_and_hardcore"]
+
+[[permission]]
+identifier = "allow-backup-config"
+description = "Allows the backup_config command"
+commands.allow = ["backup_config"]
+
+[[permission]]
+identifier = "allow-restore-config"
+description = "Allows the restore_config command"
+commands.allow = ["restore_config"]

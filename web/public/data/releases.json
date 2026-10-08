@@ -1,11 +1,38 @@
 {
-    "latest": "1.4.2",
+    "latest": "1.4.3",
     "releases": [
+        {
+            "version": "1.4.3",
+            "tag": "v1.4.3",
+            "published_at": "2026-10-09",
+            "is_latest": true,
+            "title": "Bản Vá Khẩn Cấp v1.4.3 (IELTS ACL Fix Final)",
+            "summary": "Sửa lỗi không mở được tính năng Học IELTS do bị chặn bởi hệ thống phân quyền mới của Tauri v2.",
+            "notes": [
+                "Sửa lỗi 'Command not allowed by ACL' triệt để khi mở tab Học IELTS và thi đấu.",
+                "Cấu hình lại toàn bộ hệ thống permissions."
+            ],
+            "files": {
+                "installer": {
+                    "filename": "cainghien_tauri_1.4.3_x64-setup.exe",
+                    "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.4.3/cainghien_tauri_1.4.3_x64-setup.exe",
+                    "direct_url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.4.3/cainghien_tauri_1.4.3_x64-setup.exe",
+                    "size_formatted": "11 MB",
+                    "platform": "Windows 10 / 11 (64-bit)"
+                },
+                "msi": {
+                    "filename": "cainghien_tauri_1.4.3_x64_en-US.msi",
+                    "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.4.3/cainghien_tauri_1.4.3_x64_en-US.msi",
+                    "size_formatted": "13 MB",
+                    "platform": "Windows MSI Installer"
+                }
+            }
+        },
         {
             "version": "1.4.2",
             "tag": "v1.4.2",
             "published_at": "2026-10-09",
-            "is_latest": true,
+            "is_latest": false,
             "title": "Bản Vá Khẩn Cấp v1.4.2 (IELTS ACL Fix)",
             "summary": "Sửa lỗi không mở được tính năng Học IELTS do bị chặn bởi hệ thống phân quyền mới của Tauri v2.",
             "notes": [
