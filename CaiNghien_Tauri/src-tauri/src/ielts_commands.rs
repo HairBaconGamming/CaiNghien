@@ -248,6 +248,7 @@ pub async fn open_ielts_battle(app: tauri::AppHandle) -> Result<(), String> {
     .inner_size(inner_size.width as f64, (inner_size.height.saturating_sub(80)) as f64)
     .position(outer_pos.x as f64, (outer_pos.y + 80) as f64)
     .initialization_script(init_script)
+    .on_new_window(|_, _| tauri::webview::NewWindowResponse::Allow)
     .build()
     .map_err(|e| e.to_string())?;
 
@@ -269,5 +270,6 @@ pub async fn ielts_battle_success(
     let _ = app.emit("battle_success", ());
     Ok(())
 }
+
 
 

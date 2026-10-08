@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { api } from '../../services/api';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
-import { Volume2, ArrowRight, ArrowLeft, CheckCircle, XCircle, Trophy } from 'lucide-react';
+import { Volume2, ArrowRight, ArrowLeft, CheckCircle, XCircle, Trophy, BookOpen } from 'lucide-react';
 
 interface IeltsTopic {
   id: number;
@@ -53,6 +53,12 @@ export const IeltsChallengeScreen: React.FC<{
   const inputRef = useRef<HTMLInputElement>(null);
   
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Dictionary Modal
+  const [dictWord, setDictWord] = useState<string | null>(null);
+  const [dictData, setDictData] = useState<any | null>(null);
+  const [dictLoading, setDictLoading] = useState(false);
+  const [dictPosition, setDictPosition] = useState<{x: number, y: number} | null>(null);
 
   useEffect(() => {
     loadTopics();
@@ -133,8 +139,8 @@ export const IeltsChallengeScreen: React.FC<{
     }
   };
 
-  const playAudio = (url: string, e: React.MouseEvent) => {
-    e.stopPropagation();
+  const playAudio = (url: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
     if (url) {
       const audio = new Audio(url);
       audio.play().catch(console.error);
@@ -142,8 +148,7 @@ export const IeltsChallengeScreen: React.FC<{
   };
 
   const startTest = () => {
-    // Shuffle words for test
-    const shuffled = [...words].sort(() => 0.5 - Math.random()).slice(0, 10); // max 10 for test
+    const shuffled = [...words].sort(() => 0.5 - Math.random()).slice(0, 10);
     setTestWords(shuffled);
     setTestIdx(0);
     setScore(0);
@@ -154,7 +159,7 @@ export const IeltsChallengeScreen: React.FC<{
   };
 
   const submitTestAnswer = async () => {
-    if (feedback !== 'none') return; // prevent spam
+    if (feedback !== 'none') return;
     const cw = testWords[testIdx];
     const isCorrect = testInput.trim().toLowerCase() === cw.word.toLowerCase();
     
@@ -193,13 +198,42 @@ export const IeltsChallengeScreen: React.FC<{
     }
   };
 
-  // Prevent paste
   const preventPaste = (e: React.ClipboardEvent | React.DragEvent | React.MouseEvent) => {
     e.preventDefault();
   };
 
+  // Handle right-click dictionary
+  const handleContextMenu = async (e: React.MouseEvent) => {
+    const selection = window.getSelection()?.toString().trim();
+    if (selection && selection.length > 0 && selection.length < 30) {
+      e.preventDefault();
+      setDictWord(selection);
+      setDictPosition({ x: e.clientX, y: e.clientY });
+      setDictLoading(true);
+      setDictData(null);
+      
+      try {
+        const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${selection.toLowerCase()}`);
+        if (res.ok) {
+          const data = await res.json();
+          setDictData(data[0]);
+        } else {
+          setDictData({ error: 'Không tìm thấy từ vựng.' });
+        }
+      } catch (err) {
+        setDictData({ error: 'Lỗi tra cứu từ điển.' });
+      }
+      setDictLoading(false);
+    }
+  };
+
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center relative p-8">
+    <div 
+      className="w-full h-full flex flex-col items-center relative p-8 overflow-y-auto"
+      onContextMenu={handleContextMenu}
+      onClick={() => setDictWord(null)}
+    >
+      <div className="min-h-full flex flex-col items-center justify-center w-full max-w-5xl">
       {screen === 1 && (
         <div className="w-full max-w-5xl relative">
           {onClose && (
@@ -257,9 +291,15 @@ export const IeltsChallengeScreen: React.FC<{
             className="relative w-full aspect-[4/3] perspective-1000 mb-8 cursor-pointer"
             onClick={() => !loadingWord && setIsFlipped(!isFlipped)}
           >
-            <div className={`w-full h-full transition-transform duration-500 preserve-3d relative ${isFlipped ? 'rotate-y-180' : ''}`}>
+            <div 
+              className="w-full h-full transition-transform duration-500 relative"
+              style={{ transformStyle: 'preserve-3d', transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)' }}
+            >
               {/* Front */}
-              <div className="absolute inset-0 backface-hidden glass-panel border border-white/10 rounded-3xl flex flex-col items-center justify-center p-8 bg-slate-900/80">
+              <div 
+                className="absolute inset-0 glass-panel border border-white/10 rounded-3xl flex flex-col items-center justify-center p-8 bg-slate-900/80"
+                style={{ backfaceVisibility: 'hidden' }}
+              >
                 <h1 className="text-5xl font-black text-white mb-4">{words[currentWordIdx].word}</h1>
                 {cambridgeData[words[currentWordIdx].word] && (
                   <span className="text-cyan-400 font-semibold italic text-lg">
@@ -270,7 +310,10 @@ export const IeltsChallengeScreen: React.FC<{
               </div>
 
               {/* Back */}
-              <div className="absolute inset-0 backface-hidden rotate-y-180 glass-panel border border-cyan-500/30 shadow-[0_0_30px_rgba(6,182,212,0.15)] rounded-3xl p-8 flex flex-col bg-slate-900/90 overflow-y-auto">
+              <div 
+                className="absolute inset-0 glass-panel border border-cyan-500/30 shadow-[0_0_30px_rgba(6,182,212,0.15)] rounded-3xl p-8 flex flex-col bg-slate-900/90 overflow-y-auto"
+                style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
+              >
                 {cambridgeData[words[currentWordIdx].word] && cambridgeData[words[currentWordIdx].word].definition ? (
                   <>
                     <div className="flex justify-between items-start border-b border-white/10 pb-4 mb-4">
@@ -451,10 +494,68 @@ export const IeltsChallengeScreen: React.FC<{
           </div>
         </div>
       )}
+      </div>
+      
       {toastMessage && (
         <div className="fixed bottom-8 right-8 z-50 bg-emerald-500/90 text-white px-6 py-4 rounded-2xl shadow-[0_0_20px_rgba(16,185,129,0.5)] border border-emerald-400 font-bold animate-fade-in-up flex items-center gap-3">
           <Trophy className="w-5 h-5 text-yellow-300" />
           {toastMessage}
+        </div>
+      )}
+
+      {/* Dictionary Popup Modal */}
+      {dictWord && dictPosition && (
+        <div 
+          className="fixed z-50 glass-panel-elevated p-4 rounded-2xl border border-cyan-500/30 shadow-2xl min-w-[250px] max-w-[320px] text-white"
+          style={{ 
+            left: Math.min(dictPosition.x, window.innerWidth - 340), 
+            top: Math.min(dictPosition.y + 15, window.innerHeight - 300),
+            backdropFilter: 'blur(32px)'
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex justify-between items-center mb-3 pb-2 border-b border-white/10">
+            <div className="flex items-center gap-2">
+              <BookOpen className="w-4 h-4 text-cyan-400" />
+              <h4 className="font-bold text-lg">{dictWord}</h4>
+            </div>
+            <button onClick={() => setDictWord(null)} className="text-slate-400 hover:text-white">
+              <XCircle className="w-5 h-5" />
+            </button>
+          </div>
+          
+          {dictLoading ? (
+            <div className="text-slate-400 text-sm animate-pulse text-center py-4">Đang tra cứu...</div>
+          ) : dictData?.error ? (
+            <div className="text-rose-400 text-sm text-center py-4">{dictData.error}</div>
+          ) : dictData ? (
+            <div className="max-h-[200px] overflow-y-auto pr-1">
+              {dictData.phonetics && dictData.phonetics.find((p:any) => p.audio) && (
+                <div className="flex items-center gap-2 mb-2 text-sm text-slate-300 font-mono">
+                  {dictData.phonetic || dictData.phonetics.find((p:any) => p.text)?.text}
+                  <button 
+                    onClick={() => playAudio(dictData.phonetics.find((p:any) => p.audio)?.audio)}
+                    className="p-1 bg-white/5 hover:bg-white/10 rounded"
+                  >
+                    <Volume2 className="w-3.5 h-3.5 text-cyan-400" />
+                  </button>
+                </div>
+              )}
+              {dictData.meanings && dictData.meanings.slice(0, 2).map((m: any, i: number) => (
+                <div key={i} className="mb-3 last:mb-0">
+                  <span className="text-xs font-bold text-cyan-400 uppercase">{m.partOfSpeech}</span>
+                  <div className="mt-1 space-y-1">
+                    {m.definitions.slice(0, 2).map((d: any, idx: number) => (
+                      <div key={idx} className="text-sm">
+                        <p className="text-white">- {d.definition}</p>
+                        {d.example && <p className="text-slate-400 text-xs italic mt-0.5">"{d.example}"</p>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : null}
         </div>
       )}
     </div>

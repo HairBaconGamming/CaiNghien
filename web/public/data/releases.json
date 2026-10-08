@@ -1,11 +1,33 @@
 {
-    "latest": "1.4.4",
+    "latest": "1.4.5",
     "releases": [
+        {
+            "version": "1.4.5",
+            "tag": "v1.4.5",
+            "published_at": "2026-10-09",
+            "is_latest": true,
+            "title": "Bản Phát Hành Ổn Định v1.4.5",
+            "summary": "Fix lỗi giao diện (scroll) và popup đăng nhập Google ở IELTS League.",
+            "notes": [
+                "Sửa lỗi layout bị cắt nút Bắt đầu ôn tập và không cuộn được",
+                "Sửa lỗi Failed to open popup window khi đăng nhập Google",
+                "Cải thiện trải nghiệm UI/UX"
+            ],
+            "files": {
+                "installer": {
+                    "filename": "cainghien_tauri_1.4.5_x64-setup.exe",
+                    "url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.4.5/cainghien_tauri_1.4.5_x64-setup.exe",
+                    "direct_url": "https://github.com/HairBaconGamming/CaiNghien/releases/download/v1.4.5/cainghien_tauri_1.4.5_x64-setup.exe",
+                    "size_formatted": "11 MB",
+                    "sha256": ""
+                }
+            }
+        },
         {
             "version": "1.4.4",
             "tag": "v1.4.4",
             "published_at": "2026-10-09",
-            "is_latest": true,
+            "is_latest": false,
             "title": "Bản Phát Hành Ổn Định v1.4.4",
             "summary": "Bản build sạch sẽ, đảm bảo hoạt động trơn tru toàn bộ tính năng và fix triệt để cấu hình permission.",
             "notes": [
